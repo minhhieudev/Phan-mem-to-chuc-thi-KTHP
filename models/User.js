@@ -10,6 +10,9 @@ const UserSchema = new mongoose.Schema({
     required: true,
     unique: true,
   },
+  khoa: {
+    type: String,
+  },
   password: {
     type: String,
     required: true,

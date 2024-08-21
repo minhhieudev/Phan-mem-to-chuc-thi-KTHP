@@ -40,15 +40,6 @@ const TongHopLaoDongSchema = new mongoose.Schema({
       type: Number,
     },
   },
-  khoa: {
-    type: String,
-  },
-  hocHamHocVi: {
-    type: String,
-  },
-  chucVuDoanTheCTXH: {
-    type: String,
-  },
   gioChuan: {
     type: Number,
   },
@@ -68,6 +59,9 @@ const TongHopLaoDongSchema = new mongoose.Schema({
     type: String,
   },
   loai: {
+    type: String,
+  },
+  namHoc: {
     type: String,
   },
 },{
