@@ -24,7 +24,7 @@ const formSchema = {
   ghiChu: "",
 };
 
-const TeachingForm = ({ onUpdateCongTacGiangDay }) => {
+const TeachingForm = ({ onUpdateCongTacGiangDay,namHoc }) => {
   const [dataList, setDataList] = useState([]);
   const [editRecord, setEditRecord] = useState(null);
   const { control, handleSubmit, setValue, reset, watch, formState: { errors, isSubmitting } } = useForm({
@@ -103,11 +103,15 @@ const TeachingForm = ({ onUpdateCongTacGiangDay }) => {
   }, [dataList]);
 
   const onSubmit = async (data) => {
+    if (namHoc == ''){
+      toast.error('Vui lòng nhập năm học!')
+      return
+    }
     try {
       const method = editRecord ? "PUT" : "POST";
       const res = await fetch("/api/work-hours/CongTacGiangDay", {
         method,
-        body: JSON.stringify({ ...data, type: type, user: currentUser?._id, id: editRecord?._id }),
+        body: JSON.stringify({ ...data, type: type, user: currentUser?._id, id: editRecord?._id ,namHoc}),
         headers: { "Content-Type": "application/json" },
       });
 
@@ -255,7 +259,7 @@ const TeachingForm = ({ onUpdateCongTacGiangDay }) => {
       <div className="p-5 shadow-xl bg-white rounded-xl flex-[40%]">
         <Title className="text-center" level={3}>CÔNG TÁC GIẢNG DẠY</Title>
 
-        <Form onFinish={handleSubmit(onSubmit)} layout="Inline" className="space-y-8 mt-10">
+        <Form onFinish={handleSubmit(onSubmit)} layout="Inline" className="space-y-1 mt-10">
           <Space direction="vertical" className="w-full">
             <div className="flex justify-between">
               <Form.Item

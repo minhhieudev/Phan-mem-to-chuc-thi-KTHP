@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { Row, Col, Button } from "antd";
+import { Row, Col, Button, Input } from "antd";
 import TeachingForm from '@components/TeachingForm';
 import EvaluationForm from "@components/EvaluationForm";
 import DutyExemptionForm from "@components/DutyExemptionForm";
@@ -13,6 +13,8 @@ import { useParams } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { ArrowLeftOutlined } from '@ant-design/icons';
+import toast from "react-hot-toast";
+
 
 const Pages = () => {
   const { type } = useParams();
@@ -33,10 +35,34 @@ const Pages = () => {
     tong: 0,
   });
   const [kiemNhiem, setKiemNhiem] = useState(0);
+  const [namHoc, setNamHoc] = useState("");
   const router = useRouter();
 
   const { data: session } = useSession();
   const currentUser = session?.user;
+
+  const [error, setError] = useState("");
+
+  const validateNamHoc = (value) => {
+    const regex = /^\d{4}\s*-\s*\d{4}$/;
+    return regex.test(value);
+  };
+
+  const normalizeNamHoc = (value) => {
+    return value.replace(/\s*-\s*/, " - ").trim();
+  };
+  
+  const handleNamHocChange = (e) => {
+    const value = normalizeNamHoc(e.target.value);
+    setNamHoc(value);
+  
+    if (validateNamHoc(value)) {
+      setError("");
+    } else {
+      setError("Năm học không đúng định dạng (YYYY - YYYY).");
+    }
+  };
+
 
   useEffect(() => {
     const buttons = getButtonList();
@@ -115,19 +141,19 @@ const Pages = () => {
   const renderForm = () => {
     switch (selectedForm) {
       case 'Công tác giảng dạy':
-        return <TeachingForm onUpdateCongTacGiangDay={updateCongTacGiangDay} />;
+        return <TeachingForm onUpdateCongTacGiangDay={updateCongTacGiangDay} namHoc={namHoc || ''} />;
       case 'Công tác chấm thi':
-        return <EvaluationForm onUpdateCongTacChamThi={updateCongTacChamThi} />;
+        return <EvaluationForm onUpdateCongTacChamThi={updateCongTacChamThi} namHoc={namHoc || ''} />;
       case 'Công tác hướng dẫn':
-        return <GuidanceForm onUpdateCongTacHuongDan={updateCongTacHuongDan} />;
+        return <GuidanceForm onUpdateCongTacHuongDan={updateCongTacHuongDan} namHoc={namHoc || ''} />;
       case 'Công tác coi thi':
-        return <ExamMonitoringForm onUpdateCongTacCoiThi={updateCongTacCoiThi} />;
+        return <ExamMonitoringForm onUpdateCongTacCoiThi={updateCongTacCoiThi} namHoc={namHoc || ''} />;
       case 'Công tác ra đề thi':
-        return <ExamPreparationForm onUpdateCongTacRaDe={updateCongTacRaDe} />;
+        return <ExamPreparationForm onUpdateCongTacRaDe={updateCongTacRaDe} namHoc={namHoc || ''} />;
       case 'Công tác kiêm nhiệm':
-        return <DutyExemptionForm onUpdateCongTacKiemNhiem={updateCongTacKiemNhiem} />;
+        return <DutyExemptionForm onUpdateCongTacKiemNhiem={updateCongTacKiemNhiem} namHoc={namHoc || ''} />;
       case 'Công tác giảng dạy bồi dưỡng':
-        return <TrainingTypeForm />;
+        return <TrainingTypeForm namHoc={namHoc || ''} />;
       default:
         return null;
     }
@@ -170,46 +196,58 @@ const Pages = () => {
   }, []);
 
   const submitResult = async () => {
-    try {
-      const res = await fetch(type !== "boi-duong" ? `/api/admin/tong-hop-lao-dong/chinh-quy/${type}` : "/api/admin/tong-hop-lao-dong/boi-duong", {
-        method: "POST",
-        body: JSON.stringify({
-          user: currentUser._id,
-          congTacGiangDay,
-          congTacKhac: { ...congTacKhac, tong: congTacKhac.chamThi + congTacKhac.coiThi + congTacKhac.deThi + congTacKhac.ngoaiKhoa },
-          kiemNhiem,
-          loai: type
-        }),
-        headers: { "Content-Type": "application/json" },
-      });
+    if (validateNamHoc(namHoc)) {
+      try {
+        const res = await fetch(type !== "boi-duong" ? `/api/admin/tong-hop-lao-dong/chinh-quy/${type}` : "/api/admin/tong-hop-lao-dong/boi-duong", {
+          method: "POST",
+          body: JSON.stringify({
+            user: currentUser._id,
+            congTacGiangDay,
+            congTacKhac: { ...congTacKhac, tong: congTacKhac.chamThi + congTacKhac.coiThi + congTacKhac.deThi + congTacKhac.ngoaiKhoa },
+            kiemNhiem,
+            loai: type,
+            namHoc
+          }),
+          headers: { "Content-Type": "application/json" },
+        });
 
-      if (res.ok) {
-        onReset();
-      } else {
-        toast.error("Failed to save record");
+        if (res.ok) {
+          onReset();
+        } else {
+          toast.error("Failed to save record");
+        }
+      } catch (err) {
+        toast.error("An error occurred while saving data");
       }
-    } catch (err) {
-      toast.error("An error occurred while saving data");
+    } else {
+      toast.error("Vui lòng nhập năm học đúng định dạng (YYYY - YYYY).");
     }
-  }
+  };
 
   return (
     <div className="flex flex-col justify-center items-center mt-3">
-      <div className="flex items-center justify-between mb-3 w-[98%] bg-white p-2 rounded-md">
-        <Button
-          className="button-kiem-nhiem text-white font-bold shadow-md"
-          onClick={() => router.push(`/work-hours`)}
-        >
-          <div className="hover:color-blue "><ArrowLeftOutlined
-            style={{
-              color: 'white',
-              fontSize: '18px',
-            }}
-          /> QUAY LẠI</div>
-        </Button>
-        <div className="flex-grow text-center rounded-xl text-heading3-bold mr-3">
-          {`HỆ ${getTitle()}`}
+      <div className=" mb-3 w-[98%]  flex justify-between gap-3">
+        <div className="w-[70%]  p-2 flex bg-white items-center justify-between rounded-md">
+          <Button
+            className="button-kiem-nhiem text-white font-bold shadow-md"
+            onClick={() => router.push(`/work-hours`)}
+          >
+            <div className="hover:color-blue "><ArrowLeftOutlined
+              style={{
+                color: 'white',
+                fontSize: '18px',
+              }}
+            /> QUAY LẠI</div>
+          </Button>
+          <div className="flex-grow text-center rounded-xl text-heading3-bold mr-3">
+            {`HỆ ${getTitle()}`}
+          </div>
         </div>
+        <div className="w-[30%]  p-2 bg-white rounded-md flex gap-2 items-center">
+          <div className='text-base-bold'>Năm học :</div>
+            <Input className="input-text w-[60%] font-bold" placeholder="Nhập năm học..." value={namHoc}
+              onChange={handleNamHocChange} />
+          </div>
       </div>
 
       {type !== 'boi-duong' && (

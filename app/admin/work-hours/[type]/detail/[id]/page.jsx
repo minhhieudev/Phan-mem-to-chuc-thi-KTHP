@@ -2,7 +2,7 @@
 import React, { useEffect, useState, useRef } from 'react'
 import { useParams } from "next/navigation";
 import { Table, Input, Button, Space, Popconfirm, Modal } from 'antd';
-import { SearchOutlined, EyeFilled, DeleteOutlined } from '@ant-design/icons';
+import { SearchOutlined, EyeFilled, DeleteOutlined, FileExcelOutlined  } from '@ant-design/icons';
 import moment from 'moment';
 import { ArrowLeftOutlined } from '@ant-design/icons';
 import { useRouter } from "next/navigation";
@@ -760,7 +760,7 @@ const Pages = () => {
         <Button
           className="button-lien-thong-vlvh text-white font-bold shadow-md mr-2"
           onClick={() => exportToExcelChiTiet(dataList, id, getType())}
-        >
+        ><FileExcelOutlined />
           Xuất file Excel
         </Button>
         <CldUploadButton

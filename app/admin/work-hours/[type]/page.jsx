@@ -1,7 +1,7 @@
 'use client';
 import React, { useEffect, useState, useRef } from 'react';
 import { Table, Input, Button, Space, Popconfirm, Spin , Modal} from 'antd';
-import { SearchOutlined, EyeFilled, DeleteOutlined } from '@ant-design/icons';
+import { SearchOutlined, EyeFilled, DeleteOutlined ,FileExcelOutlined } from '@ant-design/icons';
 import Highlighter from 'react-highlight-words';
 import { useParams } from "next/navigation";
 import { useRouter } from "next/navigation";
@@ -229,7 +229,7 @@ const App = () => {
       dataIndex: 'username',
       ...getColumnSearchProps('user.username'),
       render: (text, record) => record.user.username,
-      className: 'text-blue-500 font-bold text-center'
+      className: 'text-blue-500 font-bold text-center',
     },
     {
       title: 'Công tác giảng dạy chính quy',
@@ -242,12 +242,14 @@ const App = () => {
               dataIndex: 'congTacGiangDay',
               key: 'congTacGiangDay.soTietLT',
               render: (text, record) => record.congTacGiangDay.soTietLT,
+              width:50
             },
             {
               title: 'TH',
               dataIndex: 'congTacGiangDay',
               key: 'congTacGiangDay.soTietTH',
               render: (text, record) => record.congTacGiangDay.soTietTH,
+              width:50
             },
           ],
         },
@@ -259,12 +261,14 @@ const App = () => {
               dataIndex: 'congTacGiangDay',
               key: 'congTacGiangDay.soTietQCLT',
               render: (text, record) => record.congTacGiangDay.soTietQCLT,
+              width:50
             },
             {
               title: 'TH',
               dataIndex: 'congTacGiangDay',
               key: 'congTacGiangDay.soTietQCTH',
               render: (text, record) => record.congTacGiangDay.soTietQCTH,
+              width:50
             },
           ],
         },
@@ -276,22 +280,26 @@ const App = () => {
       dataIndex: 'congTacGiangDay',
       key: 'congTacGiangDay.tong',
       render: (text, record) => record.congTacGiangDay.tong,
-      className: 'text-green-500 font-bold text-center'
+      className: 'text-green-500 font-bold text-center',
+      width:50
     },
     {
       title: 'Giờ chuẩn',
       dataIndex: 'gioChuan',
-      className: 'text-center'
+      className: 'text-center',
+      width:50
     },
     {
       title: 'Kiêm nhiệm',
       dataIndex: 'kiemNhiem',
-      className: 'text-center'
+      className: 'text-center',
+      width:50
     },
     {
       title: 'Chuẩn năm học',
       dataIndex: 'chuanNamHoc',
-      className: 'text-center'
+      className: 'text-center',
+      width:50
     },
     {
       title: 'Công tác khác',
@@ -301,31 +309,37 @@ const App = () => {
           dataIndex: 'congTacKhac',
           key: 'congTacKhac.chamThi',
           render: (text, record) => record.congTacKhac.chamThi,
+          width:50
         },
         {
           title: 'Ngoại khóa',
           dataIndex: 'congTacKhac',
           key: 'congTacKhac.ngoaiKhoa',
           render: (text, record) => record.congTacKhac.ngoaiKhoa,
+          width:50
         },
         {
           title: 'Coi thi',
           dataIndex: 'congTacKhac',
           key: 'congTacKhac.coiThi',
           render: (text, record) => record.congTacKhac.coiThi,
+          width:50
         },
         {
           title: 'Đề thi',
           dataIndex: 'congTacKhac',
           key: 'congTacKhac.deThi',
           render: (text, record) => record.congTacKhac.deThi,
+          width:50
         },
         {
           title: 'Tổng',
           dataIndex: 'congTacKhac',
           key: 'congTacKhac.tong',
           render: (text, record) => record.congTacKhac.tong,
-          className: 'text-yellow-500 font-bold'
+          className: 'text-yellow-500 font-bold',
+          width:50
+
         },
       ],
       className: 'text-center'
@@ -333,19 +347,21 @@ const App = () => {
     {
       title: 'Tổng giờ chính quy',
       dataIndex: 'tongGioChinhQuy',
-      className: 'text-red-500 font-bold text-center'
+      className: 'text-red-500 font-bold text-center',
+      width:60
     },
     {
       title: 'Thừa/Thiếu giờ lao động',
       dataIndex: 'thuaThieuGioLaoDong',
-      className: 'text-center'
+      className: 'text-center',
+      width:60
     },
     {
       title: 'Thao tác',
       key: 'action',
       render: (_, record) => (
         <Space size="middle">
-          <Button onClick={() => handleDetail(record._id)} type="primary" icon={<EyeFilled />} />
+          {/* <Button onClick={() => handleDetail(record._id)} type="primary" icon={<EyeFilled />} /> */}
           <Popconfirm
             title="Bạn có chắc chắn muốn xoá?"
             onConfirm={() => handleDelete(record._id)}
@@ -418,7 +434,8 @@ const App = () => {
       dataIndex: 'congTacGiangDay',
       key: 'congTacGiangDay.tong',
       render: (text, record) => record.congTacGiangDay.tong,
-      className: 'text-green-500 font-bold text-center'
+      className: 'text-green-500 font-bold text-center',
+      width:70
     },
     {
       title: 'Công tác khác',
@@ -428,31 +445,36 @@ const App = () => {
           dataIndex: 'congTacKhac',
           key: 'congTacKhac.chamThi',
           render: (text, record) => record.congTacKhac.chamThi,
+          width:50
         },
         {
           title: 'Ngoại khóa',
           dataIndex: 'congTacKhac',
           key: 'congTacKhac.ngoaiKhoa',
           render: (text, record) => record.congTacKhac.ngoaiKhoa,
+          width:50
         },
         {
           title: 'Coi thi',
           dataIndex: 'congTacKhac',
           key: 'congTacKhac.coiThi',
           render: (text, record) => record.congTacKhac.coiThi,
+          width:50
         },
         {
           title: 'Đề thi',
           dataIndex: 'congTacKhac',
           key: 'congTacKhac.deThi',
           render: (text, record) => record.congTacKhac.deThi,
+          width:50
         },
         {
           title: 'Tổng',
           dataIndex: 'congTacKhac',
           key: 'congTacKhac.tong',
           render: (text, record) => record.congTacKhac.tong,
-          className: 'text-yellow-500 font-bold'
+          className: 'text-yellow-500 font-bold',
+          width:50
         },
       ],
       className: 'text-center'
@@ -460,19 +482,15 @@ const App = () => {
     {
       title: 'Tổng giờ chính quy',
       dataIndex: 'tongGioChinhQuy',
-      className: 'text-red-500 font-bold text-center'
-    },
-    {
-      title: 'Ghi chú',
-      dataIndex: 'ghiChu',
-      className: 'text-center'
+      className: 'text-red-500 font-bold text-center',
+      width:60
     },
     {
       title: 'Thao tác',
       key: 'action',
       render: (_, record) => (
         <Space size="middle">
-          <Button onClick={() => handleDetail(record._id)} type="primary" icon={<EyeFilled />} />
+          {/* <Button onClick={() => handleDetail(record._id)} type="primary" icon={<EyeFilled />} /> */}
           <Popconfirm
             title="Bạn có chắc chắn muốn xoá?"
             onConfirm={() => handleDelete(record._id)}
@@ -484,6 +502,7 @@ const App = () => {
         </Space>
       ),
       className: 'text-center',
+      width:50
     },
   ];
   const columnBoiDuong = [
@@ -543,7 +562,7 @@ const App = () => {
       key: 'action',
       render: (_, record) => (
         <Space size="middle">
-          <Button onClick={() => handleDetail(record._id)} type="primary" icon={<EyeFilled />} />
+          {/* <Button onClick={() => handleDetail(record._id)} type="primary" icon={<EyeFilled />} /> */}
           <Popconfirm
             title="Bạn có chắc chắn muốn xoá?"
             onConfirm={() => handleDelete(record._id)}
@@ -628,11 +647,11 @@ const App = () => {
   };
 
   return (
-    <div className='p-2 font-bold text-center bg-white rounded-md shadow-md w-[98%] m-auto my-3'>
+    <div className='p-2 font-bold text-center bg-white rounded-md shadow-md m-auto  my-3'>
       <div className="flex items-center justify-center mb-3">
         <Button
           className="button-kiem-nhiem text-white font-bold shadow-md mr-2"
-          onClick={() => router.push(`/admin`)}
+          onClick={() => router.push(`/admin/work-hours`)}
         >
           <ArrowLeftOutlined
             style={{
@@ -672,7 +691,7 @@ const App = () => {
         <Button
           className="button-lien-thong-vlvh text-white font-bold shadow-md mr-2"
           onClick={type !== 'boi-duong' ? () => exportToExcelTongHop(dataList, type, getType()) : () => { exportToExcelTongHopBoiDuong(dataList, getType()) }}
-        >
+        ><FileExcelOutlined />
           Xuất file Excel
         </Button>
         {/* <Button

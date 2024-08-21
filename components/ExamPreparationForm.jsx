@@ -24,7 +24,7 @@ const formSchema = {
 
 const generateUniqueId = () => '_' + Math.random().toString(36).substr(2, 9);
 
-const ExamPreparationForm = ({ onUpdateCongTacRaDe }) => {
+const ExamPreparationForm = ({ onUpdateCongTacRaDe,namHoc }) => {
     const [dataList, setDataList] = useState([]);
     const [editRecord, setEditRecord] = useState(null);
     const [current, setCurrent] = useState(1);
@@ -80,11 +80,15 @@ const ExamPreparationForm = ({ onUpdateCongTacRaDe }) => {
     }, [dataList]);
 
     const onSubmit = async (data) => {
+        if (namHoc == ''){
+            toast.error('Vui lòng nhập năm học!')
+            return
+        }
         try {
             const method = editRecord ? "PUT" : "POST";
             const res = await fetch("/api/work-hours/CongTacRaDe", {
                 method,
-                body: JSON.stringify({ ...data, type: type, user: currentUser._id, id: editRecord?._id }),
+                body: JSON.stringify({ ...data, type: type, user: currentUser._id, id: editRecord?._id,namHoc }),
                 headers: { "Content-Type": "application/json" },
             });
 

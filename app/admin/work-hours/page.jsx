@@ -12,11 +12,11 @@ const WorkHours = () => {
   const [isChinhQuyKhac, setIsChinhQuyKhac] = useState(false)
 
   const handlePage = (type) => {
-    router.push(`admin/${type}`);
+    router.push(`work-hours/${type}`);
   };
 
   return (
-    <div className='p-4 bg-white rounded-xl w-[80%] h-[70vh] mx-auto  mt-6 max-sm:h-[70vh] shadow-xl'>
+    <div className=' bg-white rounded-xl h-[70vh] mx-auto  mt-6 max-sm:h-[70vh] shadow-xl'>
       {isChinhQuyKhac&& (
         <Button
         className="button-kiem-nhiem text-white font-bold shadow-md left-0"

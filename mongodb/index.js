@@ -13,9 +13,8 @@ export const connectToDB = async () => {
   try {
     await mongoose.connect(process.env.MONGODB_URL, {
       dbName: "HaloChat",
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
     });
+    
 
     isConnected = true;
     console.log("MongoDB is connected successfully");

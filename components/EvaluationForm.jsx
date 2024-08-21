@@ -22,7 +22,7 @@ const formSchema = {
     ghiChu: "",
 };
 
-const EvaluationForm = ({ onUpdateCongTacChamThi }) => {
+const EvaluationForm = ({ onUpdateCongTacChamThi ,namHoc}) => {
     const [dataList, setDataList] = useState([]);
     const [editRecord, setEditRecord] = useState(null);
     const [current, setCurrent] = useState(1);
@@ -86,11 +86,15 @@ const EvaluationForm = ({ onUpdateCongTacChamThi }) => {
     }, [dataList]);
 
     const onSubmit = async (data) => {
+        if (namHoc == ''){
+            toast.error('Vui lòng nhập năm học!')
+            return
+        }
         try {
             const method = editRecord ? "PUT" : "POST";
             const res = await fetch("/api/work-hours/CongTacChamThi", {
                 method,
-                body: JSON.stringify({ ...data, type: type, user: currentUser._id, id: editRecord?._id }),
+                body: JSON.stringify({ ...data, type: type, user: currentUser._id, id: editRecord?._id,namHoc }),
                 headers: { "Content-Type": "application/json" },
             });
 
@@ -210,7 +214,7 @@ const EvaluationForm = ({ onUpdateCongTacChamThi }) => {
             <div className="p-5 shadow-xl bg-white rounded-xl flex-[40%]">
                 <Title className="text-center" level={3}>CÔNG TÁC CHẤM THI</Title>
 
-                <Form onFinish={handleSubmit(onSubmit)} layout="vertical" className="space-y-8 mt-10">
+                <Form onFinish={handleSubmit(onSubmit)} layout="vertical" className="space-y-1 mt-10">
                     <Space direction="vertical" className="w-full">
                         <div className="flex justify-between max-sm:flex-col">
                             <Form.Item
