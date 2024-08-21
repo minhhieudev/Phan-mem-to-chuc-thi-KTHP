@@ -75,10 +75,10 @@ const WorkHours = () => {
     };
 
     return (
-        <div className='m-auto w-[90%] h-[75vh] max-sm:h-fit shadow-xl bg-white mt-4 rounded-md p-2'>
+        <div className='m-auto w-[99%] h-[80vh] max-sm:h-fit shadow-xl bg-white mt-4 rounded-md p-2'>
             <Button
                 className="button-kiem-nhiem text-white font-bold shadow-md mr-2"
-                onClick={() => router.push(`/admin/${type}`)}
+                onClick={() => router.push(`/admin/work-hours/${type}`)}
             >
                 <ArrowLeftOutlined
                     style={{
@@ -87,7 +87,7 @@ const WorkHours = () => {
                     }}
                 /> QUAY LẠI
             </Button>
-            <div className='rounded-xl flex justify-center items-center gap-20 flex-wrap w-[90%] mx-auto  mt-7'>
+            <div className='rounded-xl flex justify-center items-center gap-20 flex-wrap w-[95%] mx-auto  mt-7'>
                 {getButtonList().map((buttonText) => (
                     <Button
                         key={buttonText}

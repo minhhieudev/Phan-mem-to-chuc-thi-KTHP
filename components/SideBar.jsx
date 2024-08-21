@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import React from "react";
-import { DashboardOutlined, ClockCircleOutlined, UserOutlined, BookOutlined ,MailOutlined } from "@ant-design/icons";
+import { DashboardOutlined, ClockCircleOutlined, UserOutlined, BookOutlined, FormOutlined, FileTextOutlined } from "@ant-design/icons";
 
 const SideBar = () => {
   const pathname = usePathname();
@@ -13,7 +13,7 @@ const SideBar = () => {
     paths.includes(pathname) ? { color: 'red' } : { color: 'gray' };
 
   return (
-    <div className="flex flex-col gap-4 bg-white shadow-xl p-6 rounded-xl mt-3 h-[85vh] font-semibold">
+    <div className="flex flex-col gap-4 bg-white shadow-xl p-6 rounded-xl mt-3 h-[85vh] font-semibold overflow-y-auto">
       <h2 className="text-xl font-bold text-gray-800 mb-4">ADMIN</h2>
       <Link href="/admin/dashboard" className={`flex items-center gap-3 p-3 rounded-lg transition border-b-2`}>
         <DashboardOutlined style={{ fontSize: "20px" }} className="text-orange-500"/>
@@ -31,9 +31,25 @@ const SideBar = () => {
         <BookOutlined style={{ fontSize: "20px" }} className="text-green-500"/>
         <span style={getIconStyle(["/admin/khoa"])}>Khoa</span>
       </Link>
-      <Link href="/admin/khoa" className={`flex items-center gap-3 p-3 rounded-lg transition border-b-2`}>
-        <MailOutlined  style={{ fontSize: "20px" }} className="text-green-500"/>
-        <span style={getIconStyle(["/admin/khoa"])}>Email</span>
+      <Link href="/admin/phancongiangday" className={`flex items-center gap-3 p-3 rounded-lg transition border-b-2`}>
+        <FormOutlined style={{ fontSize: "20px" }} className="text-purple-500"/>
+        <span style={getIconStyle(["/admin/phancongiangday"])}>Phân công giảng dạy</span>
+      </Link>
+      <Link href="/admin/phanconcoithi" className={`flex items-center gap-3 p-3 rounded-lg transition border-b-2`}>
+        <FormOutlined style={{ fontSize: "20px" }} className="text-purple-500"/>
+        <span style={getIconStyle(["/admin/phanconcoithi"])}>Phân công coi thi</span>
+      </Link>
+      <Link href="/admin/phancongchamthi" className={`flex items-center gap-3 p-3 rounded-lg transition border-b-2`}>
+        <FormOutlined style={{ fontSize: "20px" }} className="text-purple-500"/>
+        <span style={getIconStyle(["/admin/phancongchamthi"])}>Phân công chấm thi</span>
+      </Link>
+      <Link href="/admin/phanconghuongdan" className={`flex items-center gap-3 p-3 rounded-lg transition border-b-2`}>
+        <FormOutlined style={{ fontSize: "20px" }} className="text-purple-500"/>
+        <span style={getIconStyle(["/admin/phanconghuongdan"])}>Phân công hướng dẫn</span>
+      </Link>
+      <Link href="/admin/phancongrade" className={`flex items-center gap-3 p-3 rounded-lg transition border-b-2`}>
+        <FileTextOutlined style={{ fontSize: "20px" }} className="text-teal-500"/>
+        <span style={getIconStyle(["/admin/phancongrade"])}>Phân công ra đề</span>
       </Link>
     </div>
   );

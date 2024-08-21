@@ -228,7 +228,15 @@ const App = () => {
       title: 'Họ và tên giảng viên',
       dataIndex: 'username',
       ...getColumnSearchProps('user.username'),
-      render: (text, record) => record.user.username,
+      render: (text, record) => (
+        <Button
+          type="link"
+          className="text-blue-500 font-bold"
+          onClick={() => router.push(`/admin/work-hours/${type}/${currentUser._id}`)}
+        >
+          {record.user.username}
+        </Button>
+      ),
       className: 'text-blue-500 font-bold text-center',
     },
     {

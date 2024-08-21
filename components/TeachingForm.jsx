@@ -256,15 +256,15 @@ const TeachingForm = ({ onUpdateCongTacGiangDay,namHoc }) => {
     <Loader />
   ) : (
     <div className="flex gap-5 max-sm:flex-col">
-      <div className="p-5 shadow-xl bg-white rounded-xl flex-[40%]">
+      <div className="p-4 shadow-xl bg-white rounded-xl flex-[40%]">
         <Title className="text-center" level={3}>CÔNG TÁC GIẢNG DẠY</Title>
 
-        <Form onFinish={handleSubmit(onSubmit)} layout="Inline" className="space-y-1 mt-10">
+        <Form onFinish={handleSubmit(onSubmit)} layout="Inline" className="space-y-5 mt-6">
           <Space direction="vertical" className="w-full">
             <div className="flex justify-between">
               <Form.Item
                 label={<span className="font-bold text-xl">Học phần giảng dạy <span className="text-red-600">*</span></span>}
-                className="w-[40%]"
+                className="w-[40%] p-0"
                 validateStatus={errors.hocPhan ? 'error' : ''}
                 help={errors.hocPhan?.message}
               >

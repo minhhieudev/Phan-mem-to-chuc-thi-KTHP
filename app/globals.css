@@ -268,7 +268,7 @@
 
 /* Thêm một đường viền dưới nút đang được chọn */
 .custom-button-active {
-  @apply  p-7 rounded-full;
+  @apply  p-5 rounded-full;
 }
 
 /* styles.css */

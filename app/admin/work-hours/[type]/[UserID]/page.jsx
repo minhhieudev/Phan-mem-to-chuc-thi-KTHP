@@ -6,7 +6,7 @@ import { SearchOutlined, EyeFilled, DeleteOutlined, FileExcelOutlined  } from '@
 import moment from 'moment';
 import { ArrowLeftOutlined } from '@ant-design/icons';
 import { useRouter } from "next/navigation";
-import { exportToExcelChiTiet } from '../../../../../../components/fileExport'
+import { exportToExcelChiTiet } from '../../../../../components/fileExport'
 import { CldUploadButton } from "next-cloudinary";
 import { useSession } from "next-auth/react";
 
@@ -732,7 +732,7 @@ const Pages = () => {
       <div className="flex items-center justify-center mb-3">
         <Button
           className="button-kiem-nhiem text-white font-bold shadow-md mr-2"
-          onClick={() => router.push(`/admin/work-hours/${type}/detail`)} 
+          onClick={() => router.push(`/admin/work-hours/${type}`)} 
         >
           <ArrowLeftOutlined
             style={{

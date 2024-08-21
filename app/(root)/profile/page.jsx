@@ -5,7 +5,10 @@ import { PersonOutline } from "@mui/icons-material";
 import { useSession } from "next-auth/react";
 import { CldUploadButton } from "next-cloudinary";
 import React, { useEffect, useState } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
+import { Table, Select, Progress, Input } from "antd";
+
+const { Option } = Select;
 
 const Profile = () => {
   const { data: session } = useSession();
@@ -13,11 +16,14 @@ const Profile = () => {
 
   const [loading, setLoading] = useState(true);
 
+  const listKhoa = ['KTCN', 'XHNV'];
+
   useEffect(() => {
     if (user) {
       reset({
         username: user?.username,
         profileImage: user?.profileImage,
+        khoa: user?.khoa || listKhoa[0]
       });
     }
     setLoading(false);
@@ -29,6 +35,7 @@ const Profile = () => {
     setValue,
     reset,
     handleSubmit,
+    control,
     formState: { error },
   } = useForm();
 
@@ -37,7 +44,7 @@ const Profile = () => {
   };
 
   const updateUser = async (data) => {
-    console.log('Data:',data)
+    console.log('Data:', data);
     setLoading(true);
     try {
       const res = await fetch(`/api/users/${user._id}/update`, {
@@ -58,11 +65,11 @@ const Profile = () => {
   return loading ? (
     <Loader />
   ) : (
-    <div className="profile-page">
+    <div className="profile-page bg-gray-200 w-[40%] rounded-md shadow-md mx-auto p-4">
       <h1 className="text-heading3-bold">CHỈNH SỬA THÔNG TIN</h1>
 
       <form className="edit-profile" onSubmit={handleSubmit(updateUser)}>
-        <div className="input">
+        <div className="input bg-white">
           <input
             {...register("username", {
               required: "Username is required",
@@ -81,6 +88,22 @@ const Profile = () => {
         {error?.username && (
           <p className="text-red-500">{error.username.message}</p>
         )}
+
+        {/* Select Khoa */}
+        <Controller
+          name="khoa"
+          control={control}
+          defaultValue={listKhoa[0]} 
+          render={({ field }) => (
+            <Select {...field} style={{ width: 180 }}>
+              {listKhoa.map((khoa, index) => (
+                <Option key={index} value={khoa}>
+                  {khoa}
+                </Option>
+              ))}
+            </Select>
+          )}
+        />
 
         <div className="flex items-center justify-between">
           <img
