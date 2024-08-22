@@ -3,6 +3,7 @@ import SideBar from "@components/SideBar";
 import TopBar from "@components/TopBar";
 import "../globals.css";
 import Provider from "@components/Provider";
+import { Toaster } from "react-hot-toast"; // Import Toaster từ react-hot-toast
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -21,6 +22,7 @@ export default function RootLayout({ children }) {
             <div className="w-[15%]"><SideBar /></div>
             <div className="w-[83%] mx-auto">{children}</div>
           </div>
+          <Toaster />
         </Provider>
       </body>
     </html>
