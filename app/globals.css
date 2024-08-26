@@ -20,7 +20,7 @@
 }
 
 .logo {
-  @apply w-16 h-16;
+  @apply w-14 h-14;
 }
 
 .form {
@@ -50,7 +50,7 @@
 
 /* Top Bar */
 .topbar {
-  @apply top-0 sticky px-10 py-2 flex items-center justify-between bg-white max-sm:py-1 max-sm:px-5 z-50;
+  @apply top-0 sticky px-10 py-1 flex items-center justify-between bg-white max-sm:py-1 max-sm:px-5 z-50;
 }
 
 .menu {

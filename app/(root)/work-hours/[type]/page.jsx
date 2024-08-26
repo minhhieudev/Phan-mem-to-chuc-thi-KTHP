@@ -1,8 +1,8 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { Row, Col, Button, Input } from "antd";
-import TeachingForm from '@components/TeachingForm';
+import { Row, Col, Button, Input, Tabs, Spin, Select } from "antd";
+import TeachingForm from '@components/GiangDay/TeachingForm';
 import EvaluationForm from "@components/EvaluationForm";
 import DutyExemptionForm from "@components/DutyExemptionForm";
 import ExamMonitoringForm from "@components/ExamMonitoringForm";
@@ -14,7 +14,6 @@ import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { ArrowLeftOutlined } from '@ant-design/icons';
 import toast from "react-hot-toast";
-
 
 const Pages = () => {
   const { type } = useParams();
@@ -41,28 +40,29 @@ const Pages = () => {
   const { data: session } = useSession();
   const currentUser = session?.user;
 
-  const [error, setError] = useState("");
+  const [kyHoc, setKyHoc] = useState("1");
 
-  const validateNamHoc = (value) => {
-    const regex = /^\d{4}\s*-\s*\d{4}$/;
-    return regex.test(value);
-  };
+  // Option lists
+  const namHocOptions = [
+    { value: '2021-2022', label: '2021 - 2022' },
+    { value: '2022-2023', label: '2022 - 2023' },
+    { value: '2023-2024', label: '2023 - 2024' },
+    { value: '2024-2025', label: '2024 - 2025' },
+  ];
 
-  const normalizeNamHoc = (value) => {
-    return value.replace(/\s*-\s*/, " - ").trim();
-  };
+  const kyHocOptions = [
+    { value: '1', label: '1' },
+    { value: '2', label: '2' },
+    // Thêm các kỳ khác nếu cần
+  ];
 
-  const handleNamHocChange = (e) => {
-    const value = normalizeNamHoc(e.target.value);
+  const handleNamHocChange = (value) => {
     setNamHoc(value);
-
-    if (validateNamHoc(value)) {
-      setError("");
-    } else {
-      setError("Năm học không đúng định dạng (YYYY - YYYY).");
-    }
   };
 
+  const handleKyHocChange = (value) => {
+    setKyHoc(value);
+  };
 
   useEffect(() => {
     const buttons = getButtonList();
@@ -141,15 +141,15 @@ const Pages = () => {
   const renderForm = () => {
     switch (selectedForm) {
       case 'Công tác giảng dạy':
-        return <TeachingForm onUpdateCongTacGiangDay={updateCongTacGiangDay} namHoc={namHoc || ''} />;
+        return <TeachingForm onUpdateCongTacGiangDay={updateCongTacGiangDay} namHoc={namHoc || ''} ky={kyHoc||''} />;
       case 'Công tác chấm thi':
-        return <EvaluationForm onUpdateCongTacChamThi={updateCongTacChamThi} namHoc={namHoc || ''} />;
+        return <EvaluationForm onUpdateCongTacChamThi={updateCongTacChamThi} namHoc={namHoc || ''} ky={kyHoc||''}/>;
       case 'Công tác hướng dẫn':
         return <GuidanceForm onUpdateCongTacHuongDan={updateCongTacHuongDan} namHoc={namHoc || ''} />;
       case 'Công tác coi thi':
-        return <ExamMonitoringForm onUpdateCongTacCoiThi={updateCongTacCoiThi} namHoc={namHoc || ''} />;
+        return <ExamMonitoringForm onUpdateCongTacCoiThi={updateCongTacCoiThi} namHoc={namHoc || ''} ky={kyHoc||''}/>;
       case 'Công tác ra đề thi':
-        return <ExamPreparationForm onUpdateCongTacRaDe={updateCongTacRaDe} namHoc={namHoc || ''} />;
+        return <ExamPreparationForm onUpdateCongTacRaDe={updateCongTacRaDe} namHoc={namHoc || ''} ky={kyHoc||''}/>;
       case 'Công tác kiêm nhiệm':
         return <DutyExemptionForm onUpdateCongTacKiemNhiem={updateCongTacKiemNhiem} namHoc={namHoc || ''} />;
       case 'Công tác giảng dạy bồi dưỡng':
@@ -196,31 +196,27 @@ const Pages = () => {
   }, []);
 
   const submitResult = async () => {
-    if (validateNamHoc(namHoc)) {
-      try {
-        const res = await fetch(type !== "boi-duong" ? `/api/admin/tong-hop-lao-dong/chinh-quy/${type}` : "/api/admin/tong-hop-lao-dong/boi-duong", {
-          method: "POST",
-          body: JSON.stringify({
-            user: currentUser._id,
-            congTacGiangDay,
-            congTacKhac: { ...congTacKhac, tong: congTacKhac.chamThi + congTacKhac.coiThi + congTacKhac.deThi + congTacKhac.ngoaiKhoa },
-            kiemNhiem,
-            loai: type,
-            namHoc
-          }),
-          headers: { "Content-Type": "application/json" },
-        });
+    try {
+      const res = await fetch(type !== "boi-duong" ? `/api/admin/tong-hop-lao-dong/chinh-quy/${type}` : "/api/admin/tong-hop-lao-dong/boi-duong", {
+        method: "POST",
+        body: JSON.stringify({
+          user: currentUser._id,
+          congTacGiangDay,
+          congTacKhac: { ...congTacKhac, tong: congTacKhac.chamThi + congTacKhac.coiThi + congTacKhac.deThi + congTacKhac.ngoaiKhoa },
+          kiemNhiem,
+          loai: type,
+          namHoc
+        }),
+        headers: { "Content-Type": "application/json" },
+      });
 
-        if (res.ok) {
-          onReset();
-        } else {
-          toast.error("Failed to save record");
-        }
-      } catch (err) {
-        toast.error("An error occurred while saving data");
+      if (res.ok) {
+        onReset();
+      } else {
+        toast.error("Failed to save record");
       }
-    } else {
-      toast.error("Vui lòng nhập năm học đúng định dạng (YYYY - YYYY).");
+    } catch (err) {
+      toast.error("An error occurred while saving data");
     }
   };
 
@@ -231,6 +227,7 @@ const Pages = () => {
           <Button
             className="button-kiem-nhiem text-white font-bold shadow-md"
             onClick={() => router.push(`/work-hours`)}
+            size="small"
           >
             <div className="hover:color-blue "><ArrowLeftOutlined
               style={{
@@ -245,8 +242,23 @@ const Pages = () => {
         </div>
         <div className="w-[30%]  p-2 bg-white rounded-md flex gap-2 items-center">
           <div className='text-base-bold'>Năm học :</div>
-          <Input className="input-text w-[60%] font-bold" placeholder="Nhập năm học..." value={namHoc}
-            onChange={handleNamHocChange} />
+          <Select
+            className="w-[60%]"
+            value={namHoc}
+            onChange={handleNamHocChange}
+            options={namHocOptions}
+            placeholder="Chọn năm học"
+          />
+        </div>
+        <div className="w-[30%]  p-2 bg-white rounded-md flex gap-2 items-center">
+          <div className='text-base-bold'>Kỳ học:</div>
+          <Select
+            className="w-[60%]"
+            value={kyHoc}
+            onChange={handleKyHocChange}
+            options={kyHocOptions}
+            placeholder="Chọn kỳ học"
+          />
         </div>
       </div>
 
@@ -273,6 +285,7 @@ const Pages = () => {
           </Col>
         </Row>
       </div>
+
       {type !== 'boi-duong' &&
         <div className="p-2 bg-white w-[98%] rounded-xl shadow-md">
           <div className="flex justify-around w-full flex-wrap">

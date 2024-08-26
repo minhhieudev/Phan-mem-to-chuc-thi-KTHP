@@ -31,25 +31,25 @@ const SideBar = () => {
         <BookOutlined style={{ fontSize: "20px" }} className="text-green-500"/>
         <span style={getIconStyle(["/admin/khoa"])}>Khoa</span>
       </Link>
-      <Link href="/admin/phancongiangday" className={`flex items-center gap-3 p-3 rounded-lg transition border-b-2`}>
+      <Link href="/giaovu/pc-giang-day" className={`flex items-center gap-3 p-3 rounded-lg transition border-b-2`}>
         <FormOutlined style={{ fontSize: "20px" }} className="text-purple-500"/>
-        <span style={getIconStyle(["/admin/phancongiangday"])}>Phân công giảng dạy</span>
+        <span style={getIconStyle(["/giaovu/pc-giang-day"])}>Phân công giảng dạy</span>
       </Link>
-      <Link href="/admin/phanconcoithi" className={`flex items-center gap-3 p-3 rounded-lg transition border-b-2`}>
+      <Link href="/giaovu/pc-coi-thi" className={`flex items-center gap-3 p-3 rounded-lg transition border-b-2`}>
         <FormOutlined style={{ fontSize: "20px" }} className="text-purple-500"/>
-        <span style={getIconStyle(["/admin/phanconcoithi"])}>Phân công coi thi</span>
+        <span style={getIconStyle(["/giaovu/pc-coi-thi"])}>Phân công coi thi</span>
       </Link>
-      <Link href="/admin/phancongchamthi" className={`flex items-center gap-3 p-3 rounded-lg transition border-b-2`}>
+      <Link href="/giaovu/pc-cham-thi" className={`flex items-center gap-3 p-3 rounded-lg transition border-b-2`}>
         <FormOutlined style={{ fontSize: "20px" }} className="text-purple-500"/>
-        <span style={getIconStyle(["/admin/phancongchamthi"])}>Phân công chấm thi</span>
+        <span style={getIconStyle(["/giaovu/pc-cham-thi"])}>Phân công chấm thi</span>
       </Link>
-      <Link href="/admin/phanconghuongdan" className={`flex items-center gap-3 p-3 rounded-lg transition border-b-2`}>
+      <Link href="/giaovu/pc-huong dan" className={`flex items-center gap-3 p-3 rounded-lg transition border-b-2`}>
         <FormOutlined style={{ fontSize: "20px" }} className="text-purple-500"/>
-        <span style={getIconStyle(["/admin/phanconghuongdan"])}>Phân công hướng dẫn</span>
+        <span style={getIconStyle(["/giaovu/pc-huong-dan"])}>Phân công hướng dẫn</span>
       </Link>
-      <Link href="/admin/phancongrade" className={`flex items-center gap-3 p-3 rounded-lg transition border-b-2`}>
+      <Link href="/giaovu/pc-ra-de" className={`flex items-center gap-3 p-3 rounded-lg transition border-b-2`}>
         <FileTextOutlined style={{ fontSize: "20px" }} className="text-teal-500"/>
-        <span style={getIconStyle(["/admin/phancongrade"])}>Phân công ra đề</span>
+        <span style={getIconStyle(["/giaovu/pc-ra-de"])}>Phân công ra đề</span>
       </Link>
     </div>
   );

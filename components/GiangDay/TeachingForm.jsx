@@ -2,17 +2,19 @@
 
 import { useState, useMemo, useEffect } from "react";
 import { useForm, Controller } from "react-hook-form";
-import { Button, Input, Form, Space, Typography, Radio, Spin, InputNumber, Table, Popconfirm } from "antd";
+import { Button, Input, Form, Space, Typography, Radio, InputNumber, Table, Popconfirm, Tabs, Spin, Select } from "antd";
 import toast from "react-hot-toast";
 import { useSession } from "next-auth/react";
 import { useParams } from "next/navigation";
-import Loader from "./Loader";
+import Loader from "../Loader";
+import TablePcGiangDay from "./TablePcGiangDay";
+
+const { TabPane } = Tabs;
 
 const { Title } = Typography;
 
 const formSchema = {
   hocPhan: "",
-  ky: "",
   soTinChi: 0,
   lopHocPhan: "",
   soSV: 0,
@@ -24,7 +26,7 @@ const formSchema = {
   ghiChu: "",
 };
 
-const TeachingForm = ({ onUpdateCongTacGiangDay,namHoc }) => {
+const TeachingForm = ({ onUpdateCongTacGiangDay, namHoc, ky }) => {
   const [dataList, setDataList] = useState([]);
   const [editRecord, setEditRecord] = useState(null);
   const { control, handleSubmit, setValue, reset, watch, formState: { errors, isSubmitting } } = useForm({
@@ -47,6 +49,9 @@ const TeachingForm = ({ onUpdateCongTacGiangDay,namHoc }) => {
 
   const { type } = useParams();
 
+  const [selectedTab, setSelectedTab] = useState('Kết quả giảng dạy');
+  const [loadings, setLoadings] = useState(true);
+
 
   useEffect(() => {
     const tongCong = (soTietQCLT || 0) + (soTietQCTH || 0);
@@ -61,12 +66,31 @@ const TeachingForm = ({ onUpdateCongTacGiangDay,namHoc }) => {
     }
   }, [editRecord, reset]);
 
+  // const fetchDataForm = async () => {
+  //   try {
+  //     const res = await fetch(`/api/work-hours/CongTacGiangDay/?user=${encodeURIComponent(currentUser._id)}&type=${encodeURIComponent(type)}&namHoc=${encodeURIComponent(namHoc)}&ky=${encodeURIComponent(ky)}`, {
+  //       method: "GET",
+  //       headers: { "Content-Type": "application/json" },
+  //     });
+  //     if (res.ok) {
+  //       const data = await res.json();
+  //       setDataList(data);
+  //       setLoading(false)
+  //       setLoadings(false)
+  //     } else {
+  //       toast.error("Failed to fetch data");
+  //     }
+  //   } catch (err) {
+  //     toast.error("An error occurred while fetching data");
+  //   }
+  // };
+
   useEffect(() => {
     if (!currentUser?._id) return;
 
     const fetchData = async () => {
       try {
-        const res = await fetch(`/api/work-hours/CongTacGiangDay/?user=${encodeURIComponent(currentUser._id)}&type=${encodeURIComponent(type)}`, {
+        const res = await fetch(`/api/work-hours/CongTacGiangDay/?user=${encodeURIComponent(currentUser._id)}&type=${encodeURIComponent(type)}&namHoc=${encodeURIComponent(namHoc)}&ky=${encodeURIComponent(ky)}`, {
           method: "GET",
           headers: { "Content-Type": "application/json" },
         });
@@ -74,6 +98,7 @@ const TeachingForm = ({ onUpdateCongTacGiangDay,namHoc }) => {
           const data = await res.json();
           setDataList(data);
           setLoading(false)
+          setLoadings(false)
         } else {
           toast.error("Failed to fetch data");
         }
@@ -83,7 +108,7 @@ const TeachingForm = ({ onUpdateCongTacGiangDay,namHoc }) => {
     };
 
     fetchData();
-  }, [currentUser]);
+  }, [currentUser, namHoc, ky]);
 
   const calculateTotals = () => {
     const totals = dataList.reduce((acc, item) => {
@@ -103,7 +128,7 @@ const TeachingForm = ({ onUpdateCongTacGiangDay,namHoc }) => {
   }, [dataList]);
 
   const onSubmit = async (data) => {
-    if (namHoc == ''){
+    if (namHoc == '') {
       toast.error('Vui lòng nhập năm học!')
       return
     }
@@ -111,7 +136,7 @@ const TeachingForm = ({ onUpdateCongTacGiangDay,namHoc }) => {
       const method = editRecord ? "PUT" : "POST";
       const res = await fetch("/api/work-hours/CongTacGiangDay", {
         method,
-        body: JSON.stringify({ ...data, type: type, user: currentUser?._id, id: editRecord?._id ,namHoc}),
+        body: JSON.stringify({ ...data, type: type, user: currentUser?._id, id: editRecord?._id, namHoc, ky }),
         headers: { "Content-Type": "application/json" },
       });
 
@@ -150,13 +175,21 @@ const TeachingForm = ({ onUpdateCongTacGiangDay,namHoc }) => {
 
       if (res.ok) {
         setDataList(prevData => prevData.filter(item => item._id !== id));
-        toast.success("Record deleted successfully!");
+        toast.success("Xóa thành công");
       } else {
         toast.error("Failed to delete record");
       }
     } catch (err) {
       toast.error("An error occurred while deleting data");
     }
+  };
+
+  const handleTabChange = (key) => {
+    setLoadings(true);
+    setSelectedTab(key);
+    setTimeout(() => {
+      setLoadings(false);
+    }, 500);
   };
 
 
@@ -234,14 +267,14 @@ const TeachingForm = ({ onUpdateCongTacGiangDay,namHoc }) => {
       key: 'action',
       render: (_, record) => (
         <Space size="middle">
-          <Button onClick={() => handleEdit(record)} type="primary">Sửa</Button>
+          <Button size="small" onClick={() => handleEdit(record)} type="primary">Sửa</Button>
           <Popconfirm
             title="Bạn có chắc chắn muốn xoá?"
             onConfirm={() => handleDelete(record._id)}
             okText="Có"
             cancelText="Không"
           >
-            <Button type="primary" danger>Xoá</Button>
+            <Button size="small" type="primary" danger>Xoá</Button>
           </Popconfirm>
         </Space>
       ),
@@ -255,46 +288,44 @@ const TeachingForm = ({ onUpdateCongTacGiangDay,namHoc }) => {
   return loading ? (
     <Loader />
   ) : (
-    <div className="flex gap-5 max-sm:flex-col">
-      <div className="p-4 shadow-xl bg-white rounded-xl flex-[40%]">
+    <div className="flex gap-3 max-sm:flex-col">
+      <div className="p-4 shadow-xl bg-white rounded-xl flex-[30%]">
         <Title className="text-center" level={3}>CÔNG TÁC GIẢNG DẠY</Title>
 
-        <Form onFinish={handleSubmit(onSubmit)} layout="Inline" className="space-y-5 mt-6">
-          <Space direction="vertical" className="w-full">
-            <div className="flex justify-between">
-              <Form.Item
-                label={<span className="font-bold text-xl">Học phần giảng dạy <span className="text-red-600">*</span></span>}
-                className="w-[40%] p-0"
-                validateStatus={errors.hocPhan ? 'error' : ''}
-                help={errors.hocPhan?.message}
-              >
-                <Controller
-                  name="hocPhan"
-                  control={control}
-                  rules={{ required: "Học phần là bắt buộc" }}
-                  render={({ field }) => <Input className="input-text" placeholder="Nhập tên học phần ..." {...field} />}
-                />
-              </Form.Item>
-
-              <Form.Item
-                label={<span className="font-bold text-xl">Học kỳ <span className="text-red-600">*</span></span>}
-                className="w-[40%]"
-                validateStatus={errors.ky ? 'error' : ''}
-                help={errors.ky?.message}
-              >
-                <Controller
-                  name="ky"
-                  control={control}
-                  rules={{ required: "Học kỳ là bắt buộc" }}
-                  render={({ field }) => (
-                    <Radio.Group {...field} className="font-semibold">
-                      <Radio value="1">Kỳ 1</Radio>
-                      <Radio value="2">Kỳ 2</Radio>
-                    </Radio.Group>
-                  )}
-                />
-              </Form.Item>
-            </div>
+        <Form onFinish={handleSubmit(onSubmit)} layout="Inline" className="">
+          <Space direction="vertical" >
+            <Form.Item
+              label={
+                <span className="font-bold text-xl">
+                  Học phần giảng dạy <span className="text-red-600">*</span>
+                </span>
+              }
+              className="w-[40%] p-0"
+              validateStatus={errors.hocPhan ? 'error' : ''}
+              help={errors.hocPhan?.message}
+            >
+              <Controller
+                name="hocPhan"
+                control={control}
+                rules={{ required: "Học phần là bắt buộc" }}
+                render={({ field }) => (
+                  <Select
+                    showSearch
+                    allowClear
+                    placeholder="Nhập hoặc chọn tên học phần..."
+                    {...field}
+                    options={[
+                      { value: 'hocPhan1', label: 'Học phần 1' },
+                      { value: 'hocPhan2', label: 'Học phần 2' },
+                      // Add more options here
+                    ]}
+                    filterOption={(input, option) =>
+                      option?.label?.toLowerCase().indexOf(input.toLowerCase()) >= 0
+                    }
+                  />
+                )}
+              />
+            </Form.Item>
 
             <div className="flex justify-between">
               <Form.Item
@@ -319,7 +350,7 @@ const TeachingForm = ({ onUpdateCongTacGiangDay,namHoc }) => {
                   name="soTinChi"
                   control={control}
                   rules={{ required: "Số TC là bắt buộc", min: { value: 1, message: "Số TC phải lớn hơn 0" } }}
-                  render={({ field }) => <InputNumber className="input-number" {...field} />}
+                  render={({ field }) => <InputNumber className="input-number w-14" {...field} />}
                 />
               </Form.Item>
 
@@ -332,7 +363,7 @@ const TeachingForm = ({ onUpdateCongTacGiangDay,namHoc }) => {
                   name="soSV"
                   control={control}
                   rules={{ required: "Số SV là bắt buộc", min: { value: 1, message: "Số SV phải lớn hơn 0" } }}
-                  render={({ field }) => <InputNumber {...field} className="input-number" />}
+                  render={({ field }) => <InputNumber {...field} className="input-number w-14" />}
                 />
               </Form.Item>
             </div>
@@ -350,7 +381,7 @@ const TeachingForm = ({ onUpdateCongTacGiangDay,namHoc }) => {
                         name="soTietLT"
                         control={control}
                         rules={{ required: "Số tiết LT là bắt buộc", min: { value: 1, message: "Số tiết phải lớn hơn 0" } }}
-                        render={({ field }) => <InputNumber className="input-number" {...field} />}
+                        render={({ field }) => <InputNumber className="input-number w-14" {...field} />}
                       />
                     </Form.Item>
 
@@ -364,7 +395,7 @@ const TeachingForm = ({ onUpdateCongTacGiangDay,namHoc }) => {
                         name="soTietTH"
                         control={control}
                         rules={{ required: "Số tiết TH là bắt buộc", min: { value: 1, message: "Số tiết phải lớn hơn 0" } }}
-                        render={({ field }) => <InputNumber className="input-number" {...field} />}
+                        render={({ field }) => <InputNumber className="input-number w-14" {...field} />}
                       />
                     </Form.Item>
                   </div>
@@ -383,7 +414,7 @@ const TeachingForm = ({ onUpdateCongTacGiangDay,namHoc }) => {
                         name="soTietQCLT"
                         control={control}
                         rules={{ required: "Số tiết quy chuẩn LT là bắt buộc", min: { value: 1, message: "Số tiết phải lớn hơn 0" } }}
-                        render={({ field }) => <InputNumber className="input-number" {...field} />}
+                        render={({ field }) => <InputNumber className="input-number w-14" {...field} />}
                       />
                     </Form.Item>
 
@@ -397,7 +428,7 @@ const TeachingForm = ({ onUpdateCongTacGiangDay,namHoc }) => {
                         name="soTietQCTH"
                         control={control}
                         rules={{ required: "Số tiết quy chuẩn TH là bắt buộc", min: { value: 1, message: "Số tiết phải lớn hơn 0" } }}
-                        render={({ field }) => <InputNumber className="input-number" {...field} />}
+                        render={({ field }) => <InputNumber className="input-number w-14" {...field} />}
                       />
                     </Form.Item>
                   </div>
@@ -436,23 +467,34 @@ const TeachingForm = ({ onUpdateCongTacGiangDay,namHoc }) => {
           </Form.Item>
         </Form>
       </div>
-      <div className="p-5 shadow-xl bg-white rounded-xl flex-[60%]">
-        <Table
-          columns={columns}
-          dataSource={dataList}
-          rowKey="_id"
-          pagination={{ current, pageSize, total: dataList.length, onChange: handleTableChange }}
-          summary={() => (
-            <Table.Summary.Row>
-              <Table.Summary.Cell colSpan={7} className="font-bold text-lg text-right">
-                Tổng số giờ:
-              </Table.Summary.Cell>
-              <Table.Summary.Cell className="font-bold text-lg text-red-600">
-                {totalHours}
-              </Table.Summary.Cell>
-            </Table.Summary.Row>
-          )}
-        />
+      <div className="p-2 shadow-xl bg-white rounded-xl flex-[70%] text-center">
+
+        <Tabs activeKey={selectedTab} onChange={handleTabChange}>
+          <TabPane tab="KẾT QUẢ GIẢNG DẠY" key="Kết quả giảng dạy">
+            {loadings ? <Spin size="large" /> :
+              <Table
+                columns={columns}
+                dataSource={dataList}
+                rowKey="_id"
+                pagination={{ current, pageSize, total: dataList.length, onChange: handleTableChange }}
+                summary={() => (
+                  <Table.Summary.Row>
+                    <Table.Summary.Cell colSpan={7} className="font-bold text-lg text-right">
+                      Tổng số giờ:
+                    </Table.Summary.Cell>
+                    <Table.Summary.Cell className="font-bold text-lg text-red-600">
+                      {totalHours}
+                    </Table.Summary.Cell>
+                  </Table.Summary.Row>
+                )}
+              />
+            }
+          </TabPane>
+          <TabPane tab="PHÂN CÔNG GIẢNG DẠY" key="Phân công giảng dạy" className="text-center">
+            {loadings ? <Spin size="large" /> : <TablePcGiangDay namHoc={namHoc || ''} ky={ky || ''} />}
+          </TabPane>
+        </Tabs>
+
       </div>
     </div>
   );

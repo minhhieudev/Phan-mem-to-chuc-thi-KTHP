@@ -5,17 +5,17 @@ export default withAuth({
   pages: {
     signIn: "/",
   },
-  callbacks: {
-    async authorized({ req, token }) {
-      if (!token) return false; 
+  // callbacks: {
+  //   async authorized({ req, token }) {
+  //     if (!token) return false; 
 
-      if (req.nextUrl.pathname.startsWith('/admin')) {
-        return token.role === 'admin';
-      }
+  //     if (req.nextUrl.pathname.startsWith('/admin')) {
+  //       return token.role === 'admin';
+  //     }
       
-      return true;
-    },
-  },
+  //     return true;
+  //   },
+  // },
 });
 
 export const config = { 

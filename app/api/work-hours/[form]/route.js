@@ -89,23 +89,27 @@ export const GET = async (req, { params }) => {
     const url = new URL(req.url, `http://${req.headers.host}`);
     const user = url.searchParams.get('user');
     const type = url.searchParams.get('type'); 
+    const namHoc = url.searchParams.get('namHoc'); 
+    const ky = url.searchParams.get('ky'); 
 
-    if (!user) {
-      return new Response("User parameter is required", { status: 400 });
+    if (!user || !type) {
+      return new Response("User and type parameters are required", { status: 400 });
     }
 
-    const currentYear = new Date().getFullYear();
-    const startOfYear = new Date(currentYear, 0, 1);
-    const endOfYear = new Date(currentYear + 1, 0, 1);
-    const model = models[form];
-    
     const query = {
-      user: user,
-      type:type,
-      createdAt: { $gte: startOfYear, $lt: endOfYear }
+      user,
+      type
     };
 
-    const records = await model.find(query);
+    if (namHoc) {
+      query.namHoc = namHoc;
+    }
+
+    if (ky) {
+      query.ky = ky;
+    }
+
+    const records = await models[form].find(query);
 
     return new Response(JSON.stringify(records), { status: 200 });
   } catch (err) {
