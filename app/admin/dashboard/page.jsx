@@ -23,7 +23,7 @@ const Dashboard = () => {
         { title: "Trạng thái", dataIndex: "status", key: "status" },
     ];
 
-    const listNam = ["2023-2024", "2024-2025"];
+    const listNam = ["2021-2022","2022-2023","2023-2024", "2024-2025"];
     const listKhoa = ["Kỹ thuật công nghệ", "Khoa học tự nhiên", "Xã hội nhân văn", "Nông nghiêp", "Mầm non"];
 
     const [selectedKhoa, setSelectedKhoa] = useState(null);
