@@ -88,13 +88,21 @@ const PcCoiThiTable = () => {
       title: 'Học phần',
       dataIndex: 'hocPhan',
       key: 'hocPhan',
-      render: (text) => <span style={{ color: 'green', fontWeight: 'bold' }}>{text}</span>,
+      render: (text) => (
+        <span style={{ color: 'green', fontWeight: 'bold' }}>
+          {Array.isArray(text) ? text.join(', ') : text}
+        </span>
+      ),
     },
     {
       title: 'Nhóm/Lớp',
       dataIndex: 'nhomLop',
       key: 'nhomLop',
-      render: (text) => <span style={{ color: 'red', fontWeight: 'bold' }}>{text}</span>,
+      render: (text) => (
+        <span style={{ color: 'red', fontWeight: 'bold' }}>
+          {Array.isArray(text) ? text.join(', ') : text}
+        </span>
+      ),
     },
     {
       title: 'Ngày thi',
@@ -135,7 +143,11 @@ const PcCoiThiTable = () => {
       dataIndex: 'time',
       key: 'time',
       width: 20,
-      render: (text) => <span style={{ fontWeight: 'bold' }}>{text}</span>,
+      render: (text) => (
+        <span style={{ fontWeight: 'bold' }}>
+          {Array.isArray(text) ? text.join(', ') : text}
+        </span>
+      ),
     },
     {
       title: 'Địa điểm thi',
@@ -150,7 +162,6 @@ const PcCoiThiTable = () => {
       key: 'ghiChu',
       render: (text) => <span style={{ fontWeight: 'bold' }}>{text}</span>,
     },
-
     {
       title: 'Hành động',
       key: 'action',
@@ -170,6 +181,7 @@ const PcCoiThiTable = () => {
       width: 20,
     },
   ];
+  
 
   // Phân trang dữ liệu
   const paginatedData = filteredData.slice(
@@ -196,7 +208,7 @@ const PcCoiThiTable = () => {
             onChange={(value) => setNamHoc(value)}
             className="w-[50%]"
           >
-            <Option value="2021-2022">2021-2022</Option>
+            <Option value="2021-2022">2021-2023</Option>
             <Option value="2022-2023">2022-2023</Option>
             <Option value="2023-2024">2023-2024</Option>
             <Option value="2024-2025">2024-2025</Option>

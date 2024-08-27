@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { Button, Input, Form, Select, InputNumber, Row, Col } from "antd";
 import toast from "react-hot-toast";
@@ -11,15 +11,15 @@ import { useRouter, useParams } from "next/navigation";
 const { Option } = Select;
 
 const formSchema = {
-  hocPhan: "",
-  nhomLop: "",
+  hocPhan: [],
+  nhomLop: [],
   ngayThi: '',
   ca: 0,
-  gvGiangDay: '',
   cb1: '',
   cb2: "",
-  time: '',
-  diaDiem: 0,
+  time: [],
+  phongThi: '',
+  diaDiem: '',
   ghiChu: "",
   namHoc: "",
   loaiKyThi: ""
@@ -58,12 +58,20 @@ const PcCoiThiForm = () => {
   }, [id, reset]);
 
   const onSubmit = async (data) => {
+    // Chuyển đổi chuỗi nhập vào thành mảng
+    const transformedData = {
+      ...data,
+      hocPhan: data.hocPhan.split(',').map(item => item.trim()),  // Cắt chuỗi thành mảng
+      nhomLop: data.nhomLop.split(',').map(item => item.trim()),  // Cắt chuỗi thành mảng
+      time: data.time.split(',').map(item => parseInt(item.trim(), 10))  // Cắt chuỗi thành mảng và chuyển thành số
+    };
+
     try {
       const url = `/api/giaovu/pc-coi-thi`;
 
       const res = await fetch(url, {
         method: "PUT",
-        body: JSON.stringify({ ...data, id: id }),
+        body: JSON.stringify({ ...transformedData, id: id }),
         headers: { "Content-Type": "application/json" },
       });
 
@@ -103,7 +111,7 @@ const PcCoiThiForm = () => {
                 name="hocPhan"
                 control={control}
                 rules={{ required: "Vui lòng nhập mã học phần" }}
-                render={({ field }) => <Input placeholder="Nhập mã học phần..." {...field} />}
+                render={({ field }) => <Input placeholder="Nhập mã học phần, cách nhau bởi dấu phẩy" {...field} />}
               />
             </Form.Item>
           </Col>
@@ -113,7 +121,7 @@ const PcCoiThiForm = () => {
                 name="nhomLop"
                 control={control}
                 rules={{ required: "Vui lòng nhập nhóm lớp" }}
-                render={({ field }) => <Input placeholder="Nhập nhóm lớp..." {...field} />}
+                render={({ field }) => <Input placeholder="Nhập nhóm lớp, cách nhau bởi dấu phẩy" {...field} />}
               />
             </Form.Item>
           </Col>
@@ -142,16 +150,6 @@ const PcCoiThiForm = () => {
         </Row>
         <Row gutter={16}>
           <Col span={12}>
-            <Form.Item label="Giảng viên giảng dạy" validateStatus={errors.gvGiangDay ? 'error' : ''} help={errors.gvGiangDay?.message}>
-              <Controller
-                name="gvGiangDay"
-                control={control}
-                rules={{ required: "Vui lòng nhập giảng viên" }}
-                render={({ field }) => <Input placeholder="Nhập giảng viên..." {...field} />}
-              />
-            </Form.Item>
-          </Col>
-          <Col span={12}>
             <Form.Item label="Cán bộ coi thi 1" validateStatus={errors.cb1 ? 'error' : ''} help={errors.cb1?.message}>
               <Controller
                 name="cb1"
@@ -161,8 +159,6 @@ const PcCoiThiForm = () => {
               />
             </Form.Item>
           </Col>
-        </Row>
-        <Row gutter={16}>
           <Col span={12}>
             <Form.Item label="Cán bộ coi thi 2" validateStatus={errors.cb2 ? 'error' : ''} help={errors.cb2?.message}>
               <Controller
@@ -173,13 +169,25 @@ const PcCoiThiForm = () => {
               />
             </Form.Item>
           </Col>
+        </Row>
+        <Row gutter={16}>
           <Col span={12}>
             <Form.Item label="Thời gian thi" validateStatus={errors.time ? 'error' : ''} help={errors.time?.message}>
               <Controller
                 name="time"
                 control={control}
                 rules={{ required: "Vui lòng nhập thời gian thi" }}
-                render={({ field }) => <Input placeholder="Nhập thời gian thi..." {...field} />}
+                render={({ field }) => <Input placeholder="Nhập thời gian thi, cách nhau bởi dấu phẩy" {...field} />}
+              />
+            </Form.Item>
+          </Col>
+          <Col span={12}>
+            <Form.Item label="Phòng thi" validateStatus={errors.phongThi ? 'error' : ''} help={errors.phongThi?.message}>
+              <Controller
+                name="phongThi"
+                control={control}
+                rules={{ required: "Vui lòng nhập phòng thi" }}
+                render={({ field }) => <Input placeholder="Nhập phòng thi..." {...field} />}
               />
             </Form.Item>
           </Col>
@@ -191,7 +199,7 @@ const PcCoiThiForm = () => {
                 name="diaDiem"
                 control={control}
                 rules={{ required: "Vui lòng nhập địa điểm thi" }}
-                render={({ field }) => <InputNumber min={1} placeholder="Nhập địa điểm thi..." style={{ width: '100%' }} {...field} />}
+                render={({ field }) => <Input placeholder="Nhập địa điểm thi..." {...field} />}
               />
             </Form.Item>
           </Col>
@@ -211,15 +219,8 @@ const PcCoiThiForm = () => {
               <Controller
                 name="namHoc"
                 control={control}
-                rules={{ required: "Vui lòng chọn năm học" }}
-                render={({ field }) => (
-                  <Select placeholder="Chọn năm học" {...field}>
-                    <Option value="2021-2022">2021-2022</Option>
-                    <Option value="2022-2023">2022-2023</Option>
-                    <Option value="2023-2024">2023-2024</Option>
-                    <Option value="2024-2025">2024-2025</Option>
-                  </Select>
-                )}
+                rules={{ required: "Vui lòng nhập năm học" }}
+                render={({ field }) => <Input placeholder="Nhập năm học..." {...field} />}
               />
             </Form.Item>
           </Col>
@@ -230,31 +231,19 @@ const PcCoiThiForm = () => {
                 control={control}
                 rules={{ required: "Vui lòng chọn loại kỳ thi" }}
                 render={({ field }) => (
-                  <Select placeholder="Chọn loại kỳ thi" {...field}>
+                  <Select placeholder="Chọn loại kỳ thi..." {...field}>
                     <Option value="Chính thức">Chính thức</Option>
                     <Option value="Phụ">Phụ</Option>
+                    <Option value="Hè">Hè</Option>
                   </Select>
                 )}
               />
             </Form.Item>
           </Col>
         </Row>
-
-        <div className="text-center">
-          <Button
-            loading={isSubmitting}
-            type="primary"
-            htmlType="submit"
-            className="bg-blue-500 hover:bg-blue-400 text-white font-bold shadow-md"
-          >
-            CẬP NHẬT
-          </Button>
-          <Button
-            className="ml-2 text-white font-bold shadow-md bg-gray-500 hover:bg-gray-400"
-            onClick={resetForm}
-          >
-            XÓA TRẮNG
-          </Button>
+        <div className="flex justify-end space-x-2">
+          <Button type="default" onClick={resetForm}>Reset</Button>
+          <Button type="primary" htmlType="submit" loading={isSubmitting}>Submit</Button>
         </div>
       </Form>
     </div>
