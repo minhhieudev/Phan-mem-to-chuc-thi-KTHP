@@ -2,25 +2,26 @@
 
 import { useState, useRef } from "react";
 import { useForm, Controller } from "react-hook-form";
-import { Button, Input, Form, Select, InputNumber, Row, Col, Spin } from "antd";
+import { Button, Input, Form, Select, DatePicker, Spin } from "antd";
 import toast from "react-hot-toast";
 import { useSession } from "next-auth/react";
 import { ArrowLeftOutlined, UploadOutlined } from '@ant-design/icons';
 import { useRouter } from "next/navigation";
 import * as XLSX from 'xlsx';
+import dayjs from 'dayjs'; // Import dayjs for date handling
 
 const { Option } = Select;
 
 const formSchema = {
-  hocPhan: "",
-  nhomLop: "",
+  hocPhan: [],
+  nhomLop: [],
   ngayThi: '',
   ca: 0,
-  gvGiangDay: '',
   cb1: '',
   cb2: "",
-  time: '',
-  diaDiem: 0,
+  time: [],
+  phongThi: '',
+  diaDiem: '',
   ghiChu: "",
   namHoc: "",
   loaiKyThi: ""
@@ -40,9 +41,15 @@ const TeachingAssignmentForm = () => {
   const [isUploading, setIsUploading] = useState(false);
 
   const onSubmit = async (data) => {
+    // Chuyển đổi các trường dạng chuỗi thành mảng
+    data.hocPhan = data.hocPhan.split(',').map(item => item.trim());
+    data.nhomLop = data.nhomLop.split(',').map(item => item.trim());
+    data.time = data.time.split(',').map(item => item.trim());
+
     try {
+      console.log('Data:', data);
       const method = editRecord ? "PUT" : "POST";
-      const res = await fetch(`/api/giaovu/pc-giang-day`, {
+      const res = await fetch(`/api/giaovu/pc-coi-thi`, {
         method,
         body: JSON.stringify({ ...data, user: currentUser?._id, id: editRecord?._id }),
         headers: { "Content-Type": "application/json" },
@@ -66,10 +73,10 @@ const TeachingAssignmentForm = () => {
   };
 
   const createMany = async (ListData) => {
-    setIsUploading(true); // Bắt đầu hiển thị hiệu ứng xoay
+    setIsUploading(true);
     try {
       const method = "POST";
-      const res = await fetch("/api/giaovu/pc-giang-day/create", {
+      const res = await fetch("/api/giaovu/pc-coi-thi/create", {
         method,
         body: JSON.stringify({ data: ListData }),
         headers: { "Content-Type": "application/json" },
@@ -84,8 +91,8 @@ const TeachingAssignmentForm = () => {
       toast.error("An error occurred while saving data:", err);
       console.log('Lỗi:', err);
     } finally {
-      fileInputRef.current.value = ""; // Luôn luôn reset input file
-      setIsUploading(false); // Ẩn hiệu ứng xoay khi hoàn thành
+      fileInputRef.current.value = "";
+      setIsUploading(false);
     }
   };
 
@@ -103,61 +110,43 @@ const TeachingAssignmentForm = () => {
 
       const structuredData = [];
       let currentEntry = null;
-      let loaiHocKy = '';
+      let loaiKyThi = '';
       let namHoc = '';
 
       rawData.forEach((row) => {
-
-
-        if (row.length === 1 && typeof row[0] === 'string') {
+        if (row.length === 1 && typeof row[0] === 'string' && /^\d\./.test(row[0])) {
           console.log('Input:', row);
-        
+
           const inputString = row[0].trim();
-          let loaiHocKy = '';
-          let namHoc = '';
-        
-          // Tìm phần chứa năm học với các định dạng khác nhau
           const yearMatch = inputString.match(/(?:Năm học\s*|\s*[-|,]?\s*)?(\d{4}\s*[-\s]\s*\d{4})$/);
-        
+
           if (yearMatch) {
-            namHoc = yearMatch[1].trim().replace(/\s+/g, '-'); // Lấy năm học từ kết quả match
-            
-            // Loại bỏ các dấu gạch ngang dư thừa
+            namHoc = yearMatch[1].trim().replace(/\s+/g, '-');
             namHoc = namHoc.replace(/-{2,}/g, '-');
-        
-            // Cắt chuỗi để lấy phần loại học kỳ
-            loaiHocKy = inputString.split(namHoc)[0].trim();
-        
-            // Loại bỏ phần không cần thiết từ loaiHocKy nếu nó chứa từ khóa 'Năm học'
-            loaiHocKy = loaiHocKy.replace(/[-|,]?\s*Năm học.*$/, '').trim().replace(/^\d+\.\s*/, '');
-            loaiHocKy = loaiHocKy.split(/,\s*| - /)[0].trim();
+
+            loaiKyThi = inputString.split(namHoc)[0].trim();
+            loaiKyThi = loaiKyThi.replace(/[-|,]?\s*Năm học.*$/, '').trim().replace(/^\d+\.\s*/, '');
+            loaiKyThi = loaiKyThi.split(/,\s*| - /)[0].trim();
           } else {
-            // Nếu không tìm thấy năm học, toàn bộ chuỗi là loại học kỳ
-            loaiHocKy = inputString;
+            loaiKyThi = inputString;
           }
-        
-          // Loại bỏ phần không cần thiết (năm học) từ loaiHocKy nếu nó còn sót lại
-          if (loaiHocKy.includes('Năm học') || loaiHocKy.includes('năm học')) {
-            loaiHocKy = loaiHocKy.split(/[-|,]?\s*Năm học/)[0].trim();
+
+          if (loaiKyThi.includes('Năm học') || loaiKyThi.includes('năm học')) {
+            loaiKyThi = loaiKyThi.split(/[-|,]?\s*Năm học/)[0].trim();
           }
-        
-          console.log('loaiHocKy:', loaiHocKy);
+          console.log('loaiKyThi:', loaiKyThi);
           console.log('namHoc:', namHoc);
-        }
-        
-        
-         else if (row.length > 1) {
+        } else if (row.length > 1) {
           if (typeof row[0] === 'number') {
-            // Dòng chứa thông tin chi tiết về kỳ thi
             if (currentEntry) {
               structuredData.push(currentEntry);
             }
             currentEntry = {
-              loaiHocKy,
+              loaiKyThi,
               namHoc,
               hocPhan: [row[1]],
               nhomLop: [row[2]],
-              ngayThi: XLSX.SSF.format('m/d/yyyy', row[3]), // Chuyển đổi ngày thi
+              ngayThi: dayjs(row[3]).format('DD/MM/YYYY'), // Chuyển đổi ngày sử dụng dayjs
               ca: row[4],
               phongThi: row[5],
               cb1: row[6],
@@ -167,7 +156,6 @@ const TeachingAssignmentForm = () => {
               ghiChu: row[10] || '',
             };
           } else if (typeof row[0] === 'undefined') {
-            // Dòng chứa học phần bổ sung cho cùng một entry
             if (currentEntry) {
               currentEntry.hocPhan.push(row[1]);
               currentEntry.nhomLop.push(row[2]);
@@ -182,7 +170,7 @@ const TeachingAssignmentForm = () => {
       }
 
       console.log('Structured Data:', structuredData);
-      createMany(structuredData); // Gửi dữ liệu đã xử lý đến API
+      createMany(structuredData);
     };
 
     reader.onerror = () => {
@@ -197,164 +185,190 @@ const TeachingAssignmentForm = () => {
       <div className="flex items-center justify-center mb-3">
         <Button
           className="button-kiem-nhiem text-white font-bold shadow-md mb-2"
-          onClick={() => router.push(`/giaovu/pc-giang-day`)}
+          onClick={() => router.push(`/giaovu/pc-coi-thi`)}
         >
           <ArrowLeftOutlined style={{ color: 'white', fontSize: '18px' }} /> QUAY LẠI
         </Button>
         <h2 className="font-bold text-heading3-bold flex-grow text-center text-green-500">PHÂN CÔNG GIẢNG DẠY</h2>
       </div>
 
-      <Form onFinish={handleSubmit(onSubmit)} layout="vertical" className="space-y-2 font-bold">
-        <Row gutter={16}>
-          <Col span={12}>
-            <Form.Item label="Năm học" validateStatus={errors.namHoc ? 'error' : ''} help={errors.namHoc?.message}>
-              <Controller
-                name="namHoc"
-                control={control}
-                rules={{ required: "Năm học là bắt buộc" }}
-                render={({ field }) => (
-                  <Select placeholder="Chọn năm học" {...field}>
-                    <Option value="2023-2024">2023-2024</Option>
-                    <Option value="2024-2025">2024-2025</Option>
-                  </Select>
-                )}
+      <Form layout="vertical" onFinish={handleSubmit(onSubmit)}>
+        {/* Học phần */}
+        <Form.Item label="Học phần" validateStatus={errors.hocPhan ? 'error' : ''} help={errors.hocPhan?.message}>
+          <Controller
+            name="hocPhan"
+            control={control}
+            rules={{ required: "Học phần là bắt buộc" }}
+            render={({ field }) => (
+              <Input placeholder="Nhập học phần (ngăn cách bởi dấu phẩy)..." {...field} />
+            )}
+          />
+        </Form.Item>
+
+        {/* Nhóm lớp */}
+        <Form.Item label="Nhóm lớp" validateStatus={errors.nhomLop ? 'error' : ''} help={errors.nhomLop?.message}>
+          <Controller
+            name="nhomLop"
+            control={control}
+            rules={{ required: "Nhóm lớp là bắt buộc" }}
+            render={({ field }) => (
+              <Input placeholder="Nhập nhóm/lớp (ngăn cách bởi dấu phẩy)..." {...field} />
+            )}
+          />
+        </Form.Item>
+
+        {/* Ngày thi */}
+        <Form.Item label="Ngày thi" validateStatus={errors.ngayThi ? 'error' : ''} help={errors.ngayThi?.message}>
+          <Controller
+            name="ngayThi"
+            control={control}
+            rules={{ required: "Ngày thi là bắt buộc" }}
+            render={({ field }) => (
+              <DatePicker
+                {...field}
+                format="DD/MM/YYYY"
+                onChange={(date, dateString) => {
+                  // Cập nhật giá trị ngày tháng dưới dạng chuỗi
+                  field.onChange(dateString);
+                }}
+                value={field.value ? dayjs(field.value, 'DD/MM/YYYY') : null} // Chuyển đổi giá trị ngày tháng cho DatePicker
               />
-            </Form.Item>
-          </Col>
-          <Col span={12}>
-            <Form.Item label="Loại kỳ thi" validateStatus={errors.loaiKyThi ? 'error' : ''} help={errors.loaiKyThi?.message}>
-              <Controller
-                name="loaiKyThi"
-                control={control}
-                rules={{ required: "Loại kỳ thi là bắt buộc" }}
-                render={({ field }) => (
-                  <Select placeholder="Chọn loại kỳ thi" {...field}>
-                    <Option value="1">Kỳ thi 1</Option>
-                    <Option value="2">Kỳ thi 2</Option>
-                  </Select>
-                )}
-              />
-            </Form.Item>
-          </Col>
-        </Row>
-        <Row gutter={16}>
-          <Col span={12}>
-            <Form.Item label="Học phần" validateStatus={errors.hocPhan ? 'error' : ''} help={errors.hocPhan?.message}>
-              <Controller
-                name="hocPhan"
-                control={control}
-                rules={{ required: "Học phần là bắt buộc" }}
-                render={({ field }) => <Input placeholder="Nhập học phần..." {...field} />}
-              />
-            </Form.Item>
-          </Col>
-          <Col span={12}>
-            <Form.Item label="Nhóm lớp" validateStatus={errors.nhomLop ? 'error' : ''} help={errors.nhomLop?.message}>
-              <Controller
-                name="nhomLop"
-                control={control}
-                rules={{ required: "Nhóm lớp là bắt buộc" }}
-                render={({ field }) => <Input placeholder="Nhập nhóm lớp..." {...field} />}
-              />
-            </Form.Item>
-          </Col>
-        </Row>
-        <Row gutter={16}>
-          <Col span={6}>
-            <Form.Item label="Ngày thi" validateStatus={errors.ngayThi ? 'error' : ''} help={errors.ngayThi?.message}>
-              <Controller
-                name="ngayThi"
-                control={control}
-                rules={{ required: "Ngày thi là bắt buộc" }}
-                render={({ field }) => <Input placeholder="Nhập ngày thi..." {...field} />}
-              />
-            </Form.Item>
-          </Col>
-          <Col span={6}>
-            <Form.Item label="Ca" validateStatus={errors.ca ? 'error' : ''} help={errors.ca?.message}>
-              <Controller
-                name="ca"
-                control={control}
-                rules={{ required: "Ca là bắt buộc" }}
-                render={({ field }) => <InputNumber min={1} max={3} placeholder="Nhập ca..." style={{ width: "100%" }} {...field} />}
-              />
-            </Form.Item>
-          </Col>
-          <Col span={6}>
-            <Form.Item label="Giảng viên giảng dạy" validateStatus={errors.gvGiangDay ? 'error' : ''} help={errors.gvGiangDay?.message}>
-              <Controller
-                name="gvGiangDay"
-                control={control}
-                rules={{ required: "Giảng viên giảng dạy là bắt buộc" }}
-                render={({ field }) => <Input placeholder="Nhập giảng viên giảng dạy..." {...field} />}
-              />
-            </Form.Item>
-          </Col>
-          <Col span={6}>
-            <Form.Item label="Địa điểm" validateStatus={errors.diaDiem ? 'error' : ''} help={errors.diaDiem?.message}>
-              <Controller
-                name="diaDiem"
-                control={control}
-                rules={{ required: "Địa điểm là bắt buộc" }}
-                render={({ field }) => <InputNumber min={1} placeholder="Nhập địa điểm..." style={{ width: "100%" }} {...field} />}
-              />
-            </Form.Item>
-          </Col>
-        </Row>
-        <Form.Item label="CB1">
+            )}
+          />
+        </Form.Item>
+
+        {/* Ca */}
+        <Form.Item label="Ca" validateStatus={errors.ca ? 'error' : ''} help={errors.ca?.message}>
+          <Controller
+            name="ca"
+            control={control}
+            rules={{ required: "Ca là bắt buộc" }}
+            render={({ field }) => (
+              <Input type="number" placeholder="Nhập ca" {...field} />
+            )}
+          />
+        </Form.Item>
+
+        {/* Phòng thi */}
+        <Form.Item label="Phòng thi" validateStatus={errors.phongThi ? 'error' : ''} help={errors.phongThi?.message}>
+          <Controller
+            name="phongThi"
+            control={control}
+            render={({ field }) => (
+              <Input placeholder="Nhập phòng thi" {...field} />
+            )}
+          />
+        </Form.Item>
+
+        {/* Cán bộ coi thi 1 */}
+        <Form.Item label="Cán bộ coi thi 1" validateStatus={errors.cb1 ? 'error' : ''} help={errors.cb1?.message}>
           <Controller
             name="cb1"
             control={control}
-            render={({ field }) => <Input placeholder="Nhập CB1..." {...field} />}
+            render={({ field }) => (
+              <Input placeholder="Nhập cán bộ coi thi 1" {...field} />
+            )}
           />
         </Form.Item>
-        <Form.Item label="CB2">
+
+        {/* Cán bộ coi thi 2 */}
+        <Form.Item label="Cán bộ coi thi 2" validateStatus={errors.cb2 ? 'error' : ''} help={errors.cb2?.message}>
           <Controller
             name="cb2"
             control={control}
-            render={({ field }) => <Input placeholder="Nhập CB2..." {...field} />}
+            render={({ field }) => (
+              <Input placeholder="Nhập cán bộ coi thi 2" {...field} />
+            )}
           />
         </Form.Item>
-        <Form.Item label="Thời gian">
+
+        {/* Thời gian */}
+        <Form.Item label="Thời gian" validateStatus={errors.time ? 'error' : ''} help={errors.time?.message}>
           <Controller
             name="time"
             control={control}
-            render={({ field }) => <Input placeholder="Nhập thời gian..." {...field} />}
+            render={({ field }) => (
+              <Input placeholder="Nhập thời gian (ngăn cách bởi dấu phẩy)..." {...field} />
+            )}
           />
         </Form.Item>
-        <Form.Item label="Ghi chú">
+
+        {/* Địa điểm thi */}
+        <Form.Item label="Địa điểm thi" validateStatus={errors.diaDiem ? 'error' : ''} help={errors.diaDiem?.message}>
+          <Controller
+            name="diaDiem"
+            control={control}
+            render={({ field }) => (
+              <Input placeholder="Nhập địa điểm thi" {...field} />
+            )}
+          />
+        </Form.Item>
+
+        {/* Ghi chú */}
+        <Form.Item label="Ghi chú" validateStatus={errors.ghiChu ? 'error' : ''} help={errors.ghiChu?.message}>
           <Controller
             name="ghiChu"
             control={control}
-            render={({ field }) => <Input placeholder="Nhập ghi chú..." {...field} />}
+            render={({ field }) => (
+              <Input.TextArea placeholder="Nhập ghi chú" {...field} />
+            )}
           />
         </Form.Item>
-        <div className="flex justify-between items-center">
-          <Button type="default" onClick={resetForm}>
-            Reset
-          </Button>
-          <Button
-            type="primary"
-            htmlType="submit"
-            loading={isSubmitting}
-          >
-            {editRecord ? "Cập nhật" : "Tạo mới"}
-          </Button>
-          <Button
-            type="default"
-            icon={<UploadOutlined />}
-            onClick={() => fileInputRef.current.click()}
-            loading={isUploading}
-          >
-            Upload File
-          </Button>
-          <input
-            type="file"
-            ref={fileInputRef}
-            accept=".xlsx, .xls"
-            style={{ display: 'none' }}
-            onChange={handleFileUpload}
+
+        {/* Năm học */}
+        <Form.Item label="Năm học" validateStatus={errors.namHoc ? 'error' : ''} help={errors.namHoc?.message}>
+          <Controller
+            name="namHoc"
+            control={control}
+            render={({ field }) => (
+              <Input placeholder="Nhập năm học" {...field} />
+            )}
           />
+        </Form.Item>
+
+        {/* Loại kỳ thi */}
+        <Form.Item label="Loại kỳ thi" validateStatus={errors.loaiKyThi ? 'error' : ''} help={errors.loaiKyThi?.message}>
+          <Controller
+            name="loaiKyThi"
+            control={control}
+            render={({ field }) => (
+              <Input placeholder="Nhập loại kỳ thi" {...field} />
+            )}
+          />
+        </Form.Item>
+        <div className="flex justify-between">
+          <Button type="primary" htmlType="submit" loading={isSubmitting}>
+            {editRecord ? "Cập nhật" : "Lưu"}
+          </Button>
+          <div className="text-center">
+            <Spin spinning={isUploading}>
+              <label htmlFor="excelUpload">
+                <Button
+                  className="mt-3 button-lien-thong-vlvh"
+                  type="primary"
+                  icon={<UploadOutlined />}
+                  onClick={() => fileInputRef.current.click()}
+                  disabled={isUploading}
+                >
+                  {isUploading ? 'Đang tải lên...' : 'Import từ file Excel'}
+                </Button>
+              </label>
+            </Spin>
+
+            <div className="hidden">
+              <input
+                type="file"
+                accept=".xlsx, .xls"
+                onChange={handleFileUpload}
+                className="hidden"
+                id="excelUpload"
+                ref={fileInputRef}
+              />
+            </div>
+          </div>
+          <Button type="default" onClick={resetForm} className="ml-2">
+            Huỷ
+          </Button>
         </div>
       </Form>
     </div>

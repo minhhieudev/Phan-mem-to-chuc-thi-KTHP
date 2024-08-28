@@ -1,5 +1,5 @@
 import { connectToDB } from '@mongodb';
-import PcGiangDay from "@models/PcGiangDay";
+import PcCoiThi from '@models/PcCoiThi';
 
 export const POST = async (req) => {
   try {
@@ -12,36 +12,44 @@ export const POST = async (req) => {
       return new Response(JSON.stringify({ message: "Invalid data format" }), { status: 400 });
     }
 
+    console.log('Data:',data);
+
     // Duyệt qua danh sách và xử lý từng phần tử
     const processedItems = await Promise.all(
       data.map(async (item) => {
-        const maMH = item[0]; 
-        const tenMH = item[1];
-        const soTC = item[2];
-        const soSVDK = item[3];
-        const gvGiangDay = item[4];
-        const nhom = item[5];
-        const thu = item[6];
-        const tietBD = item[7];
-        const soTiet = item[8];
-        const phong = item[9];
-        const lop = item[10];
-        const tuanHoc = item[11];
-        const namHoc = item[12]; 
-        const ky = item[13]; 
+        const { 
+          ca, 
+          cb1, 
+          cb2, 
+          diaDiem, 
+          ghiChu, 
+          hocPhan, 
+          loaiKyThi, 
+          namHoc, 
+          ngayThi, 
+          nhomLop, 
+          phongThi, 
+          time 
+        } = item;
+
+        // Chuyển đổi các giá trị từ mảng thành chuỗi nếu cần
+        const hocPhanArray = Array.isArray(hocPhan) ? hocPhan : [hocPhan];
+        const nhomLopArray = Array.isArray(nhomLop) ? nhomLop : [nhomLop];
+        const timeArray = Array.isArray(time) ? time : [time];
 
         // Tìm và cập nhật nếu tồn tại, nếu không thì tạo mới
-        const updatedItem = await PcGiangDay.findOneAndUpdate(
-          { maMH, namHoc, ky, thu, tietBD, phong }, 
+        const updatedItem = await PcCoiThi.findOneAndUpdate(
+          { namHoc, loaiKyThi, ngayThi, phongThi,hocPhan,nhomLop }, 
           {
-            tenMH,
-            soTC,
-            soSVDK,
-            gvGiangDay,
-            nhom,
-            soTiet,
-            lop,
-            tuanHoc,
+            $set: {
+              ca,
+              cb1,
+              cb2,
+              diaDiem,
+              ghiChu,
+              phongThi,
+              time: timeArray,
+            }
           }, 
           { new: true, upsert: true } // Nếu không tìm thấy thì tạo mới
         );
