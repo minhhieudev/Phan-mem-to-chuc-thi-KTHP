@@ -23,7 +23,8 @@ const formSchema = {
   phong: "",
   lop: "",
   namHoc: "",
-  ky: ""
+  ky: "",
+  tuanHoc:""
 };
 
 const TeachingAssignmentForm = () => {
@@ -247,7 +248,8 @@ const TeachingAssignmentForm = () => {
           </Col>
         </Row>
         <Row gutter={16}>
-          <Col span={12}>
+
+          <Col span={8}>
             <Form.Item label="Phòng" validateStatus={errors.phong ? 'error' : ''} help={errors.phong?.message}>
               <Controller
                 name="phong"
@@ -257,7 +259,7 @@ const TeachingAssignmentForm = () => {
               />
             </Form.Item>
           </Col>
-          <Col span={12}>
+          <Col span={8}>
             <Form.Item label="Lớp" validateStatus={errors.lop ? 'error' : ''} help={errors.lop?.message}>
               <Controller
                 name="lop"
@@ -267,6 +269,16 @@ const TeachingAssignmentForm = () => {
               />
             </Form.Item>
           </Col>
+          <Col span={8}>
+            <Form.Item label="Tuần học" >
+              <Controller
+                name="tuanHoc"
+                control={control}
+                render={({ field }) => <Input placeholder="Nhập tuần học" {...field} />}
+              />
+            </Form.Item>
+          </Col>
+
         </Row>
 
         <div className="flex justify-between mt-4">

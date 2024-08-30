@@ -25,6 +25,8 @@ export const GET = async (req) => {
       filter.ky = ky;
     }
 
+  
+
     // Nếu không có cả namHoc lẫn ky thì trả về lỗi
     if (!namHoc && !ky) {
       return new Response("Thiếu tham số namHoc hoặc kiHoc.", { status: 400 });
@@ -44,7 +46,6 @@ export const GET = async (req) => {
 
 
 
-// POST - Thêm mới bản ghi
 export const POST = async (req) => {
   try {
     // Kết nối tới MongoDB
@@ -58,34 +59,66 @@ export const POST = async (req) => {
       return new Response("Dữ liệu không hợp lệ, vui lòng điền đầy đủ các trường bắt buộc.", { status: 400 });
     }
 
-    // Tạo một bản ghi mới cho Phân Công Giảng Dạy
-    const newPcGiangDay = new PcGiangDay({
+    // Điều kiện để tìm kiếm bản ghi
+    const condition = {
       maMH: data.maMH,
       tenMH: data.tenMH,
-      soTC: data.soTC || 0,
-      soSVDK: data.soSVDK || 0,
       gvGiangDay: data.gvGiangDay,
-      nhom: data.nhom || 0,
       thu: data.thu || '',
       tietBD: data.tietBD || 0,
-      soTiet: data.soTiet || 0,
-      phong: data.phong || '',
-      lop: data.lop || '',
       namHoc: data.namHoc,
-      ky:data.ky
-    });
+      ky: data.ky
+    };
 
-    // Lưu bản ghi mới vào database
-    await newPcGiangDay.save();
+    // Tìm kiếm bản ghi dựa trên điều kiện
+    const existingRecord = await PcGiangDay.findOne(condition);
 
-    // Trả về phản hồi thành công
-    return new Response(JSON.stringify(newPcGiangDay), { status: 201 });
+    if (existingRecord) {
+      // Nếu tìm thấy bản ghi, cập nhật nó
+      existingRecord.soTC = data.soTC || existingRecord.soTC;
+      existingRecord.soSVDK = data.soSVDK || existingRecord.soSVDK;
+      existingRecord.nhom = data.nhom || existingRecord.nhom;
+      existingRecord.soTiet = data.soTiet || existingRecord.soTiet;
+      existingRecord.phong = data.phong || existingRecord.phong;
+      existingRecord.lop = data.lop || existingRecord.lop;
+
+      // Lưu bản ghi đã cập nhật
+      await existingRecord.save();
+
+      // Trả về phản hồi thành công
+      return new Response(JSON.stringify(existingRecord), { status: 200 });
+    } else {
+      // Nếu không tìm thấy bản ghi, tạo mới một bản ghi
+      const newPcGiangDay = new PcGiangDay({
+        maMH: data.maMH,
+        tenMH: data.tenMH,
+        soTC: data.soTC || 0,
+        soSVDK: data.soSVDK || 0,
+        gvGiangDay: data.gvGiangDay,
+        nhom: data.nhom || 0,
+        thu: data.thu || '',
+        tietBD: data.tietBD || 0,
+        soTiet: data.soTiet || 0,
+        phong: data.phong || '',
+        lop: data.lop || '',
+        namHoc: data.namHoc,
+        ky: data.ky,
+        tuanHoc: data.tuanHoc || "",
+      });
+
+      // Lưu bản ghi mới vào database
+      await newPcGiangDay.save();
+
+      // Trả về phản hồi thành công
+      return new Response(JSON.stringify(newPcGiangDay), { status: 201 });
+    }
   } catch (err) {
     // Bắt lỗi và trả về phản hồi lỗi
     console.error("Error saving PcGiangDay:", err);
     return new Response(`Lỗi: ${err.message}`, { status: 500 });
   }
 };
+
 
 // PUT - Cập nhật bản ghi
 export const PUT = async (req) => {

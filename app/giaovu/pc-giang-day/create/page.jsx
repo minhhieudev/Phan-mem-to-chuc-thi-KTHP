@@ -23,7 +23,8 @@ const formSchema = {
   phong: "",
   lop: "",
   namHoc: "",
-  ky: ""
+  ky: "",
+  tuanHoc: ""
 };
 
 const TeachingAssignmentForm = () => {
@@ -167,13 +168,15 @@ const TeachingAssignmentForm = () => {
       <Form onFinish={handleSubmit(onSubmit)} layout="vertical" className="space-y-2 font-bold">
         <Row gutter={16}>
           <Col span={12}>
-            <Form.Item label="Năm học" validateStatus={errors.namHoc ? 'error' : ''} help={errors.namHoc?.message}>
+            <Form.Item label="Năm học:" validateStatus={errors.namHoc ? 'error' : ''} help={errors.namHoc?.message}>
               <Controller
                 name="namHoc"
                 control={control}
                 rules={{ required: "Năm học là bắt buộc" }}
                 render={({ field }) => (
                   <Select placeholder="Chọn năm học" {...field}>
+                    <Option value="2021-2022">2021-2022</Option>
+                    <Option value="2022-2023">2022-2023</Option>
                     <Option value="2023-2024">2023-2024</Option>
                     <Option value="2024-2025">2024-2025</Option>
                   </Select>
@@ -182,15 +185,15 @@ const TeachingAssignmentForm = () => {
             </Form.Item>
           </Col>
           <Col span={12}>
-            <Form.Item label="Kì" validateStatus={errors.ky ? 'error' : ''} help={errors.ky?.message}>
+            <Form.Item label="Học Kỳ:" validateStatus={errors.ky ? 'error' : ''} help={errors.ky?.message}>
               <Controller
                 name="ky"
                 control={control}
                 rules={{ required: "Kì là bắt buộc" }}
                 render={({ field }) => (
                   <Select placeholder="Chọn kì" {...field}>
-                    <Option value="1">Kì 1</Option>
-                    <Option value="2">Kì 2</Option>
+                    <Option value="1">1</Option>
+                    <Option value="2">2</Option>
                   </Select>
                 )}
               />
@@ -302,7 +305,7 @@ const TeachingAssignmentForm = () => {
           </Col>
         </Row>
         <Row gutter={16}>
-          <Col span={12}>
+          <Col span={8}>
             <Form.Item label="Phòng" validateStatus={errors.phong ? 'error' : ''} help={errors.phong?.message}>
               <Controller
                 name="phong"
@@ -312,13 +315,22 @@ const TeachingAssignmentForm = () => {
               />
             </Form.Item>
           </Col>
-          <Col span={12}>
+          <Col span={8}>
             <Form.Item label="Lớp" validateStatus={errors.lop ? 'error' : ''} help={errors.lop?.message}>
               <Controller
                 name="lop"
                 control={control}
                 rules={{ required: "Lớp là bắt buộc" }}
                 render={({ field }) => <Input placeholder="Nhập lớp..." {...field} />}
+              />
+            </Form.Item>
+          </Col>
+          <Col span={8}>
+            <Form.Item label="Tuần học" >
+              <Controller
+                name="tuanHoc"
+                control={control}
+                render={({ field }) => <Input placeholder="Nhập tuần học" {...field} />}
               />
             </Form.Item>
           </Col>
@@ -359,7 +371,7 @@ const TeachingAssignmentForm = () => {
       </Form>
 
 
-     
+
     </div>
   );
 };

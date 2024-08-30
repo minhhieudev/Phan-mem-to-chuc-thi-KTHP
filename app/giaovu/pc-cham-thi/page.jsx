@@ -9,7 +9,7 @@ import { FileExcelOutlined } from '@ant-design/icons';
 
 const { Option } = Select;
 
-const PcCoiThiTable = () => {
+const PcChamThiTable = () => {
   const [dataList, setDataList] = useState([]);
   const [filteredData, setFilteredData] = useState([]);
   const [namHoc, setNamHoc] = useState("");
@@ -30,7 +30,7 @@ const PcCoiThiTable = () => {
     const fetchData = async () => {
       try {
         setLoading(true);
-        const res = await fetch(`/api/giaovu/pc-coi-thi?namHoc=${namHoc}&loaiKyThi=${loaiKyThi}&loai=${loai}`, {
+        const res = await fetch(`/api/giaovu/pc-cham-thi?namHoc=${namHoc}&loaiKyThi=${loaiKyThi}&loai=${loai}`, {
           method: "GET",
           headers: { "Content-Type": "application/json" },
         });
@@ -52,17 +52,20 @@ const PcCoiThiTable = () => {
   }, [namHoc, loaiKyThi, loai]);
 
   useEffect(() => {
-    const filtered = dataList.filter((item) =>
-      item.cb1.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      item.cb2.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      item.hocPhan.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    const filtered = dataList.filter((item) => {
+      const cb1 = item.cb1?.toLowerCase().includes(searchTerm.toLowerCase());
+      const cb2 = item.cb2?.toLowerCase().includes(searchTerm.toLowerCase());
+      const hocPhan = typeof item.hocPhan === 'string' && item.hocPhan.toLowerCase().includes(searchTerm.toLowerCase());
+  
+      return cb1 || cb2 || hocPhan;
+    });
     setFilteredData(filtered);
   }, [searchTerm, dataList]);
+  
 
   const handleDelete = async (id) => {
     try {
-      const res = await fetch(`/api/giaovu/pc-coi-thi`, {
+      const res = await fetch(`/api/giaovu/pc-cham-thi`, {
         method: "DELETE",
         body: JSON.stringify({ id }),
         headers: { "Content-Type": "application/json" },
@@ -92,7 +95,7 @@ const PcCoiThiTable = () => {
       key: 'hocPhan',
       render: (text) => (
         <span style={{ color: 'green', fontWeight: 'bold' }}>
-          {Array.isArray(text) ? text.join(', ') : text}
+          {text}
         </span>
       ),
     },
@@ -102,7 +105,7 @@ const PcCoiThiTable = () => {
       key: 'nhomLop',
       render: (text) => (
         <span style={{ color: 'red', fontWeight: 'bold' }}>
-          {Array.isArray(text) ? text.join(', ') : text}
+          {text}
         </span>
       ),
     },
@@ -110,20 +113,6 @@ const PcCoiThiTable = () => {
       title: 'Ngày thi',
       dataIndex: 'ngayThi',
       key: 'ngayThi',
-      render: (text) => <span style={{ fontWeight: 'bold' }}>{text}</span>,
-    },
-    {
-      title: 'Ca',
-      dataIndex: 'ca',
-      key: 'ca',
-      width: '1%',
-      render: (text) => <span style={{ fontWeight: 'bold', color: 'orange' }}>{text}</span>,
-    },
-    {
-      title: 'Phòng thi',
-      dataIndex: 'phongThi',
-      key: 'phongThi',
-      width: 120,
       render: (text) => <span style={{ fontWeight: 'bold' }}>{text}</span>,
     },
     {
@@ -141,27 +130,16 @@ const PcCoiThiTable = () => {
       render: (text) => <span style={{ fontWeight: 'bold' }}>{text}</span>,
     },
     {
-      title: 'Thời gian (phút)',
-      dataIndex: 'time',
-      key: 'time',
-      width: 20,
-      render: (text) => (
-        <span style={{ fontWeight: 'bold' }}>
-          {Array.isArray(text) ? text.join(', ') : text}
-        </span>
-      ),
-    },
-    {
-      title: 'Địa điểm thi',
-      dataIndex: 'diaDiem',
-      key: 'diaDiem',
+      title: 'Số bài',
+      dataIndex: 'soBai',
+      key: 'soBai',
       width: 20,
       render: (text) => <span style={{ fontWeight: 'bold' }}>{text}</span>,
     },
     {
-      title: 'Ghi chú',
-      dataIndex: 'ghiChu',
-      key: 'ghiChu',
+      title: 'Hình thức/Thời gian thi',
+      dataIndex: 'hinhThucThoiGianThi',
+      key: 'hinhThucThoiGianThi',
       render: (text) => <span style={{ fontWeight: 'bold' }}>{text}</span>,
     },
     {
@@ -169,7 +147,7 @@ const PcCoiThiTable = () => {
       key: 'action',
       render: (_, record) => (
         <Space size="middle">
-          <Button size="small" onClick={() => router.push(`/giaovu/pc-coi-thi/edit/${record._id}`)} type="primary">Sửa</Button>
+          <Button size="small" onClick={() => router.push(`/giaovu/pc-cham-thi/edit/${record._id}`)} type="primary">Sửa</Button>
           <Popconfirm
             title="Bạn có chắc chắn muốn xoá?"
             onConfirm={() => handleDelete(record._id)}
@@ -202,10 +180,10 @@ const PcCoiThiTable = () => {
             <Option value="lien-thong-vlvh">Liên thông vừa làm vừa học</Option>
           </Select>
         </div>
-        <h2 className="font-bold text-heading3-bold text-center text-green-500">DANH SÁCH PHÂN CÔNG COI THI</h2>
+        <h2 className="font-bold text-heading3-bold text-center text-green-500">DANH SÁCH PHÂN CÔNG CHẤM THI</h2>
         <Button
           className="button-dang-day text-white font-bold shadow-md mb-2"
-          onClick={() => router.push(`/giaovu/pc-coi-thi/create`)}
+          onClick={() => router.push(`/giaovu/pc-cham-thi/create`)}
         >
           TẠO MỚI
         </Button>
@@ -293,4 +271,4 @@ const PcCoiThiTable = () => {
   );
 };
 
-export default PcCoiThiTable;
+export default PcChamThiTable;

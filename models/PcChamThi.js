@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 
-const PcCoiThiSchema = new mongoose.Schema({
+const PcChamThiSchema = new mongoose.Schema({
   hocPhan: {
     type: [String],  
   },
@@ -10,25 +10,16 @@ const PcCoiThiSchema = new mongoose.Schema({
   ngayThi: {
     type: String,  
   },
-  ca: {
-    type: Number, 
-  },
   cb1: {
     type: String,  
   },
   cb2: {
     type: String,  
   },
-  time: {
-    type: [Number],  
+  soBai: {
+    type: Number,  
   },
-  phongThi: {
-    type: String,  
-  },
-  diaDiem: {
-    type: String,  
-  },
-  ghiChu: {
+  hinhThucThoiGianThi: {
     type: String,  
   },
   namHoc: {
@@ -44,6 +35,6 @@ const PcCoiThiSchema = new mongoose.Schema({
   timestamps: true,
 });
 
-const PcCoiThi = mongoose.models.PcCoiThi || mongoose.model('PcCoiThi', PcCoiThiSchema);
+const PcChamThi = mongoose.models.PcChamThi || mongoose.model('PcChamThi', PcChamThiSchema);
 
-export default PcCoiThi;
+export default PcChamThi;

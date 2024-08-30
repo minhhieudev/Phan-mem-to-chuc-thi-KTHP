@@ -12,16 +12,13 @@ import dayjs from 'dayjs'; // Import dayjs for date handling
 const { Option } = Select;
 
 const formSchema = {
-  hocPhan: [],
-  nhomLop: [],
+  hocPhan: '',
+  nhomLop: '',
   ngayThi: '',
-  ca: 0,
   cb1: '',
   cb2: "",
-  time: [],
-  phongThi: '',
-  diaDiem: '',
-  ghiChu: "",
+  soBai: 0,
+  hinhThucThoiGianThi: "",
   namHoc: "",
   loaiKyThi: ""
 };
@@ -44,7 +41,7 @@ const PcCoiThiForm = () => {
     if (id) {
       const fetchRecord = async () => {
         try {
-          const res = await fetch(`/api/giaovu/pc-coi-thi/edit?id=${id}`);
+          const res = await fetch(`/api/giaovu/pc-cham-thi/edit?id=${id}`);
           if (res.ok) {
             const data = await res.json();
             setEditRecord(data);
@@ -64,27 +61,19 @@ const PcCoiThiForm = () => {
   }, [id, reset]);
 
   const onSubmit = async (data) => {
-    // Chuyển đổi chuỗi nhập vào thành mảng
-    const transformedData = {
-      ...data,
-      hocPhan: typeof data.hocPhan === 'string' ? data.hocPhan.split(',').map(item => item.trim()) : data.hocPhan,
-      nhomLop: typeof data.nhomLop === 'string' ? data.nhomLop.split(',').map(item => item.trim()) : data.nhomLop,
-      time: typeof data.time === 'string' ? data.time.split(',').map(item => parseInt(item.trim(), 10)) : data.time
-    };
-
-    // Tiếp tục logic gửi dữ liệu
+   
     try {
-      const url = `/api/giaovu/pc-coi-thi`;
+      const url = `/api/giaovu/pc-cham-thi`;
 
       const res = await fetch(url, {
         method: "PUT",
-        body: JSON.stringify({ ...transformedData, id: id, loai }),
+        body: JSON.stringify({ ...data, id: id, loai }),
         headers: { "Content-Type": "application/json" },
       });
 
       if (res.ok) {
         toast.success("Cập nhật thành công!");
-        router.push("/giaovu/pc-coi-thi");
+        router.push("/giaovu/pc-cham-thi");
       } else {
         toast.error("Cập nhật thất bại!");
       }
@@ -103,11 +92,11 @@ const PcCoiThiForm = () => {
       <div className="flex items-between justify-center mb-3">
         <Button
           className="button-kiem-nhiem text-white font-bold shadow-md mb-2"
-          onClick={() => router.push(`/giaovu/pc-coi-thi`)}
+          onClick={() => router.push(`/giaovu/pc-cham-thi`)}
         >
           <ArrowLeftOutlined style={{ color: 'white', fontSize: '18px' }} /> QUAY LẠI
         </Button>
-        <h2 className="font-bold text-heading3-bold flex-grow text-center text-green-500">CHỈNH SỬA PHÂN CÔNG COI THI</h2>
+        <h2 className="font-bold text-heading3-bold flex-grow text-center text-green-500">CHỈNH SỬA PHÂN CÔNG CHẤM THI</h2>
         <div className="flex gap-2">
           <div className="text-heading4-bold">LOẠI:</div>
           <Select placeholder="Chọn loại hình đào tạo..." value={loai} onChange={(value) => setLoai(value)}>
@@ -164,12 +153,12 @@ const PcCoiThiForm = () => {
           </Col>
 
           <Col span={12}>
-            <Form.Item label="Ca thi" validateStatus={errors.ca ? 'error' : ''} help={errors.ca?.message}>
+            <Form.Item label="soBai" validateStatus={errors.soBai? 'error' : ''} help={errors.soBai?.message}>
               <Controller
-                name="ca"
+                name="soBai"
                 control={control}
-                rules={{ required: "Vui lòng nhập ca thi" }}
-                render={({ field }) => <InputNumber min={1} placeholder="Nhập ca thi..." style={{ width: '100%' }} {...field} />}
+                rules={{ required: "Vui lòng nhập số bài" }}
+                render={({ field }) => <InputNumber min={1} placeholder="Nhập số bài..." style={{ width: '100%' }} {...field} />}
               />
             </Form.Item>
           </Col>
@@ -197,44 +186,13 @@ const PcCoiThiForm = () => {
           </Col>
         </Row>
         <Row gutter={16}>
-          <Col span={12}>
-            <Form.Item label="Thời gian thi (phút)" validateStatus={errors.time ? 'error' : ''} help={errors.time?.message}>
+          <Col span={24}>
+            <Form.Item label="Hình thức/Thời gian " validateStatus={errors.hinhThucThoiGianThi ? 'error' : ''} help={errors.hinhThucThoiGianThi?.message}>
               <Controller
-                name="time"
+                name="hinhThucThoiGianThi"
                 control={control}
-                rules={{ required: "Vui lòng nhập thời gian thi" }}
-                render={({ field }) => <Input placeholder="Nhập thời gian thi, cách nhau bởi dấu phẩy" {...field} />}
-              />
-            </Form.Item>
-          </Col>
-          <Col span={12}>
-            <Form.Item label="Phòng thi" validateStatus={errors.phongThi ? 'error' : ''} help={errors.phongThi?.message}>
-              <Controller
-                name="phongThi"
-                control={control}
-                rules={{ required: "Vui lòng nhập phòng thi" }}
-                render={({ field }) => <Input placeholder="Nhập phòng thi..." {...field} />}
-              />
-            </Form.Item>
-          </Col>
-        </Row>
-        <Row gutter={16}>
-          <Col span={12}>
-            <Form.Item label="Địa điểm thi" validateStatus={errors.diaDiem ? 'error' : ''} help={errors.diaDiem?.message}>
-              <Controller
-                name="diaDiem"
-                control={control}
-                rules={{ required: "Vui lòng nhập địa điểm thi" }}
-                render={({ field }) => <Input placeholder="Nhập địa điểm thi..." {...field} />}
-              />
-            </Form.Item>
-          </Col>
-          <Col span={12}>
-            <Form.Item label="Ghi chú" validateStatus={errors.ghiChu ? 'error' : ''} help={errors.ghiChu?.message}>
-              <Controller
-                name="ghiChu"
-                control={control}
-                render={({ field }) => <Input.TextArea placeholder="Nhập ghi chú..." {...field} />}
+                rules={{ required: "Vui lòng nhập thời gian/hình thức" }}
+                render={({ field }) => <Input placeholder="Nhập thời gian /hình thức" {...field} />}
               />
             </Form.Item>
           </Col>

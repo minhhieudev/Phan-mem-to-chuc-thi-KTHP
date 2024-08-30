@@ -1,5 +1,5 @@
 import { connectToDB } from '@mongodb';
-import PcCoiThi from '@models/PcCoiThi';
+import PcChamThi from '@models/PcChamThi';
 
 export const POST = async (req) => {
   try {
@@ -16,38 +16,27 @@ export const POST = async (req) => {
     const processedItems = await Promise.all(
       data.map(async (item) => {
         const { 
-          ca, 
           cb1, 
           cb2, 
-          diaDiem, 
-          ghiChu, 
           hocPhan, 
           loaiKyThi, 
           namHoc, 
           ngayThi, 
           nhomLop, 
-          phongThi, 
-          time ,
-          loai
+          loai,
+          soBai,
+          hinhThucThoiGianThi
         } = item;
 
-        // Chuyển đổi các giá trị từ mảng thành chuỗi nếu cần
-        const hocPhanArray = Array.isArray(hocPhan) ? hocPhan : [hocPhan];
-        const nhomLopArray = Array.isArray(nhomLop) ? nhomLop : [nhomLop];
-        const timeArray = Array.isArray(time) ? time : [time];
-
-        // Tìm và cập nhật nếu tồn tại, nếu không thì tạo mới
-        const updatedItem = await PcCoiThi.findOneAndUpdate(
-          { namHoc, loaiKyThi, ngayThi, phongThi,hocPhan,nhomLop }, 
+        
+        const updatedItem = await PcChamThi.findOneAndUpdate(
+          { namHoc, loaiKyThi, ngayThi, hocPhan,nhomLop }, 
           {
             $set: {
-              ca,
+              soBai,
               cb1,
               cb2,
-              diaDiem,
-              ghiChu,
-              phongThi,
-              time: timeArray,
+              hinhThucThoiGianThi,
               loai
             }
           }, 

@@ -8,21 +8,18 @@ import { useSession } from "next-auth/react";
 import { ArrowLeftOutlined, UploadOutlined } from '@ant-design/icons';
 import { useRouter } from "next/navigation";
 import * as XLSX from 'xlsx';
-import dayjs from 'dayjs'; // Import dayjs for date handling
+import dayjs from 'dayjs';
 
 const { Option } = Select;
 
 const formSchema = {
-  hocPhan: [],
-  nhomLop: [],
+  hocPhan: '',
+  nhomLop: '',
   ngayThi: '',
-  ca: 0,
   cb1: '',
   cb2: "",
-  time: [],
-  phongThi: '',
-  diaDiem: '',
-  ghiChu: "",
+  soBai: 0,
+  hinhThucThoiGianThi: '',
   namHoc: "",
   loaiKyThi: "",
   loai: ""
@@ -44,21 +41,16 @@ const TeachingAssignmentForm = () => {
   const [isUploading, setIsUploading] = useState(false);
 
   const onSubmit = async (data) => {
-
-    if (loai == "") {
-      toast.error("Vui lòng chọn Loại hình đào tạo trước !");
-      return
+    if (loai === "") {
+      toast.error("Vui lòng chọn Loại hình đào tạo trước!");
+      return;
     }
 
-    // Chuyển đổi các trường dạng chuỗi thành mảng
-    data.hocPhan = data.hocPhan.split(',').map(item => item.trim());
-    data.nhomLop = data.nhomLop.split(',').map(item => item.trim());
-    data.time = data.time.split(',').map(item => item.trim());
-
+    // Không cần chuyển đổi các trường dạng chuỗi thành mảng nữa
     try {
       console.log('Data:', data);
       const method = editRecord ? "PUT" : "POST";
-      const res = await fetch(`/api/giaovu/pc-coi-thi`, {
+      const res = await fetch(`/api/giaovu/pc-cham-thi`, {
         method,
         body: JSON.stringify({ ...data, user: currentUser?._id, id: editRecord?._id, loai }),
         headers: { "Content-Type": "application/json" },
@@ -85,7 +77,7 @@ const TeachingAssignmentForm = () => {
     setIsUploading(true);
     try {
       const method = "POST";
-      const res = await fetch("/api/giaovu/pc-coi-thi/create", {
+      const res = await fetch("/api/giaovu/pc-cham-thi/create", {
         method,
         body: JSON.stringify({ data: ListData }),
         headers: { "Content-Type": "application/json" },
@@ -94,7 +86,7 @@ const TeachingAssignmentForm = () => {
       if (res.ok) {
         toast.success("Thêm mới thành công");
       } else {
-        toast.error("Import thất bài, file chưa đúng định dạng yêu cầu !");
+        toast.error("Import thất bại, file chưa đúng định dạng yêu cầu!");
       }
     } catch (err) {
       toast.error("An error occurred while saving data:", err);
@@ -106,12 +98,12 @@ const TeachingAssignmentForm = () => {
   };
 
   const handleFileUpload = (e) => {
-
-    if (loai == "") {
-      toast.error("Vui lòng chọn Loại hình đào tạo trước !");
+    if (loai === "") {
+      toast.error("Vui lòng chọn Loại hình đào tạo trước!");
       fileInputRef.current.value = "";
-      return
+      return;
     }
+
     const file = e.target.files[0];
     const reader = new FileReader();
 
@@ -130,15 +122,11 @@ const TeachingAssignmentForm = () => {
 
       rawData.forEach((row) => {
         if (row.length === 1 && typeof row[0] === 'string' && /^\d\./.test(row[0])) {
-          console.log('Input:', row);
-
           const inputString = row[0].trim();
           const yearMatch = inputString.match(/(?:Năm học\s*|\s*[-|,]?\s*)?(\d{4}\s*[-\s]\s*\d{4})$/);
 
           if (yearMatch) {
-            namHoc = yearMatch[1].trim().replace(/\s+/g, '-');
-            namHoc = namHoc.replace(/-{2,}/g, '-');
-
+            namHoc = yearMatch[1].trim().replace(/\s+/g, '-').replace(/-{2,}/g, '-');
             loaiKyThi = inputString.split(namHoc)[0].trim();
             loaiKyThi = loaiKyThi.replace(/[-|,]?\s*Năm học.*$/, '').trim().replace(/^\d+\.\s*/, '');
             loaiKyThi = loaiKyThi.split(/,\s*| - /)[0].trim();
@@ -149,8 +137,6 @@ const TeachingAssignmentForm = () => {
           if (loaiKyThi.includes('Năm học') || loaiKyThi.includes('năm học')) {
             loaiKyThi = loaiKyThi.split(/[-|,]?\s*Năm học/)[0].trim();
           }
-          console.log('loaiKyThi:', loaiKyThi);
-          console.log('namHoc:', namHoc);
         } else if (row.length > 1) {
           if (typeof row[0] === 'number') {
             if (currentEntry) {
@@ -159,24 +145,15 @@ const TeachingAssignmentForm = () => {
             currentEntry = {
               loaiKyThi,
               namHoc,
-              hocPhan: [row[1]],
-              nhomLop: [row[2]],
-              ngayThi: dayjs(row[3]).format('DD/MM/YYYY'), // Chuyển đổi ngày sử dụng dayjs
-              ca: row[4],
-              phongThi: row[5],
-              cb1: row[6],
-              cb2: row[7],
-              time: [row[8]],
-              diaDiem: row[9],
-              ghiChu: row[10] || '',
+              hocPhan: row[1],
+              nhomLop: row[2],
+              ngayThi: dayjs(row[3]).format('DD/MM/YYYY'),
+              cb1: row[4],
+              cb2: row[5],
+              hinhThucThoiGianThi: row[7],
+              soBai: parseInt(row[6], 6) || 0, // Số bài là số nguyên, thêm kiểm tra nếu trường này có giá trị null
               loai
             };
-          } else if (typeof row[0] === 'undefined') {
-            if (currentEntry) {
-              currentEntry.hocPhan.push(row[1]);
-              currentEntry.nhomLop.push(row[2]);
-              currentEntry.time.push(row[8]);
-            }
           }
         }
       });
@@ -201,11 +178,11 @@ const TeachingAssignmentForm = () => {
       <div className="flex items-center justify-center mb-3">
         <Button
           className="button-kiem-nhiem text-white font-bold shadow-md mb-2"
-          onClick={() => router.push(`/giaovu/pc-coi-thi`)}
+          onClick={() => router.push(`/giaovu/pc-cham-thi`)}
         >
           <ArrowLeftOutlined style={{ color: 'white', fontSize: '18px' }} /> QUAY LẠI
         </Button>
-        <h2 className="font-bold text-heading3-bold flex-grow text-center text-green-500">PHÂN CÔNG COI THI</h2>
+        <h2 className="font-bold text-heading3-bold flex-grow text-center text-green-500">PHÂN CÔNG CHẤM THI</h2>
         <div className="flex gap-2">
           <div className="text-heading4-bold">LOẠI:</div>
           <Select placeholder="Chọn loại hình đào tạo..." onChange={(value) => setLoai(value)}>
@@ -229,8 +206,6 @@ const TeachingAssignmentForm = () => {
               render={({ field }) => (
                 <Select
                   placeholder="Chọn năm học"
-                  onChange={(value) => setNamHoc(value)}
-                  className="w-[50%]"
                   {...field}
                 >
                   <Option value="2021-2022">2021-2022</Option>
@@ -253,25 +228,18 @@ const TeachingAssignmentForm = () => {
               control={control}
               render={({ field }) => (
                 <Select
-                  placeholder="Nhập loại kỳ thi"
-                  onChange={(value) => setLoaiKyThi(value)}
-                  className="w-[50%]"
+                  placeholder="Chọn loại kỳ thi"
                   {...field}
                 >
                   <Option value="Học kỳ 1">Học kỳ 1</Option>
-                  <Option value="Học kỳ 1 (đợt 2)">Học kỳ 1 (đợt 2)</Option>
-                  <Option value="Học kỳ 1 (đợt 3)">Học kỳ 1 (đợt 3)</Option>
                   <Option value="Học kỳ 2">Học kỳ 2</Option>
-                  <Option value="Học kỳ 2 (đợt 2)">Học kỳ 2 (đợt 2)</Option>
-                  <Option value="Học kỳ 2 (đợt 3)">Học kỳ 2 (đợt 3)</Option>
-                  <Option value="Kỳ thi phụ (đợt 1)">Kỳ thi phụ (đợt 1)</Option>
-                  <Option value="Kỳ thi phụ (đợt 2)">Kỳ thi phụ (đợt 2)</Option>
-                  <Option value="Kỳ thi phụ (đợt 3)">Kỳ thi phụ (đợt 3)</Option>
                   <Option value="Học kỳ hè">Học kỳ hè</Option>
+                  <Option value="Kỳ thi phụ">Kỳ thi phụ</Option>
                 </Select>
               )}
             />
           </Form.Item>
+
           {/* Học phần */}
           <Form.Item
             label="Học phần"
@@ -281,10 +249,7 @@ const TeachingAssignmentForm = () => {
             <Controller
               name="hocPhan"
               control={control}
-              rules={{ required: "Học phần là bắt buộc" }}
-              render={({ field }) => (
-                <Input placeholder="Nhập học phần (ngăn cách bởi dấu phẩy)..." {...field} />
-              )}
+              render={({ field }) => <Input placeholder="Nhập học phần" {...field} />}
             />
           </Form.Item>
 
@@ -297,10 +262,7 @@ const TeachingAssignmentForm = () => {
             <Controller
               name="nhomLop"
               control={control}
-              rules={{ required: "Nhóm lớp là bắt buộc" }}
-              render={({ field }) => (
-                <Input placeholder="Nhập nhóm/lớp (ngăn cách bởi dấu phẩy)..." {...field} />
-              )}
+              render={({ field }) => <Input placeholder="Nhập nhóm lớp" {...field} />}
             />
           </Form.Item>
 
@@ -313,45 +275,13 @@ const TeachingAssignmentForm = () => {
             <Controller
               name="ngayThi"
               control={control}
-              rules={{ required: "Ngày thi là bắt buộc" }}
               render={({ field }) => (
                 <DatePicker
-                  {...field}
+                  placeholder="Chọn ngày thi"
+                  style={{ width: '100%' }}
                   format="DD/MM/YYYY"
-                  onChange={(date, dateString) => field.onChange(dateString)}
-                  value={field.value ? dayjs(field.value, 'DD/MM/YYYY') : null}
+                  {...field}
                 />
-              )}
-            />
-          </Form.Item>
-
-          {/* Ca */}
-          <Form.Item
-            label="Ca"
-            validateStatus={errors.ca ? 'error' : ''}
-            help={errors.ca?.message}
-          >
-            <Controller
-              name="ca"
-              control={control}
-              rules={{ required: "Ca là bắt buộc" }}
-              render={({ field }) => (
-                <Input type="number" placeholder="Nhập ca" {...field} />
-              )}
-            />
-          </Form.Item>
-
-          {/* Phòng thi */}
-          <Form.Item
-            label="Phòng thi"
-            validateStatus={errors.phongThi ? 'error' : ''}
-            help={errors.phongThi?.message}
-          >
-            <Controller
-              name="phongThi"
-              control={control}
-              render={({ field }) => (
-                <Input placeholder="Nhập phòng thi" {...field} />
               )}
             />
           </Form.Item>
@@ -365,9 +295,7 @@ const TeachingAssignmentForm = () => {
             <Controller
               name="cb1"
               control={control}
-              render={({ field }) => (
-                <Input placeholder="Nhập cán bộ coi thi 1" {...field} />
-              )}
+              render={({ field }) => <Input placeholder="Nhập cán bộ coi thi 1" {...field} />}
             />
           </Form.Item>
 
@@ -380,99 +308,68 @@ const TeachingAssignmentForm = () => {
             <Controller
               name="cb2"
               control={control}
-              render={({ field }) => (
-                <Input placeholder="Nhập cán bộ coi thi 2" {...field} />
-              )}
+              render={({ field }) => <Input placeholder="Nhập cán bộ coi thi 2" {...field} />}
             />
           </Form.Item>
 
-          {/* Thời gian */}
+          {/* Số bài thi */}
           <Form.Item
-            label="Thời gian (phút)"
-            validateStatus={errors.time ? 'error' : ''}
-            help={errors.time?.message}
+            label="Số bài thi"
+            validateStatus={errors.soBai ? 'error' : ''}
+            help={errors.soBai?.message}
           >
             <Controller
-              name="time"
+              name="soBai"
               control={control}
-              render={({ field }) => (
-                <Input placeholder="Nhập thời gian (ngăn cách bởi dấu phẩy)..." {...field} />
-              )}
+              render={({ field }) => <Input type="number" placeholder="Nhập số bài thi" {...field} />}
             />
           </Form.Item>
 
-          {/* Địa điểm thi */}
+          {/* Hình thức thời gian */}
           <Form.Item
-            label="Địa điểm thi"
-            validateStatus={errors.diaDiem ? 'error' : ''}
-            help={errors.diaDiem?.message}
+            label="Hình thức thời gian"
+            validateStatus={errors.hinhThucThoiGianThi ? 'error' : ''}
+            help={errors.hinhThucThoiGianThi?.message}
           >
             <Controller
-              name="diaDiem"
+              name="hinhThucThoiGianThi"
               control={control}
-              render={({ field }) => (
-                <Input placeholder="Nhập địa điểm thi" {...field} />
-              )}
+              render={({ field }) => <Input placeholder="Nhập hình thức thời gian" {...field} />}
             />
           </Form.Item>
-
-          {/* Ghi chú */}
-          <Form.Item
-            label="Ghi chú"
-            validateStatus={errors.ghiChu ? 'error' : ''}
-            help={errors.ghiChu?.message}
-          >
-            <Controller
-              name="ghiChu"
-              control={control}
-              render={({ field }) => (
-                <Input.TextArea placeholder="Nhập ghi chú" {...field} />
-              )}
-            />
-          </Form.Item>
-
 
         </div>
 
-        {/* Action Buttons */}
-        <div className="flex justify-between mt-6">
-          <Button type="primary" htmlType="submit" loading={isSubmitting}>
-            {editRecord ? "Cập nhật" : "Lưu"}
+        <div className="flex justify-end gap-4">
+
+          <Button
+            type="primary"
+            htmlType="submit"
+            loading={isSubmitting}
+            className="bg-blue-500 text-white"
+          >
+            Lưu
           </Button>
+          <div className="hidden">
+            <input
+              type="file"
+              ref={fileInputRef}
+              onChange={handleFileUpload}
+              accept=".xlsx"
 
-          <div className="text-center">
-            <Spin spinning={isUploading}>
-              <label htmlFor="excelUpload">
-                <Button
-                  className="mt-3"
-                  type="primary"
-                  icon={<UploadOutlined />}
-                  onClick={() => fileInputRef.current.click()}
-                  disabled={isUploading}
-                >
-                  {isUploading ? 'Đang tải lên...' : 'Import từ file Excel'}
-                </Button>
-              </label>
-            </Spin>
-
-            <div className="hidden">
-              <input
-                type="file"
-                accept=".xlsx, .xls"
-                onChange={handleFileUpload}
-                className="hidden"
-                id="excelUpload"
-                ref={fileInputRef}
-              />
-            </div>
+            />
           </div>
-
-          <Button type="default" onClick={resetForm} className="ml-2">
-            Huỷ
+          <Button
+            type="primary"
+            onClick={() => fileInputRef.current.click()}
+            icon={<UploadOutlined />}
+            loading={isUploading}
+          >
+            Upload Excel File
           </Button>
+          <Button type="default" onClick={resetForm} danger>Reset</Button>
         </div>
       </Form>
-
     </div>
   );
 };
