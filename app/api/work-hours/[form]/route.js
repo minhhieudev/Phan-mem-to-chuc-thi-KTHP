@@ -96,6 +96,9 @@ export const GET = async (req, { params }) => {
       return new Response("User and type parameters are required", { status: 400 });
     }
 
+    console.log("Nam hoc:",namHoc)
+    console.log("Ky hoc:",ky)
+
     const query = {
       user,
       type
@@ -109,7 +112,7 @@ export const GET = async (req, { params }) => {
       query.ky = ky;
     }
 
-    const records = await models[form].find(query);
+    const records = await models[form].find(query).populate('user', 'username');;
 
     return new Response(JSON.stringify(records), { status: 200 });
   } catch (err) {

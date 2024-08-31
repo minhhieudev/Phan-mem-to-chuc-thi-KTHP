@@ -30,7 +30,7 @@ const TopBar = () => {
       </div>
 
       <div className="menu">
-        {user?.role == 'admin' &&
+        {user?.role == 'Admin' &&
           <Link
             href="/admin"
             className={`${pathname === "/admin" ? "text-red-1" : ""

@@ -211,11 +211,13 @@ const Pages = () => {
       });
 
       if (res.ok) {
-        onReset();
+        toast.success("Lưu kết quả thành công !");
+        // onReset();
       } else {
         toast.error("Failed to save record");
       }
     } catch (err) {
+      console.log('Err:', err)
       toast.error("An error occurred while saving data");
     }
   };

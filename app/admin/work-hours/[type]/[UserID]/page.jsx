@@ -2,16 +2,18 @@
 import React, { useEffect, useState, useRef } from 'react'
 import { useParams } from "next/navigation";
 import { Table, Input, Button, Space, Popconfirm, Modal } from 'antd';
-import { SearchOutlined, EyeFilled, DeleteOutlined, FileExcelOutlined  } from '@ant-design/icons';
+import { SearchOutlined, EyeFilled, DeleteOutlined, FileExcelOutlined } from '@ant-design/icons';
 import moment from 'moment';
 import { ArrowLeftOutlined } from '@ant-design/icons';
-import { useRouter } from "next/navigation";
+import { useRouter } from 'next/navigation';
 import { exportToExcelChiTiet } from '../../../../../components/fileExport'
 import { CldUploadButton } from "next-cloudinary";
 import { useSession } from "next-auth/react";
+import toast from "react-hot-toast";
+import { useSearchParams } from 'next/navigation'
 
 const Pages = () => {
-  const { type, id } = useParams();
+  const { type, UserID } = useParams();
   const [dataList, setDataList] = useState([]);
   const [tableParams, setTableParams] = useState({
     pagination: {
@@ -31,17 +33,31 @@ const Pages = () => {
   const { data: session } = useSession();
   const currentUser = session?.user;
 
+  const [activeKey, setActiveKey] = useState('Công tác giảng dạy');
+  const [tenGV, setTenGV] = useState('');
+  const [columns, setColumns] = useState([]);
+  const [loai, setLoai] = useState('CongTacGiangDay');
+
+  // Sử dụng useSearchParams để lấy các tham số truy vấn từ URL
+  const searchParams = useSearchParams();
+  const ki = searchParams.get('ki');
+  const namHoc = searchParams.get('namHoc');
+
   useEffect(() => {
-    setLoading(true);
     const fetchData = async () => {
+      if (loai === "") return;
+      setLoading(true);
+
       try {
-        const res = await fetch(`/api/admin/tong-hop-lao-dong/detail/${id}/?type=${encodeURIComponent(type)}`, {
+        const res = await fetch(`/api/work-hours/${loai}/?user=${encodeURIComponent(UserID)}&type=${encodeURIComponent(type)}&namHoc=${encodeURIComponent(namHoc)}&ky=${encodeURIComponent(ki)}`, {
           method: "GET",
           headers: { "Content-Type": "application/json" },
         });
         if (res.ok) {
           const data = await res.json();
           setDataList(data);
+          setTenGV(data[0].user.username)
+          console.log("Name:",data[0])
           setLoading(false);
         } else {
           toast.error("Failed to fetch data");
@@ -52,25 +68,12 @@ const Pages = () => {
     };
 
     fetchData();
-  }, []);
-  const getColumns = () => {
-    switch (id) {
-      case 'CongTacGiangDay':
-        return columnsGiangDay;
-      case 'CongTacChamThi':
-        return columnsChamThi
-      case 'CongTacCoiThi':
-        return columnsCoiThi
-      case 'CongTacHuongDan':
-        return columnsHuongDan
-      case 'CongTacKiemNhiem':
-        return columnsKiemNhiem
-      case 'CongTacRaDe':
-        return columnsRade
-      default:
-        return null;
-    }
-  };
+  }, [ki, namHoc, loai]);
+
+  useEffect(() => {
+    setColumns(columnsGiangDay);
+  }, [])
+
   const getColumnSearchProps = (dataIndex) => ({
     filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters, close }) => (
       <div
@@ -165,7 +168,6 @@ const Pages = () => {
         text
       ),
   });
-
   const columnsChamThi = [
     {
       title: 'TT',
@@ -622,38 +624,6 @@ const Pages = () => {
       setDataList([]);
     }
   };
-  const getTitle1 = () => {
-    switch (type) {
-      case 'chinh-quy':
-        return 'CHÍNH QUY';
-      case 'lien-thong-chinh-quy':
-        return 'LIÊN THÔNG CHÍNH QUY';
-      case 'lien-thong-vlvh':
-        return 'LIÊN THÔNG VỪA LÀM VỪA HỌC';
-      case 'lien-thong-vhvl-nd71':
-        return 'LIÊN THÔNG VỪA LÀM VỪA HỌC - NĐ71';
-      default:
-        return '';
-    }
-  };
-  const getTitle2 = () => {
-    switch (id) {
-      case 'CongTacGiangDay':
-        return 'GIẢNG DẠY';
-      case 'CongTacChamThi':
-        return 'CHẤM THI';
-      case 'CongTacHuongDan':
-        return 'HƯỚNG DẪN';
-      case 'CongTacCoiThi':
-        return 'COI THI';
-      case 'CongTacRaDe':
-        return 'RA ĐỀ';
-      case 'CongTacKiemNhiem':
-        return 'KIÊM NHIỆM';
-      default:
-        return '';
-    }
-  };
   const getType = () => {
     switch (type) {
       case 'chinh-quy':
@@ -704,7 +674,7 @@ const Pages = () => {
           text: contentEmail,
           attachments: [
             {
-              filename: `BẢNG TỔNG HỢP CÔNG TÁC ${getTitle2()} - ${getTitle1()}.xlsx`,
+              filename: `BẢNG TỔNG HỢP LAO ĐỘNG GIẢNG VIÊN - ${getType()}.xlsx`,
               path: fileUrl, // Đảm bảo rằng fileUrl là đường dẫn hợp lệ
               contentType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
             }
@@ -727,28 +697,114 @@ const Pages = () => {
     setFileUrl(url);
     await sendEmail();
   };
+  const getButtonList = () => {
+    switch (type) {
+      case 'boi-duong':
+        return ['Công tác giảng dạy bồi dưỡng'];
+      case 'chinh-quy':
+        return [
+          'Công tác giảng dạy',
+          'Công tác chấm thi',
+          'Công tác hướng dẫn',
+          'Công tác coi thi',
+          'Công tác ra đề thi',
+          'Công tác kiêm nhiệm'
+        ];
+      default:
+        return [
+          'Công tác giảng dạy',
+          'Công tác chấm thi',
+          'Công tác hướng dẫn',
+          'Công tác coi thi',
+          'Công tác ra đề thi'
+        ];
+    }
+  };
+  const getButtonClass = (buttonText) => {
+    switch (buttonText) {
+      case 'Công tác giảng dạy':
+        return 'button-dang-day';
+      case 'Công tác chấm thi':
+        return 'button-cham-thi';
+      case 'Công tác hướng dẫn':
+        return 'button-huong-dan';
+      case 'Công tác coi thi':
+        return 'button-coi-thi';
+      case 'Công tác ra đề thi':
+        return 'button-ra-de-thi';
+      case 'Công tác kiêm nhiệm':
+        return 'button-kiem-nhiem';
+      case 'Công tác giảng dạy bồi dưỡng':
+        return 'button-boi-duong';
+      default:
+        return '';
+    }
+  };
+  const handleButtonClick = (key, formType) => {
+    setActiveKey(key);
+    switch (formType) {
+      case 'Công tác giảng dạy':
+        setColumns(columnsGiangDay)
+        setLoai('CongTacGiangDay');
+        break
+      case 'Công tác chấm thi':
+        setColumns(columnsChamThi)
+        setLoai('CongTacChamThi');
+        break
+      case 'Công tác coi thi':
+        setColumns(columnsCoiThi)
+        setLoai('CongTacCoiThi');
+        break
+      case 'Công tác hướng dẫn':
+        setColumns(columnsHuongDan)
+        setLoai('CongTacHuongDan');
+        break
+      case 'Công tác kiêm nhiệm':
+        setColumns(columnsKiemNhiem)
+        setLoai('CongTacKiemNhiem');
+        break
+      case 'Công tác ra đề thi':
+        setColumns(columnsRade)
+        setLoai('CongTacRaDe');
+        break
+      default:
+        return null;
+    }
+  };
+
   return (
     <div className='p-2 font-bold text-center bg-white rounded-md shadow-md w-[98%] m-auto my-3'>
-      <div className="flex items-center justify-center mb-3">
-        <Button
-          className="button-kiem-nhiem text-white font-bold shadow-md mr-2"
-          onClick={() => router.push(`/admin/work-hours/${type}`)} 
-        >
-          <ArrowLeftOutlined
-            style={{
-              color: 'white',
-              fontSize: '18px',
-            }}
-          /> QUAY LẠI
-        </Button>
-        <div className="font-bold text-heading3-bold flex-grow text-center">
-          {/* {getType()} */}
-          {`BẢNG TỔNG HỢP CÔNG TÁC ${getTitle2()} – HỆ ${getTitle1()}`}
+      <div className="">
+        {/* <div className='text-heading3-bold text-green-500'>{`BẢNG KÊ KHAI LAO ĐỘNG GIẢNG VIÊN - ${gv}`}</div> */}
+        <div className="flex items-center justify-center mb-3">
+          <Button
+            className="button-kiem-nhiem text-white font-bold shadow-md mr-2"
+            onClick={() => router.push(`/admin/work-hours/${type}`)}
+          >
+            <ArrowLeftOutlined
+              style={{
+                color: 'white',
+                fontSize: '18px',
+              }}
+            /> QUAY LẠI
+          </Button>
+          <div className='text-heading3-bold text-green-500 flex-grow'>{`BẢNG KÊ KHAI LAO ĐỘNG GIẢNG VIÊN - ${tenGV.toUpperCase() }`} </div>
+        </div>
+        <div className="flex space-x-4 justify-around items-center max-sm:flex-col max-sm:gap-4 mt-2 mb-2">
+          {getButtonList().map((buttonText) => (
+            <Button
+              key={buttonText}
+              className={`custom-button ${getButtonClass(buttonText)} ${activeKey === buttonText ? 'custom-button-active' : ''}`}
+              onClick={() => handleButtonClick(buttonText, buttonText)}
+            >
+              {buttonText}
+            </Button>
+          ))}
         </div>
       </div>
 
       <Table
-        columns={getColumns()}
+        columns={columns}
         rowKey={(record) => record._id}
         dataSource={dataList}
         pagination={tableParams.pagination}
@@ -759,18 +815,18 @@ const Pages = () => {
       <div className="mt-2 flex justify-center gap-6">
         <Button
           className="button-lien-thong-vlvh text-white font-bold shadow-md mr-2"
-          onClick={() => exportToExcelChiTiet(dataList, id, getType())}
+          onClick={() => exportToExcelChiTiet(dataList, loai, getType())}
         ><FileExcelOutlined />
           Xuất file Excel
         </Button>
-        <CldUploadButton
+        {/* <CldUploadButton
           className="button-huong-dan rounded-md shadow-md mr-2"
           options={{ maxFiles: 1 }}
           onUpload={uploadPhoto}
           uploadPreset="e0rggou2"
         >
           <p className="text-white text-small-bold px-2">Chọn file gửi Email</p>
-        </CldUploadButton>
+        </CldUploadButton> */}
       </div>
       <Modal
         title="Thông Báo"

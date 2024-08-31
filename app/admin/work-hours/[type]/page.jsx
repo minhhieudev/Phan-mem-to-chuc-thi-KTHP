@@ -1,6 +1,6 @@
 'use client';
 import React, { useEffect, useState, useRef } from 'react';
-import { Table, Input, Button, Space, Popconfirm, Spin , Modal} from 'antd';
+import { Table, Input, Button, Space, Popconfirm, Spin , Modal, Select} from 'antd';
 import { SearchOutlined, EyeFilled, DeleteOutlined ,FileExcelOutlined } from '@ant-design/icons';
 import Highlighter from 'react-highlight-words';
 import { useParams } from "next/navigation";
@@ -33,10 +33,15 @@ const App = () => {
   const { data: session } = useSession();
   const currentUser = session?.user;
 
+  const [namHoc, setNamHoc] = useState("2024-2025");
+  const [kiHoc, setKiHoc] = useState("1");
+
   const fetchData = async () => {
     setLoading(true);
     try {
-      const res = await fetch(type !== "boi-duong" ? `/api/admin/tong-hop-lao-dong/chinh-quy/${type}` : "/api/admin/tong-hop-lao-dong/boi-duong", {
+      const res = await fetch(type !== "boi-duong" ? 
+        `/api/admin/tong-hop-lao-dong/chinh-quy/${type}/?namHoc=${encodeURIComponent(namHoc)}&ky=${encodeURIComponent(kiHoc)}` : 
+        `/api/admin/tong-hop-lao-dong/boi-duong/?namHoc=${encodeURIComponent(namHoc)}&ky=${encodeURIComponent(kiHoc)}`, {
         method: "GET",
         headers: { "Content-Type": "application/json" },
       });
@@ -109,7 +114,7 @@ const App = () => {
 
   useEffect(() => {
     fetchData();
-  }, []);
+  }, [namHoc,kiHoc]);
 
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
     confirm();
@@ -232,7 +237,7 @@ const App = () => {
         <Button
           type="link"
           className="text-blue-500 font-bold"
-          onClick={() => router.push(`/admin/work-hours/${type}/${currentUser._id}`)}
+          onClick={() => router.push(`/admin/work-hours/${type}/${currentUser._id}?ki=${kiHoc}&namHoc=${namHoc}`)}
         >
           {record.user.username}
         </Button>
@@ -394,7 +399,15 @@ const App = () => {
       title: 'Họ và tên giảng viên',
       dataIndex: 'username',
       ...getColumnSearchProps('user.username'),
-      render: (text, record) => record.user.username,
+      render: (text, record) => (
+        <Button
+          type="link"
+          className="text-blue-500 font-bold"
+          onClick={() => router.push(`/admin/work-hours/${type}/${currentUser._id}?ki=${kiHoc}&namHoc=${namHoc}`)}
+        >
+          {record.user.username}
+        </Button>
+      ),
       className: 'text-blue-500 font-bold text-center'
     },
     {
@@ -685,6 +698,36 @@ const App = () => {
           </Button>
         )}
       </div>
+      <div className="flex justify-around items-center mb-3">
+          <div className="w-[25%] flex items-center gap-2">
+            <label className="block text-sm font-semibold mb-1">Năm học:</label>
+            <Select
+              placeholder="Chọn năm học"
+              onChange={(value) => setNamHoc(value)}
+              className="w-[50%]"
+              value={namHoc}
+            >
+              <Option value="2021-2022">2021-2022</Option>
+              <Option value="2022-2023">2022-2023</Option>
+              <Option value="2023-2024">2023-2024</Option>
+              <Option value="2024-2025">2024-2025</Option>
+            </Select>
+          </div>
+
+          <div className="w-[25%] flex items-center gap-2">
+            <label className="block text-sm font-semibold mb-1">Kỳ học:</label>
+            <Select
+              placeholder="Chọn kỳ học"
+              onChange={(value) => setKiHoc(value)}
+              className="w-[50%]"
+              value={kiHoc}
+            >
+              <Option value="1">Kỳ 1</Option>
+              <Option value="2">Kỳ 2</Option>
+            </Select>
+          </div>
+
+        </div>
 
       <Table
         columns={getColumns()}

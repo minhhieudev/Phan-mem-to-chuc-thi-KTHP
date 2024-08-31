@@ -44,18 +44,25 @@ export const DELETE = async (req) => {
 export const GET = async (req, { params }) => {
   try {
     const { type } = params;
-    console.log('333:',type)
 
     await connectToDB();
 
-    const currentYear = new Date().getFullYear();
-    const startOfYear = new Date(currentYear, 0, 1);
-    const endOfYear = new Date(currentYear + 1, 0, 1);
-    
-    const records = await TongHopLaoDong.find({
-      loai: type,
-      createdAt: { $gte: startOfYear, $lt: endOfYear }
-    }).populate('user', 'username'); 
+    await connectToDB();
+    const url = new URL(req.url, `http://${req.headers.host}`);
+    const namHoc = url.searchParams.get('namHoc'); 
+    const ky = url.searchParams.get('ky'); 
+
+    const query = {};
+
+    if (namHoc) {
+      query.namHoc = namHoc;
+    }
+
+    if (ky) {
+      query.ky = ky;
+    }
+
+    const records = await TongHopLaoDong.find().populate('user', 'username'); 
 
     return new Response(JSON.stringify(records), { status: 200 });
   } catch (err) {
