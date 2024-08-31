@@ -8,7 +8,7 @@ import { useRouter } from "next/navigation";
 import { FileExcelOutlined } from '@ant-design/icons';
 import { useSession } from "next-auth/react";
 
-const TablePcGiangDay = ({ namHoc, ky ,listSelect}) => {
+const TablePcCoiThi = ({ namHoc, ky ,listSelect}) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -26,84 +26,81 @@ const TablePcGiangDay = ({ namHoc, ky ,listSelect}) => {
       render: (text, record, index) => <span style={{ fontWeight: 'bold' }}>{index + 1}</span>,
     },
     {
-      title: 'Mã MH',
-      dataIndex: 'maMH',
-      key: 'maMH',
-      width: 20,
-      render: (text) => <span style={{ color: 'blue', fontWeight: 'bold' }}>{text}</span>,
+      title: 'Học phần',
+      dataIndex: 'hocPhan',
+      key: 'hocPhan',
+      render: (text) => (
+        <span style={{ color: 'green', fontWeight: 'bold' }}>
+          {Array.isArray(text) ? text.join(', ') : text}
+        </span>
+      ),
     },
     {
-      title: 'Tên MH',
-      dataIndex: 'tenMH',
-      key: 'tenMH',
-      render: (text) => <span style={{ color: 'green', fontWeight: 'bold' }}>{text}</span>,
+      title: 'Nhóm/Lớp',
+      dataIndex: 'nhomLop',
+      key: 'nhomLop',
+      render: (text) => (
+        <span style={{ color: 'red', fontWeight: 'bold' }}>
+          {Array.isArray(text) ? text.join(', ') : text}
+        </span>
+      ),
     },
     {
-      title: 'Số TC',
-      dataIndex: 'soTC',
-      key: 'soTC',
-      width: '1%',
-      render: (text) => <span style={{ color: 'red', fontWeight: 'bold' }}>{text}</span>,
-    },
-    {
-      title: 'Số SV',
-      dataIndex: 'soSVDK',
-      key: 'soSVDK',
-      width: '1%',
+      title: 'Ngày thi',
+      dataIndex: 'ngayThi',
+      key: 'ngayThi',
       render: (text) => <span style={{ fontWeight: 'bold' }}>{text}</span>,
     },
     {
-      title: 'Giảng viên',
-      dataIndex: 'gvGiangDay',
-      key: 'gvGiangDay',
+      title: 'Ca',
+      dataIndex: 'ca',
+      key: 'ca',
+      width: '1%',
       render: (text) => <span style={{ fontWeight: 'bold', color: 'orange' }}>{text}</span>,
     },
     {
-      title: 'Nhóm',
-      dataIndex: 'nhom',
-      key: 'nhom',
+      title: 'Phòng thi',
+      dataIndex: 'phongThi',
+      key: 'phongThi',
+      width: 120,
+      render: (text) => <span style={{ fontWeight: 'bold' }}>{text}</span>,
+    },
+    {
+      title: 'Cán bộ coi thi 1',
+      dataIndex: 'cb1',
+      key: 'cb1',
+      width: 120,
+      render: (text) => <span style={{ fontWeight: 'bold' }}>{text}</span>,
+    },
+    {
+      title: 'Cán bộ coi thi 2',
+      dataIndex: 'cb2',
+      key: 'cb2',
+      width: 120,
+      render: (text) => <span style={{ fontWeight: 'bold' }}>{text}</span>,
+    },
+    {
+      title: 'Thời gian (phút)',
+      dataIndex: 'time',
+      key: 'time',
+      width: 20,
+      render: (text) => (
+        <span style={{ fontWeight: 'bold' }}>
+          {Array.isArray(text) ? text.join(', ') : text}
+        </span>
+      ),
+    },
+    {
+      title: 'Địa điểm thi',
+      dataIndex: 'diaDiem',
+      key: 'diaDiem',
       width: 20,
       render: (text) => <span style={{ fontWeight: 'bold' }}>{text}</span>,
     },
     {
-      title: 'Thứ',
-      dataIndex: 'thu',
-      key: 'thu',
-      width: 20,
-      render: (text) => <span style={{ fontWeight: 'bold' }}>{text}</span>,
-    },
-    {
-      title: 'Tiết BĐ',
-      dataIndex: 'tietBD',
-      key: 'tietBD',
-      width: 20,
-      render: (text) => <span style={{ fontWeight: 'bold' }}>{text}</span>,
-    },
-    {
-      title: 'Số tiết',
-      dataIndex: 'soTiet',
-      key: 'soTiet',
-      width: 20,
-      render: (text) => <span style={{ fontWeight: 'bold' }}>{text}</span>,
-    },
-    {
-      title: 'Phòng',
-      dataIndex: 'phong',
-      key: 'phong',
-      width: 50,
-      render: (text) => <span style={{ fontWeight: 'bold' }}>{text}</span>,
-    },
-    {
-      title: 'Lớp',
-      dataIndex: 'lop',
-      key: 'lop',
-      width: 145,
-      render: (text) => <span style={{ fontWeight: 'bold' }}>{text}</span>,
-    },
-    {
-      title: 'Tuần bắt đầu học',
-      dataIndex: 'tuanHoc',
-      key: 'tuanHoc',
+      title: 'Ghi chú',
+      dataIndex: 'ghiChu',
+      key: 'ghiChu',
       render: (text) => <span style={{ fontWeight: 'bold' }}>{text}</span>,
     },
   ];
@@ -149,4 +146,4 @@ const TablePcGiangDay = ({ namHoc, ky ,listSelect}) => {
   );
 };
 
-export default TablePcGiangDay;
+export default TablePcCoiThi;

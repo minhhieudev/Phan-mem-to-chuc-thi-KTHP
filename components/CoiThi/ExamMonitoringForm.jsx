@@ -2,28 +2,32 @@
 
 import { useState, useEffect, useMemo } from "react";
 import { useForm, Controller } from "react-hook-form";
-import { Button, Input, Form, Space, Typography, InputNumber, Table, Popconfirm, Spin, Radio } from "antd";
+import { Button, Input, Form, Space, Typography, InputNumber, Radio, Table, Popconfirm, Tabs, Spin, Select } from "antd";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 import { useSession } from "next-auth/react";
+import moment from 'moment';
 import { useParams } from "next/navigation";
-import Loader from "./Loader";
+import Loader from "../Loader";
+import TablePcCoiThi from "./TablePcCoiThi";
 
 const { Title } = Typography;
+const { TabPane } = Tabs;
 
 const formSchema = {
-    hocPhan: "",
     ky: "",
-    lopHocPhan: "",
-    canBoChamThi: '',
-    soBaiCham: 0,
     soTietQuyChuan: 0,
-    tongCong: 0,
     ghiChu: "",
+    hocPhan: '',
+    thoiGianThi: '',
+    ngayThi: ''
 };
 
-const EvaluationForm = ({ onUpdateCongTacChamThi ,namHoc}) => {
+const generateUniqueId = () => '_' + Math.random().toString(36).substr(2, 9);
+
+const ExamMonitoringForm = ({ onUpdateCongTacCoiThi, namHoc, ky }) => {
     const [dataList, setDataList] = useState([]);
+    const [listSelect, setListSelect] = useState([]);
     const [editRecord, setEditRecord] = useState(null);
     const [current, setCurrent] = useState(1);
     const [pageSize] = useState(6);
@@ -31,15 +35,14 @@ const EvaluationForm = ({ onUpdateCongTacChamThi ,namHoc}) => {
     const { control, handleSubmit, reset, setValue, watch, formState: { errors, isSubmitting } } = useForm({
         defaultValues: formSchema,
     });
-
     const { data: session } = useSession();
     const currentUser = session?.user;
-
+    const [loading, setLoading] = useState(true);
     const { type } = useParams();
 
-    const [loading, setLoading] = useState(true);
+    const [selectedTab, setSelectedTab] = useState('Kết quả coi thi');
+    const [loadings, setLoadings] = useState(true);
 
-    const soTietQuyChuan = watch("soTietQuyChuan");
 
     useEffect(() => {
         if (editRecord) {
@@ -50,15 +53,11 @@ const EvaluationForm = ({ onUpdateCongTacChamThi ,namHoc}) => {
     }, [editRecord, reset]);
 
     useEffect(() => {
-        setValue("tongCong", soTietQuyChuan);
-    }, [soTietQuyChuan, setValue]);
-
-    useEffect(() => {
         if (!currentUser?._id) return;
 
         const fetchData = async () => {
             try {
-                const res = await fetch(`/api/work-hours/CongTacChamThi/?user=${encodeURIComponent(currentUser._id)}&type=${encodeURIComponent(type)}`, {
+                const res = await fetch(`/api/work-hours/CongTacCoiThi/?user=${encodeURIComponent(currentUser._id)}&type=${encodeURIComponent(type)}`, {
                     method: "GET",
                     headers: { "Content-Type": "application/json" },
                 });
@@ -66,6 +65,8 @@ const EvaluationForm = ({ onUpdateCongTacChamThi ,namHoc}) => {
                     const data = await res.json();
                     setDataList(data);
                     setLoading(false)
+                    setLoadings(false)
+
                 } else {
                     toast.error("Failed to fetch data");
                 }
@@ -77,8 +78,39 @@ const EvaluationForm = ({ onUpdateCongTacChamThi ,namHoc}) => {
         fetchData();
     }, [currentUser]);
 
+    useEffect(() => {
+        if (!namHoc && !ky) return;
+    
+        const fetchData = async () => {
+          try {
+            setLoading(true);
+    
+            const res = await fetch(`/api/giaovu/pc-coi-thi/get-for-gv/?namHoc=${namHoc}&gvGiangDay=${currentUser.username}`, {
+              method: "GET",
+              headers: { "Content-Type": "application/json" },
+            });
+    
+    
+            if (res.ok) {
+              const data = await res.json();
+              setListSelect(data);
+              //setFilteredData(data);
+            } else {
+              toast.error("Không thể tải dữ liệu");
+            }
+            setLoading(false);
+          } catch (err) {
+            console.log('Error:', err);
+            toast.error("Lỗi khi tải dữ liệu");
+            setLoading(false);
+          }
+        };
+    
+        fetchData();
+      }, [namHoc, ky]);
+
     const calculateTotals = () => {
-        onUpdateCongTacChamThi(totalHours);
+        onUpdateCongTacCoiThi(totalSoTietQuyChuan);
     };
 
     useEffect(() => {
@@ -86,15 +118,15 @@ const EvaluationForm = ({ onUpdateCongTacChamThi ,namHoc}) => {
     }, [dataList]);
 
     const onSubmit = async (data) => {
-        if (namHoc == ''){
+        if (namHoc == '') {
             toast.error('Vui lòng nhập năm học!')
             return
         }
         try {
             const method = editRecord ? "PUT" : "POST";
-            const res = await fetch("/api/work-hours/CongTacChamThi", {
+            const res = await fetch("/api/work-hours/CongTacCoiThi", {
                 method,
-                body: JSON.stringify({ ...data, type: type, user: currentUser._id, id: editRecord?._id,namHoc }),
+                body: JSON.stringify({ ...data, type: type, user: currentUser._id, id: editRecord?._id, namHoc }),
                 headers: { "Content-Type": "application/json" },
             });
 
@@ -125,7 +157,7 @@ const EvaluationForm = ({ onUpdateCongTacChamThi ,namHoc}) => {
 
     const handleDelete = async (id) => {
         try {
-            const res = await fetch("/api/work-hours/CongTacChamThi", {
+            const res = await fetch("/api/work-hours/CongTacCoiThi", {
                 method: "DELETE",
                 body: JSON.stringify({ id }),
                 headers: { "Content-Type": "application/json" },
@@ -144,36 +176,30 @@ const EvaluationForm = ({ onUpdateCongTacChamThi ,namHoc}) => {
 
     const columns = [
         {
-            title: 'Học phần chấm thi',
-            dataIndex: 'hocPhan',
-            key: 'hocPhan',
-            className: 'text-blue-500 font-bold'
-        },
-        {
-            title: 'Lớp học phần',
-            dataIndex: 'lopHocPhan',
-            key: 'lopHocPhan'
-        },
-        {
             title: 'Học kỳ',
             dataIndex: 'ky',
             key: 'ky'
         },
         {
-            title: 'Cán bộ chấm thi',
-            dataIndex: 'canBoChamThi',
-            key: 'canBoChamThi'
-        },
-        {
-            title: 'Số bài chấm',
-            dataIndex: 'soBaiCham',
-            key: 'soBaiCham'
-        },
-        {
             title: 'Số tiết quy chuẩn',
             dataIndex: 'soTietQuyChuan',
-            key: 'soTietQuyChuan',
-            className: 'text-green-500 font-bold'
+            key: 'soTietQuyChuan'
+        },
+        {
+            title: 'Học phần',
+            dataIndex: 'hocPhan',
+            key: 'hocPhan'
+        },
+        {
+            title: 'Thời gian thi',
+            dataIndex: 'thoiGianThi',
+            key: 'thoiGianThi'
+        },
+        {
+            title: 'Ngày thi',
+            dataIndex: 'ngayThi',
+            key: 'ngayThi',
+            render: (text) => moment(text).format('DD-MM-YYYY'),
         },
         {
             title: 'Ghi chú',
@@ -188,7 +214,7 @@ const EvaluationForm = ({ onUpdateCongTacChamThi ,namHoc}) => {
                     <Button onClick={() => handleEdit(record)} type="primary">Sửa</Button>
                     <Popconfirm
                         title="Bạn có chắc chắn muốn xoá?"
-                        onConfirm={() => handleDelete(record._id)} // Sử dụng ID để xoá
+                        onConfirm={() => handleDelete(record._id)}
                         okText="Có"
                         cancelText="Không"
                     >
@@ -199,52 +225,44 @@ const EvaluationForm = ({ onUpdateCongTacChamThi ,namHoc}) => {
         },
     ];
 
-    const totalHours = useMemo(() => {
-        return dataList.reduce((total, item) => total + (item.soTietQuyChuan || 0), 0);
-    }, [dataList]);
-
     const handleTableChange = (pagination) => {
         setCurrent(pagination.current);
     };
+
+    const handleTabChange = (key) => {
+        setLoadings(true);
+        setSelectedTab(key);
+        setTimeout(() => {
+            setLoadings(false);
+        }, 500);
+    };
+
+    // Tính tổng số tiết quy chuẩn
+    const totalSoTietQuyChuan = useMemo(() => {
+        return dataList.reduce((total, item) => total + (item.soTietQuyChuan || 0), 0);
+    }, [dataList]);
+
 
     return loading ? (
         <Loader />
     ) : (
         <div className="flex gap-5 max-sm:flex-col">
-            <div className="p-5 shadow-xl bg-white rounded-xl flex-[40%]">
-                <Title className="text-center" level={3}>CÔNG TÁC CHẤM THI</Title>
+            <div className="p-5 shadow-xl bg-white rounded-xl flex-[25%]">
+                <Title className="text-center" level={3}>CÔNG TÁC COI THI</Title>
 
-                <Form onFinish={handleSubmit(onSubmit)} layout="vertical" className="space-y-1 mt-10">
+                <Form onFinish={handleSubmit(onSubmit)} layout="vertical" >
                     <Space direction="vertical" className="w-full">
-                        <div className="flex justify-between max-sm:flex-col">
+                        <div className="flex justify-between items-center">
                             <Form.Item
-                                label={<span className="font-bold text-xl">Học phần chấm thi <span className="text-red-600">*</span></span>}
-                                className="w-[40%]"
-                                validateStatus={errors.hocPhan ? 'error' : ''}
-                                help={errors.hocPhan?.message}
+                                label={<span className="font-bold text-xl">Học phần</span>}
                             >
                                 <Controller
                                     name="hocPhan"
                                     control={control}
-                                    rules={{ required: "Học phần là bắt buộc" }}
-                                    render={({ field }) => <Input className="input-text" placeholder="Nhập tên học phần ..." {...field} />}
+                                    render={({ field }) => <Input className="input-text" {...field} />}
                                 />
                             </Form.Item>
 
-                            <Form.Item
-                                label={<span className="font-bold text-xl">Lớp học phần <span className="text-red-600">*</span></span>}
-                                validateStatus={errors.lopHocPhan ? 'error' : ''}
-                                help={errors.lopHocPhan?.message}
-                            >
-                                <Controller
-                                    name="lopHocPhan"
-                                    control={control}
-                                    rules={{ required: "Lớp học phần là bắt buộc" }}
-                                    render={({ field }) => <Input className="input-text" placeholder="Nhập lớp ..." {...field} />}
-                                />
-                            </Form.Item>
-                        </div>
-                        <div className="flex justify-between items-center">
                             <Form.Item
                                 label={<span className="font-bold text-xl">Học kỳ <span className="text-red-600">*</span></span>}
                                 className="w-[40%]"
@@ -263,43 +281,30 @@ const EvaluationForm = ({ onUpdateCongTacChamThi ,namHoc}) => {
                                     )}
                                 />
                             </Form.Item>
-
-                            <Form.Item
-                                label={<span className="font-bold text-xl">Cán bộ chấm thi <span className="text-red-600">*</span></span>}
-                                className="w-[40%]"
-                                validateStatus={errors.canBoChamThi ? 'error' : ''}
-                                help={errors.canBoChamThi?.message}
-                            >
-                                <Controller
-                                    name="canBoChamThi"
-                                    control={control}
-                                    rules={{ required: "Cán bộ chấm thi là bắt buộc" }}
-                                    render={({ field }) => (
-                                        <Radio.Group {...field} className="font-semibold">
-                                            <Radio value="1">1</Radio>
-                                            <Radio value="2">2</Radio>
-                                        </Radio.Group>
-                                    )}
-                                />
-                            </Form.Item>
                         </div>
 
                         <div className="flex justify-between">
                             <Form.Item
-                                label={<span className="font-bold text-xl">Số bài chấm <span className="text-red-600">*</span></span>}
-                                validateStatus={errors.soBaiCham ? 'error' : ''}
-                                help={errors.soBaiCham?.message}
+                                label={<span className="font-bold text-xl">Thời gian thi (Phút)</span>}
                             >
                                 <Controller
-                                    name="soBaiCham"
+                                    name="thoiGianThi"
                                     control={control}
-                                    rules={{ required: "Số bài chấm là bắt buộc" }}
-                                    render={({ field }) => (
-                                        <InputNumber className="input-number" min={0} {...field} />
-                                    )}
+                                    render={({ field }) => <InputNumber className="input-text" {...field} />}
                                 />
                             </Form.Item>
 
+                            <Form.Item
+                                label={<span className="font-bold text-xl">Ngày thi</span>}
+                            >
+                                <Controller
+                                    name="ngayThi"
+                                    control={control}
+                                    render={({ field }) => <Input className="input-text" type="date" {...field} />}
+                                />
+                            </Form.Item>
+                        </div>
+                        <div className="flex justify-between">
                             <Form.Item
                                 label={<span className="font-bold text-xl">Số tiết quy chuẩn <span className="text-red-600">*</span></span>}
                                 validateStatus={errors.soTietQuyChuan ? 'error' : ''}
@@ -308,23 +313,20 @@ const EvaluationForm = ({ onUpdateCongTacChamThi ,namHoc}) => {
                                 <Controller
                                     name="soTietQuyChuan"
                                     control={control}
-                                    rules={{ required: "Số tiết quy chuẩn là bắt buộc" }}
-                                    render={({ field }) => (
-                                        <InputNumber className="input-number" min={0} {...field} />
-                                    )}
+                                    rules={{ required: "Số tiết quy chuẩn là bắt buộc", min: { value: 1, message: "Số tiết quy chuẩn phải lớn hơn 0" } }}
+                                    render={({ field }) => <InputNumber className="input-number" min={1} {...field} />}
+                                />
+                            </Form.Item>
+                            <Form.Item
+                                label={<span className="font-bold text-xl">Ghi chú</span>}
+                            >
+                                <Controller
+                                    name="ghiChu"
+                                    control={control}
+                                    render={({ field }) => <Input.TextArea className="input-text" rows={4} {...field} />}
                                 />
                             </Form.Item>
                         </div>
-
-                        <Form.Item
-                            label={<span className="font-bold text-xl">Ghi chú</span>}
-                        >
-                            <Controller
-                                name="ghiChu"
-                                control={control}
-                                render={({ field }) => <Input.TextArea className="input-text" rows={4} {...field} />}
-                            />
-                        </Form.Item>
 
                         <div className="flex justify-between">
                             <Button type="default" danger onClick={onReset}>Nhập lại</Button>
@@ -336,25 +338,37 @@ const EvaluationForm = ({ onUpdateCongTacChamThi ,namHoc}) => {
                 </Form>
             </div>
 
-            <div className="flex-1 p-5 shadow-xl bg-white rounded-xl flex-[60%]">
-                <Title level={3} className="text-center">Danh sách dữ liệu</Title>
-                <Table
-                    columns={columns}
-                    dataSource={dataList}
-                    pagination={{
-                        current,
-                        pageSize,
-                        total: dataList.length,
-                    }}
-                    onChange={handleTableChange}
-                    rowKey="id"
-                />
-                <div className="flex justify-center mt-5 text-lg">
-                    <span className="font-bold text-lg">Tổng số giờ:  <span className="text-red-500 text-lg">{totalHours}</span></span>
-                </div>
+            <div className="p-2 shadow-xl bg-white rounded-xl flex-[75%] text-center">
+
+                <Tabs activeKey={selectedTab} onChange={handleTabChange}>
+                    <TabPane tab="KẾT QUẢ COI THI" key="Kết quả coi thi">
+                        {loadings ? <Spin size="large" /> :
+                            <div>
+                                <Table
+                                    columns={columns}
+                                    dataSource={dataList}
+                                    pagination={{
+                                        current,
+                                        pageSize,
+                                        total: dataList.length,
+                                    }}
+                                    onChange={handleTableChange}
+                                    rowKey="id"
+                                />
+                                <div className="flex justify-center mt-4">
+                                    <div className="font-bold text-xl">Tổng số tiết quy chuẩn: <span className="text-red-500 text-lg">{totalSoTietQuyChuan}</span></div>
+                                </div>
+                            </div>
+                        }
+                    </TabPane>
+                    <TabPane tab="PHÂN CÔNG COI THI" key="Phân công coi thi" className="text-center">
+                        {loadings ? <Spin size="large" /> : <TablePcCoiThi namHoc={namHoc || ''} ky={ky || ''} listSelect={listSelect || []} />}
+                    </TabPane>
+                </Tabs>
+
             </div>
         </div>
     );
 };
 
-export default EvaluationForm;
+export default ExamMonitoringForm;

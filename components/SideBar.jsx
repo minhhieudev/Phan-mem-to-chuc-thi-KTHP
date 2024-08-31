@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import React from "react";
-import { DashboardOutlined, ClockCircleOutlined, UserOutlined, BookOutlined, FormOutlined, FileTextOutlined } from "@ant-design/icons";
+import { DashboardOutlined, ClockCircleOutlined, UserOutlined, BookOutlined, FormOutlined, FileTextOutlined , MailFilled} from "@ant-design/icons";
 
 const SideBar = () => {
   const pathname = usePathname();
@@ -50,6 +50,10 @@ const SideBar = () => {
       <Link href="/giaovu/pc-ra-de" className={`flex items-center gap-3 p-3 rounded-lg transition border-b-2`}>
         <FileTextOutlined style={{ fontSize: "20px" }} className="text-teal-500"/>
         <span style={getIconStyle(["/giaovu/pc-ra-de"])}>Phân công ra đề</span>
+      </Link>
+      <Link href="/admin/email" className={`flex items-center gap-3 p-3 rounded-lg transition border-b-2`}>
+        <MailFilled style={{ fontSize: "20px" }} className="text-teal-500"/>
+        <span style={getIconStyle(["/giaovu/pc-ra-de"])}>Gửi Email</span>
       </Link>
     </div>
   );

@@ -19,10 +19,10 @@ const formSchema = {
   cb1: '',
   cb2: "",
   soBai: 0,
-  hinhThucThoiGianThi: '',
   namHoc: "",
   loaiKyThi: "",
-  loai: ""
+  loai: "",
+  hinhThucThoiGianThi:''
 };
 
 const TeachingAssignmentForm = () => {

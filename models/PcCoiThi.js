@@ -39,7 +39,10 @@ const PcCoiThiSchema = new mongoose.Schema({
   },
   loai: {
     type: String,  
-  }
+  },
+  ky: {
+    type: String,
+  },
 }, {
   timestamps: true,
 });

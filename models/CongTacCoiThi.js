@@ -35,7 +35,10 @@ const CongTacCoiThiSchema = new mongoose.Schema({
     type: {
         type: String,
         required: true,
-      },
+    },
+    hinhThucThoiGianThi: {
+        type: String,
+    },
 }, {
     timestamps: true,
 });

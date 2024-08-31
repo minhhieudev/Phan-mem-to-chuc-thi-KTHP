@@ -8,6 +8,7 @@ import { useSession } from "next-auth/react";
 import { useParams } from "next/navigation";
 import Loader from "../Loader";
 import TablePcGiangDay from "./TablePcGiangDay";
+import { PlusOutlined } from "@ant-design/icons";
 
 const { TabPane } = Tabs;
 
@@ -28,6 +29,7 @@ const formSchema = {
 
 const TeachingForm = ({ onUpdateCongTacGiangDay, namHoc, ky }) => {
   const [dataList, setDataList] = useState([]);
+  const [listSelect, setListSelect] = useState([]);
   const [editRecord, setEditRecord] = useState(null);
   const { control, handleSubmit, setValue, reset, watch, formState: { errors, isSubmitting } } = useForm({
     defaultValues: formSchema,
@@ -52,6 +54,31 @@ const TeachingForm = ({ onUpdateCongTacGiangDay, namHoc, ky }) => {
   const [selectedTab, setSelectedTab] = useState('Kết quả giảng dạy');
   const [loadings, setLoadings] = useState(true);
 
+  const [isAddingNew, setIsAddingNew] = useState(false);
+  const [newHocPhan, setNewHocPhan] = useState("");
+
+  const handleAddNewClick = () => {
+    setIsAddingNew(!isAddingNew);
+  };
+
+  const handleSaveNewHocPhan = () => {
+    const newHocPhanObj = {
+      _id: Math.random().toString(36).substr(2, 9), // Tạo ID ngẫu nhiên
+      tenMH: newHocPhan, // Sử dụng tên học phần mà người dùng nhập
+      soTC: 0,
+      lop: "",
+      soSVDK: 0,
+    };
+  
+    // Cập nhật listSelect với học phần mới
+    setListSelect([...listSelect, newHocPhanObj]);
+  
+    // Reset trạng thái thêm mới và input học phần
+    setIsAddingNew(false);
+    setNewHocPhan("");
+  };
+  
+
 
   useEffect(() => {
     const tongCong = (soTietQCLT || 0) + (soTietQCTH || 0);
@@ -65,25 +92,6 @@ const TeachingForm = ({ onUpdateCongTacGiangDay, namHoc, ky }) => {
       reset(formSchema);
     }
   }, [editRecord, reset]);
-
-  // const fetchDataForm = async () => {
-  //   try {
-  //     const res = await fetch(`/api/work-hours/CongTacGiangDay/?user=${encodeURIComponent(currentUser._id)}&type=${encodeURIComponent(type)}&namHoc=${encodeURIComponent(namHoc)}&ky=${encodeURIComponent(ky)}`, {
-  //       method: "GET",
-  //       headers: { "Content-Type": "application/json" },
-  //     });
-  //     if (res.ok) {
-  //       const data = await res.json();
-  //       setDataList(data);
-  //       setLoading(false)
-  //       setLoadings(false)
-  //     } else {
-  //       toast.error("Failed to fetch data");
-  //     }
-  //   } catch (err) {
-  //     toast.error("An error occurred while fetching data");
-  //   }
-  // };
 
   useEffect(() => {
     if (!currentUser?._id) return;
@@ -109,6 +117,38 @@ const TeachingForm = ({ onUpdateCongTacGiangDay, namHoc, ky }) => {
 
     fetchData();
   }, [currentUser, namHoc, ky]);
+
+  useEffect(() => {
+    if (!namHoc && !ky) return;
+
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+
+        const res = await fetch(`/api/giaovu/pc-giang-day/get-for-gv/?namHoc=${namHoc}&ky=${ky}&gvGiangDay=${currentUser.username}`, {
+          method: "GET",
+          headers: { "Content-Type": "application/json" },
+        });
+
+
+        if (res.ok) {
+          const data = await res.json();
+          setListSelect(data);
+          //setFilteredData(data);
+        } else {
+          toast.error("Không thể tải dữ liệu");
+        }
+        setLoading(false);
+      } catch (err) {
+        console.log('Error:', err);
+        toast.error("Lỗi khi tải dữ liệu");
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [namHoc, ky]);
+
 
   const calculateTotals = () => {
     const totals = dataList.reduce((acc, item) => {
@@ -190,6 +230,15 @@ const TeachingForm = ({ onUpdateCongTacGiangDay, namHoc, ky }) => {
     setTimeout(() => {
       setLoadings(false);
     }, 500);
+  };
+
+  const handleSelectChange = (value) => {
+    const selectedHocPhan = listSelect.find(item => item.tenMH == value);
+    if (selectedHocPhan) {
+      setValue("soTinChi", selectedHocPhan.soTC);
+      setValue("lopHocPhan", selectedHocPhan.lop);
+      setValue("soSV", selectedHocPhan.soSVDK);
+    }
   };
 
 
@@ -304,28 +353,59 @@ const TeachingForm = ({ onUpdateCongTacGiangDay, namHoc, ky }) => {
               validateStatus={errors.hocPhan ? 'error' : ''}
               help={errors.hocPhan?.message}
             >
-              <Controller
-                name="hocPhan"
-                control={control}
-                rules={{ required: "Học phần là bắt buộc" }}
-                render={({ field }) => (
-                  <Select
-                    showSearch
-                    allowClear
-                    placeholder="Nhập hoặc chọn tên học phần..."
-                    {...field}
-                    options={[
-                      { value: 'hocPhan1', label: 'Học phần 1' },
-                      { value: 'hocPhan2', label: 'Học phần 2' },
-                      // Add more options here
-                    ]}
-                    filterOption={(input, option) =>
-                      option?.label?.toLowerCase().indexOf(input.toLowerCase()) >= 0
-                    }
+              <Space className="flex">
+                <div className="w-[200px]">
+                  <Controller
+                    
+                    name="hocPhan"
+                    control={control}
+                    rules={{ required: "Học phần là bắt buộc" }}
+                    render={({ field }) => (
+                      <Select
+                        showSearch
+
+                        allowClear
+                        placeholder="Nhập hoặc chọn tên học phần..."
+                        {...field}
+                        options={listSelect.map(item => ({
+                          value: item.tenMH,
+                          label: item.tenMH,
+                        }))}
+                        filterOption={(input, option) =>
+                          option?.label?.toLowerCase().indexOf(input.toLowerCase()) >= 0
+                        }
+                        onChange={(value) => {
+                          field.onChange(value);
+                          handleSelectChange(value);
+                        }}
+                      />
+                    )}
                   />
-                )}
-              />
+                </div>
+                <Button
+                  icon={<PlusOutlined />}
+                  onClick={handleAddNewClick}
+                />
+              </Space>
             </Form.Item>
+            {isAddingNew && (
+              <Form.Item
+                label={<span className="font-bold text-xl">Thêm học phần mới</span>}
+                className="w-full"
+              >
+                <Space className="w-full">
+                  <Input
+                    value={newHocPhan}
+                    onChange={(e) => setNewHocPhan(e.target.value)}
+                    placeholder="Nhập tên học phần mới..."
+                    className="w-[90%]"
+                  />
+                  <Button type="primary" onClick={handleSaveNewHocPhan}>
+                    Lưu
+                  </Button>
+                </Space>
+              </Form.Item>
+            )}
 
             <div className="flex justify-between">
               <Form.Item
@@ -491,7 +571,7 @@ const TeachingForm = ({ onUpdateCongTacGiangDay, namHoc, ky }) => {
             }
           </TabPane>
           <TabPane tab="PHÂN CÔNG GIẢNG DẠY" key="Phân công giảng dạy" className="text-center">
-            {loadings ? <Spin size="large" /> : <TablePcGiangDay namHoc={namHoc || ''} ky={ky || ''} />}
+            {loadings ? <Spin size="large" /> : <TablePcGiangDay namHoc={namHoc || ''} ky={ky || ''} listSelect={listSelect || []} />}
           </TabPane>
         </Tabs>
 

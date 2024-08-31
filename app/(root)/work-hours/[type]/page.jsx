@@ -3,9 +3,9 @@
 import { useState, useEffect, useCallback } from "react";
 import { Row, Col, Button, Input, Tabs, Spin, Select } from "antd";
 import TeachingForm from '@components/GiangDay/TeachingForm';
-import EvaluationForm from "@components/EvaluationForm";
+import EvaluationForm from "@components/ChamThi/EvaluationForm";
 import DutyExemptionForm from "@components/DutyExemptionForm";
-import ExamMonitoringForm from "@components/ExamMonitoringForm";
+import ExamMonitoringForm from "@components/CoiThi/ExamMonitoringForm";
 import ExamPreparationForm from "@components/ExamPreparationForm";
 import GuidanceForm from "@components/GuidanceForm";
 import TrainingTypeForm from "@components/TrainingTypeForm";
