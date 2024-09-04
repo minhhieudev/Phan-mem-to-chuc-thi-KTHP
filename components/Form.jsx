@@ -47,7 +47,7 @@ const Form = ({ type }) => {
       })
 
       if (res.ok) {
-        router.push("/work-hours");
+        router.push("/home");
       }
 
       if (res.error) {

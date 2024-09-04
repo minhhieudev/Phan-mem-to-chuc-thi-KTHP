@@ -1,7 +1,6 @@
 import Khoa from "@models/Khoa";
 import { connectToDB } from "@mongodb";
 
-// GET all departments
 export const GET = async (req, res) => {
   try {
     await connectToDB();
@@ -15,17 +14,14 @@ export const GET = async (req, res) => {
   }
 };
 
-// POST (Create new department)
 export const POST = async (req, res) => {
   try {
     await connectToDB();
     const { tenKhoa, maKhoa } = await req.json();
 
-    // Kiểm tra khoa đã tồn tại
     let existingDepartment = await Khoa.findOne({ maKhoa });
 
     if (existingDepartment) {
-      // Nếu tồn tại, cập nhật thông tin
       existingDepartment.tenKhoa = tenKhoa;
       await existingDepartment.save();
 
@@ -46,7 +42,6 @@ export const POST = async (req, res) => {
   }
 };
 
-// PUT (Update existing department)
 export const PUT = async (req, res) => {
   try {
     await connectToDB();
@@ -70,13 +65,11 @@ export const PUT = async (req, res) => {
   }
 };
 
-// DELETE (Delete department)
 export const DELETE = async (req, res) => {
   try {
     await connectToDB();
     const { id } = await req.json();
 
-    // Tìm và xóa khoa
     const departmentToDelete = await Khoa.findByIdAndDelete(id);
 
     if (!departmentToDelete) {

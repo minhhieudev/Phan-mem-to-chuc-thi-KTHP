@@ -25,12 +25,12 @@ const TopBar = () => {
         </Link>
         <div className="max-sm:hidden">
           <div className="text-heading4-bold">TRƯỜNG ĐẠI HỌC PHÚ YÊN</div>
-          <p className="text-small-bold ml-1">HỆ THỐNG QUẢN LÝ GIỜ LAO ĐỘNG</p>
+          <p className="text-small-bold ml-1">PHẦN MỀM HỖ TRỢ TỔ CHỨC THI KTHP</p>
         </div>
       </div>
 
       <div className="menu">
-        {user?.role == 'Admin' &&
+        {user?.role == 'admin' &&
           <Link
             href="/admin"
             className={`${pathname === "/admin" ? "text-red-1" : ""

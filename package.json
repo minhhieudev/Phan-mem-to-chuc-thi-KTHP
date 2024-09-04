@@ -31,10 +31,12 @@
     "pusher-js": "^8.4.0-rc2",
     "qs": "^6.12.3",
     "react": "^18",
+    "react-beautiful-dnd": "^13.1.1",
     "react-dom": "^18",
     "react-highlight-words": "^0.20.0",
     "react-hook-form": "^7.52.1",
     "react-hot-toast": "^2.4.1",
+    "react-random": "^1.1.2",
     "xlsx": "^0.18.5"
   },
   "devDependencies": {
