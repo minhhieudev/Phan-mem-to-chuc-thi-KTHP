@@ -12,6 +12,12 @@ const HocPhanThiSchema = new mongoose.Schema({
   soTinChi: {
     type: Number,
   },
+  lop: {
+    type: [String],  
+  },
+  hinhThucThoiGian: {
+    type: String,
+  },
 });
 
 const HocPhanThi = mongoose.models.HocPhanThi || mongoose.model("HocPhanThi", HocPhanThiSchema);

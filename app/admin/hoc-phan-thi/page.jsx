@@ -1,5 +1,4 @@
 "use client";
-
 import { useState, useEffect } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { Button, Input, Form, Space, Typography, Table, Popconfirm, InputNumber } from "antd";
@@ -13,6 +12,9 @@ const formSchema = {
     maHocPhan: "",
     tenHocPhan: "",
     soTinChi: "",
+    soSV: 0,
+    lop: "",  // Updated schema
+    hinhThucThoiGian: "",  // Updated schema
 };
 
 const HocPhanThiForm = () => {
@@ -69,11 +71,17 @@ const HocPhanThiForm = () => {
     };
 
     const onSubmit = async (data) => {
+
         try {
+            const updatedData = {
+                ...data,
+                lop: data.lop.split(',').map(item => item.trim()),
+                id: editRecord ? editRecord._id : undefined
+            };
             const method = editRecord ? "PUT" : "POST";
             const res = await fetch("/api/admin/hoc-phan-thi", {
                 method,
-                body: JSON.stringify({ ...data, id: editRecord?._id }),
+                body: JSON.stringify(updatedData),
                 headers: { "Content-Type": "application/json" },
             });
 
@@ -99,6 +107,9 @@ const HocPhanThiForm = () => {
         setValue("maHocPhan", record.maHocPhan);
         setValue("tenHocPhan", record.tenHocPhan);
         setValue("soTinChi", record.soTinChi);
+        setValue("lop", record.lop.join(', '));  // Convert array to comma-separated string
+        setValue("hinhThucThoiGian", record.hinhThucThoiGian);
+        setValue("soSV", record.soSV);
     };
 
     const handleDelete = async (id) => {
@@ -143,18 +154,31 @@ const HocPhanThiForm = () => {
             key: 'soTinChi',
         },
         {
+            title: 'Lớp',
+            dataIndex: 'lop',
+            key: 'lop',
+            render: (text) => text.join(', '),  // Convert array to comma-separated string
+        },
+        {
+            title: 'Hình thức/Thời gian',
+            dataIndex: 'hinhThucThoiGian',
+            key: 'hinhThucThoiGian',
+        },
+        { title: 'Giảng viên dạy', dataIndex: 'gvDay', key: 'gvDay' },
+
+        {
             title: 'Hành động',
             key: 'action',
             render: (_, record) => (
                 <Space size="middle">
-                    <Button onClick={() => handleEdit(record)} type="primary">Sửa</Button>
+                    <Button size="small" onClick={() => handleEdit(record)} type="primary">Sửa</Button>
                     <Popconfirm
                         title="Bạn có chắc chắn muốn xoá?"
                         onConfirm={() => handleDelete(record._id)}
                         okText="Có"
                         cancelText="Không"
                     >
-                        <Button type="primary" danger>Xoá</Button>
+                        <Button size="small" type="primary" danger>Xoá</Button>
                     </Popconfirm>
                 </Space>
             ),
@@ -162,10 +186,7 @@ const HocPhanThiForm = () => {
         },
     ];
 
-    return  (
-    // return loading ? (
-    //     <Loader />
-    // ) : (
+    return (
         <div className="flex gap-5 max-sm:flex-col mt-4 h-[83vh]">
             <div className="p-4 shadow-xl bg-white rounded-xl flex-[25%]">
                 <Title className="text-center" level={3}>QUẢN LÝ HỌC PHẦN THI</Title>
@@ -210,6 +231,30 @@ const HocPhanThiForm = () => {
                         />
                     </Form.Item>
 
+                    <Form.Item
+                        label={<span className="font-bold text-xl">Lớp</span>}
+                        validateStatus={errors.lop ? 'error' : ''}
+                        help={errors.lop?.message}
+                    >
+                        <Controller
+                            name="lop"
+                            control={control}
+                            render={({ field }) => <Input className="input-text" placeholder="Nhập lớp, ngăn cách bởi dấu ',' ..." {...field} />}
+                        />
+                    </Form.Item>
+
+                    <Form.Item
+                        label={<span className="font-bold text-xl">Hình thức/Thời gian</span>}
+                        validateStatus={errors.hinhThucThoiGian ? 'error' : ''}
+                        help={errors.hinhThucThoiGian?.message}
+                    >
+                        <Controller
+                            name="hinhThucThoiGian"
+                            control={control}
+                            render={({ field }) => <Input className="input-text" placeholder="Nhập hình thức/thời gian ..." {...field} />}
+                        />
+                    </Form.Item>
+
                     <Space size="middle">
                         <Button className="bg-blue-500 hover:bg-blue-700" loading={isSubmitting} type="primary" htmlType="submit">
                             {editRecord ? "Lưu chỉnh sửa" : "Thêm mới"}
@@ -231,7 +276,7 @@ const HocPhanThiForm = () => {
                         style={{
                             width: 250,
                         }}
-                        onChange={(e) => setSearchName(e.target.value)} 
+                        onChange={(e) => setSearchName(e.target.value)}
                         prefix={<SearchOutlined />}
                     />
                 </div>

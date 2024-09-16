@@ -21,7 +21,7 @@ export const GET = async (req, res) => {
 export const POST = async (req, res) => {
   try {
     await connectToDB();
-    const { tenHocPhan, soTinChi, maHocPhan } = await req.json();
+    const { tenHocPhan, soTinChi, maHocPhan, lop, hinhThucThoiGian } = await req.json();
 
     // Kiểm tra học phần thi có tồn tại không, nếu có thì cập nhật, nếu không thì tạo mới
     let existingHocPhanThi = await HocPhanThiModel.findOne({ tenHocPhan });
@@ -36,7 +36,9 @@ export const POST = async (req, res) => {
       const newHocPhanThi = new HocPhanThiModel({
         tenHocPhan,
         soTinChi,
-        maHocPhan
+        maHocPhan,
+        lop,
+        hinhThucThoiGian,
       });
 
       await newHocPhanThi.save();
@@ -51,7 +53,7 @@ export const POST = async (req, res) => {
 export const PUT = async (req, res) => {
   try {
     await connectToDB();
-    const {  tenHocPhan, soTinChi, maHocPhan } = await req.json();
+    const { tenHocPhan, soTinChi, maHocPhan, id, lop, hinhThucThoiGian } = await req.json();
 
     const hocPhanThiToUpdate = await HocPhanThiModel.findById(id);
 
@@ -62,6 +64,8 @@ export const PUT = async (req, res) => {
     hocPhanThiToUpdate.tenHocPhan = tenHocPhan;
     hocPhanThiToUpdate.soTinChi = soTinChi;
     hocPhanThiToUpdate.maHocPhan = maHocPhan;
+    hocPhanThiToUpdate.lop = lop;
+    hocPhanThiToUpdate.hinhThucThoiGian = hinhThucThoiGian;
 
     await hocPhanThiToUpdate.save();
 

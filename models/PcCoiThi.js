@@ -2,27 +2,33 @@ import mongoose from "mongoose";
 
 const PcCoiThiSchema = new mongoose.Schema({
   hocPhan: {
-    type: [String],  
+    type: String,  
   },
-  nhomLop: {
-    type: [String],  
+  lop: {
+    type: String,  
   },
+  // hocPhan: {
+  //   type: [String],  
+  // },
+  // lop: {
+  //   type: [String],  
+  // },
   ngayThi: {
     type: String,  
   },
   ca: {
     type: Number, 
   },
-  cb1: {
+  cbo1: {
     type: String,  
   },
-  cb2: {
+  cbo2: {
     type: String,  
   },
-  time: {
-    type: [Number],  
+  hinhThucThoiGian: {
+    type: String,  
   },
-  phongThi: {
+  phong: {
     type: String,  
   },
   diaDiem: {
@@ -37,10 +43,10 @@ const PcCoiThiSchema = new mongoose.Schema({
   loaiKyThi: {
     type: String,  
   },
-  loai: {
+  loaiDaoTao: {
     type: String,  
   },
-  ky: {
+  hocky: {
     type: String,
   },
 }, {

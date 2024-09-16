@@ -1,31 +1,42 @@
 'use client'
 import { useState, useEffect } from "react";
-import { Select, DatePicker, Button, message, Tabs, Card, Col, Row, Checkbox, Radio } from "antd";
-import { UserOutlined } from '@ant-design/icons';
+import { Select, DatePicker, Button, message, Tabs, Card, Col, Row, Checkbox, Radio, Input, Table } from "antd";
+
+import { UserOutlined, BookOutlined, HomeOutlined, CalendarOutlined, SettingOutlined } from '@ant-design/icons';
+import Loader from "../../../components/Loader";
+import { useRouter } from "next/navigation";
+import TablePcCoiThi from "@components/CoiThi/TablePcCoiThi";
 
 const { Option } = Select;
 const { TabPane } = Tabs;
+const { RangePicker } = DatePicker;
 
-const PcCoiThiTable = () => {
+const PcCoiThi = () => {
   const [activeTab, setActiveTab] = useState("1");
   const [selectedItems, setSelectedItems] = useState({
     hocPhan: [],
     lop: [],
+    hinhThucThoiGian: [],
     phong: [],
   });
-  const [listLop, setListLop] = useState([]);
   const [listHocPhan, setListHocPhan] = useState([]);
   const [listGV, setListGV] = useState([]);
   const [listPhong, setListPhong] = useState([]);
   const [examDate, setExamDate] = useState(null);
-  const [examSession, setExamSession] = useState("");
+  const [examSessions, setExamSessions] = useState([]);
+  const [list, setList] = useState([]);
   const [selectedGV, setSelectedGV] = useState([]);
 
   const [cbo1, setCbo1] = useState(null); // Cán bộ 1
   const [cbo2, setCbo2] = useState(null); // Cán bộ 2
-  const [namHoc, setNamHoc] = useState("");
-  const [loaiKyThi, setLoaiKyThi] = useState("");
-  const [hocky, setHocKy] = useState("");
+  const [namHoc, setNamHoc] = useState("2024-2025");
+  const [loaiKyThi, setLoaiKyThi] = useState("Học kỳ 1");
+  const [loaiDaoTao, setLoaiDaoTao] = useState("Chính quy");
+  const [hocky, setHocKy] = useState("1");
+  const [examDateRange, setExamDateRange] = useState({});
+  const [loading, setLoading] = useState(true);
+
+  const router = useRouter();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -42,11 +53,6 @@ const PcCoiThiTable = () => {
           setListPhong(data);
         }
 
-        const res3 = await fetch('/api/admin/nhom-lop');
-        if (res3.ok) {
-          const data = await res3.json();
-          setListLop(data);
-        }
 
         const res = await fetch('/api/admin/user/get-gv', {
           method: "GET",
@@ -56,6 +62,8 @@ const PcCoiThiTable = () => {
           const data = await res.json();
           setListGV(data);
         }
+
+        setLoading(false);
       } catch (error) {
         message.error("Failed to fetch data");
       }
@@ -64,108 +72,97 @@ const PcCoiThiTable = () => {
     fetchData();
   }, []);
 
-  const handleSelectChange = (tabKey, checkedValues) => {
-    setSelectedItems(prevState => ({
-      ...prevState,
-      [tabKey]: checkedValues
-    }));
-  };
-
   const formatDate = (dateString) => {
     const date = new Date(dateString);
-    return date.toLocaleDateString(); // Định dạng ngày theo ngôn ngữ và vùng của trình duyệt
+    return date.toLocaleDateString();
   };
 
-  const handleSubmit = async () => {
-    const formattedDate = examDate ? formatDate(examDate.toISOString()) : null;
 
-    const body = JSON.stringify({
-      courses: selectedItems.hocPhan.map(id => listHocPhan.find(hp => hp._id === id)?.tenHocPhan),
-      classes: selectedItems.lop.map(id => listLop.find(lp => lp._id === id)?.tenLop),
-      room: selectedItems.phong ? listPhong.find(ph => ph._id === selectedItems.phong)?.tenPhong : null,
-      cb1: cbo1?.username,
-      cb2: cbo2?.username,
-      examDate: formattedDate,
-      examSession,
-      loaiKyThi,
-      namHoc,
-      ky: hocky
-    });
-
-
-    console.log("Body", body);
-
-    // if (!selectedItems.hocPhan.length || !selectedItems.lop.length || !examDate || !examSession || !selectedItems.phong.length) {
-    //   message.error("Please fill in all fields");
-    //   return;
-    // }
-
-    // try {
-    //   const response = await fetch("/api/admin/lich-thi", {
-    //     method: "POST",
-    //     headers: {
-    //       "Content-Type": "application/json",
-    //     },
-    //     body: JSON.stringify({
-    //       courses: selectedItems.hocPhan,
-    //       classes: selectedItems.lop,
-    //       examDate,
-    //       examSession,
-    //       rooms: selectedItems.phong,
-    //       cb1:cbo1,
-    //       cb2:cbo2
-    //     }),
-    //   });
-
-    //   if (response.ok) {
-    //     message.success("Assignment saved successfully");
-    //   } else {
-    //     message.error("Failed to save assignment");
-    //   }
-    // } catch (error) {
-    //   message.error("An error occurred");
-    // }
+  // Helper to get a random value from an array
+  const randomFromArray = (array) => {
+    return array[Math.floor(Math.random() * array.length)];
   };
 
-  const handleRandom = () => {
-    if (listGV.length < 2) {
-      message.warning("Not enough cán bộ to random");
+  const handleCreate = () => {
+    // Check data
+    if (!examDateRange.startDate || !examDateRange.endDate || !examSessions.length || !namHoc || !loaiKyThi || !hocky || !loaiDaoTao) {
+      message.error("Vui lòng nhập đầy đủ thông tin");
       return;
     }
 
-    // Copy the list and shuffle it
+    const getRandomDate = (start, end) => {
+      const date = new Date(start.getTime() + Math.random() * (end.getTime() - start.getTime()));
+      return formatDate(date);
+    };
+
+    // Copy lists to avoid mutation
+    let hocPhanList = [...listHocPhan];
+    let phongList = [...listPhong];
     let gvList = [...listGV];
-    for (let i = gvList.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [gvList[i], gvList[j]] = [gvList[j], gvList[i]];
+
+    const randomSchedules = [];
+
+    // Ensure you process all hoc phan
+    while (hocPhanList.length > 0) {
+      const randomHocPhan = hocPhanList.length > 0 ? hocPhanList.splice(Math.floor(Math.random() * hocPhanList.length), 1)[0] : { tenHocPhan: "Không có dữ liệu", lop: ["Không có dữ liệu"], hinhThucThoiGian: "Không có dữ liệu" };
+      const randomPhong = phongList.length > 0 ? phongList.splice(Math.floor(Math.random() * phongList.length), 1)[0] : { tenPhong: "Hết phòng" };
+
+      // Ensure cán bộ 1 and cán bộ 2 are unique
+      let randomCbo1 = gvList.length > 0 ? gvList.splice(Math.floor(Math.random() * gvList.length), 1)[0] : { username: "Hết giảng viên" };
+      let randomCbo2 = gvList.length > 0 ? gvList.splice(Math.floor(Math.random() * gvList.length), 1)[0] : { username: "Hết giảng viên" };
+
+      // Ensure cán bộ 2 is not the same as cán bộ 1
+      if (randomCbo2.username === randomCbo1.username && gvList.length > 0) {
+        randomCbo2 = gvList.splice(Math.floor(Math.random() * gvList.length), 1)[0];
+      }
+
+      // Ensure ca thi always has data
+      const availableCaSessions = examSessions.split(",").filter(ca => ca.trim() !== "");
+      const randomCa = availableCaSessions.length > 0 ? randomFromArray(availableCaSessions) : "Không có dữ liệu";
+      const randomDate = getRandomDate(examDateRange.startDate, examDateRange.endDate);
+
+      const schedule = {
+        hocPhan: randomHocPhan.tenHocPhan,
+        lop: randomHocPhan.lop.join(", "),
+        hinhThucThoiGian: randomHocPhan.hinhThucThoiGian,
+        phong: randomPhong.tenPhong,
+        cbo1: randomCbo1.username,
+        cbo2: randomCbo2.username,
+        ca: randomCa,
+        ngayThi: randomDate,
+        namHoc,
+        loaiKyThi,
+        hocky,
+        loaiDaoTao
+      };
+
+      randomSchedules.push(schedule);
     }
 
-    // Select 2 random cán bộ
-    const [selectedCbo1, selectedCbo2] = gvList.slice(0, 2);
+    // Handle "Hết giảng viên" cases
+    randomSchedules.forEach(schedule => {
+      if (!schedule.cbo1) schedule.cbo1 = "Hết giảng viên";
+      if (!schedule.cbo2) schedule.cbo2 = "Hết giảng viên";
+    });
 
-    // Update state
-    setCbo1(selectedCbo1);
-    setCbo2(selectedCbo2);
-    setSelectedGV([selectedCbo1, selectedCbo2]);
+    // Log the final schedules and list lengths
+    console.log("Generated Schedules:", randomSchedules);
+    console.log("Remaining hoc phan list:", hocPhanList);
+    console.log("Remaining phong list:", phongList);
+    console.log("Remaining cán bộ list:", gvList);
 
-    // Remove selected cán bộ from the original list
-    const newListGV = gvList.slice(2);
-    setListGV(newListGV);
+    setList(randomSchedules); // Store the generated schedules in state
+    setActiveTab("2")
   };
 
-  // const getRandomColor = () => {
-  //   const letters = '0123456789ABCDEF';
-  //   let color = '#';
-  //   for (let i = 0; i < 6; i++) {
-  //     color += letters[Math.floor(Math.random() * 16)];
-  //   }
-  //   return color;
-  // };
-  const getRandomColor = () => {
-    // Tạo giá trị R, G, B với một mức độ ngẫu nhiên nhưng không quá tối hoặc quá sáng
-    const randomValue = () => Math.floor(Math.random() * 128) + 64; // Từ 64 đến 191
+  const handleExamSessionChange = (e) => {
+    setExamSessions(e.target.value);
+  };
 
-    // Tạo màu sắc với các giá trị R, G, và B trong khoảng trung bình
+
+  const getRandomColor = () => {
+    const randomValue = () => Math.floor(Math.random() * 128) + 64;
+
     const r = randomValue().toString(16).padStart(2, '0');
     const g = randomValue().toString(16).padStart(2, '0');
     const b = randomValue().toString(16).padStart(2, '0');
@@ -173,210 +170,195 @@ const PcCoiThiTable = () => {
     return `#${r}${g}${b}`;
   };
 
+  return loading ? (
+    <Loader />
+  ) : (
+    <div>
+      <div className="py-1 px-6 bg-white rounded-lg shadow-lg mt-3 ">
+        <Tabs activeKey={activeTab} onChange={(key) => setActiveTab(key)}>
+          <TabPane tab="Tạo lịch thi" key="1">
+            <div className="text-heading3-bold text-blue-600 text-center ">THÔNG TIN KỲ THI</div>
+            <div className="flex justify-between gap-3 mt-2">
+              <div className=" flex items-center gap-2">
+                <label className="block text-sm font-semibold mb-1 ">Năm học:</label>
+                <Select
+                  value={namHoc}
+                  placeholder="Chọn năm học"
+                  onChange={(value) => setNamHoc(value)}
+                  className=""
+                >
+                  <Option value="2021-2022">2021-2022</Option>
+                  <Option value="2022-2023">2022-2023</Option>
+                  <Option value="2023-2024">2023-2024</Option>
+                  <Option value="2024-2025">2024-2025</Option>
+                </Select>
+              </div>
+              <div className=" flex items-center gap-2">
+                <label className="block text-sm font-semibold mb-1 ">Học kỳ:</label>
+                <Select
+                  value={hocky}
+                  placeholder="Chọn học kỳ"
+                  onChange={(value) => setHocKy(value)} // Set the value when an option is selected
+                  className=""
+                >
+                  <Option value="1">1</Option>
+                  <Option value="2">2</Option>
+                </Select>
 
-  return (
-    <div className="py-4 px-6 bg-white rounded-lg shadow-lg mt-3 h-[85vh]">
-      <div className="mb-4">
-        <div className="flex justify-between h-[50vh] bg-gray-100 p-3">
-          <Tabs activeKey={activeTab} onChange={(key) => setActiveTab(key)}>
-            <TabPane tab="Chọn học phần" key="1">
-              <Checkbox.Group
-                options={listHocPhan.map(hocPhan => ({ label: hocPhan.tenHocPhan, value: hocPhan._id }))}
-                value={selectedItems.hocPhan}
-                onChange={(checkedValues) => handleSelectChange("hocPhan", checkedValues)}
-              />
-            </TabPane>
+              </div>
 
-            <TabPane tab="Chọn lớp" key="2">
-              <Checkbox.Group
-                options={listLop.map(lop => ({ label: lop.tenLop, value: lop._id }))}
-                value={selectedItems.lop}
-                onChange={(checkedValues) => handleSelectChange("lop", checkedValues)}
-              />
-            </TabPane>
+              <div className=" flex items-center gap-2">
+                <label className="block text-sm font-semibold mb-1 ">Loại kỳ thi:</label>
+                <Select
+                  value={loaiKyThi}
+                  placeholder="Chọn loại kỳ thi"
+                  onChange={(value) => setLoaiKyThi(value)}
+                  className=""
+                >
+                  <Option value="Học kỳ 1">Học kỳ 1</Option>
+                  <Option value="Học kỳ 1 (đợt 2)">Học kỳ 1 (đợt 2)</Option>
+                  <Option value="Học kỳ 1 (đợt 3)">Học kỳ 1 (đợt 3)</Option>
+                  <Option value="Học kỳ 2">Học kỳ 2</Option>
+                  <Option value="Học kỳ 2 (đợt 2)">Học kỳ 2 (đợt 2)</Option>
+                  <Option value="Học kỳ 2 (đợt 3)">Học kỳ 2 (đợt 3)</Option>
+                  <Option value="Kỳ thi phụ (đợt 1)">Kỳ thi phụ (đợt 1)</Option>
+                  <Option value="Kỳ thi phụ (đợt 2)">Kỳ thi phụ (đợt 2)</Option>
+                  <Option value="Kỳ thi phụ (đợt 3)">Kỳ thi phụ (đợt 3)</Option>
+                  <Option value="Học kỳ hè">Học kỳ hè</Option>
+                </Select>
+              </div>
 
-            <TabPane tab="Chọn phòng" key="3">
-              <Radio.Group
-                value={selectedItems.phong[0]} // Chọn giá trị đầu tiên của mảng phong
-                onChange={(e) => {
-                  const newSelection = [e.target.value]; // Cập nhật thành mảng với một giá trị
-                  setSelectedItems(prevState => ({
-                    ...prevState,
-                    phong: newSelection
-                  }));
-                }}
-              >
-                {listPhong.map(phong => (
-                  <Radio key={phong._id} value={phong._id}>
-                    {phong.tenPhong}
-                  </Radio>
-                ))}
-              </Radio.Group>
-
-            </TabPane>
-
-            <TabPane tab="Cán bộ coi thi" key="4">
-              <div className="max-h-96 overflow-y-auto p-4">
-                <div className="flex flex-wrap gap-3">
-                  {listGV.map((gv) => (
-                    <div
-                      key={gv._id}
-                      className="flex items-center p-2 border border-gray-300 rounded-lg"
-                      style={{ backgroundColor: getRandomColor() }} // Áp dụng màu ngẫu nhiên
+              <div className=" flex items-center gap-2">
+                <label className="block text-sm font-semibold mb-1 ">Loại đào tạo:</label>
+                <Select
+                  value={loaiDaoTao}
+                  placeholder="Chọn loại đào tạo"
+                  onChange={(value) => setLoaiDaoTao(value)}
+                  className=""
+                >
+                  <Option value="Chính quy">Chính quy</Option>
+                  <Option value="Liên thông">Liên thông</Option>
+                </Select>
+              </div>
+            </div>
+            <div className="w-full mt-5">
+              <Row gutter={16}>
+                <Col span={7}>
+                  <div className="shadow-lg h-full ">
+                    <Card
+                      title={<span><BookOutlined /> HỌC PHẦN</span>}
+                      bordered={false}
+                      className="h-full text-center"
+                      style={{ backgroundColor: '#f0f8ff' }} // Màu nền nhẹ
                     >
-                      <UserOutlined className="text-gray-500 mr-2" style={{ fontSize: '24px' }} />
-                      <span className="text-base-bold text-white">{gv.username}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </TabPane>
+                      <ul className="list-decimal pl-5 text-left">
+                        {listHocPhan.map((hocPhan) => (
+                          <li key={hocPhan.tenHocPhan}>
+                            {hocPhan.tenHocPhan} ({hocPhan.lop?.join(', ')})
+                          </li>
+                        ))}
+                      </ul>
+                    </Card>
+                  </div>
+                </Col>
 
-          </Tabs>
-          <Button>TABLE</Button>
-        </div>
-
-        <div className="w-full mt-5">
-          <Row gutter={16}>
-            <Col span={6}>
-              <div className="shadow-lg h-full">
-                <Card title="HỌC PHẦN" bordered={false} className="h-full text-center">
-                  <ul className="list-decimal pl-5 text-left">
-                    {selectedItems.hocPhan.map(id => {
-                      const hocPhan = listHocPhan.find(hp => hp._id === id);
-                      return hocPhan ? <li key={id}>{hocPhan.tenHocPhan}</li> : null;
-                    })}
-                  </ul>
-                </Card>
-              </div>
-            </Col>
-            <Col span={3}>
-              <div className="shadow-lg h-full text-center">
-                <Card title="LỚP" bordered={false} className="h-full shadow-lg">
-                  <ul className="list-decimal pl-5 text-left">
-                    {selectedItems.lop.map(id => {
-                      const lop = listLop.find(lp => lp._id === id);
-                      return lop ? <li key={id}>{lop.tenLop}</li> : null;
-                    })}
-                  </ul>
-                </Card>
-              </div>
-            </Col>
-            <Col span={4}>
-              <div className="shadow-lg h-full text-center">
-                <Card title="PHÒNG THI" bordered={false} className="h-full shadow-lg">
-                  <div className="flex flex-col gap-3">
-                    <div>
-                      {selectedItems.phong.map(id => {
-                        const phong = listPhong.find(ph => ph._id === id);
-                        return phong ? <p className="text-base-bold" key={id}>Phòng: {phong.tenPhong}</p> : null;
-                      })}
-                    </div>
-                    <DatePicker
-                      placeholder="Ngày thi"
-                      onChange={(date) => setExamDate(date)}
-                    />
-                    <Select
-                      placeholder="Ca thi"
-                      onChange={(value) => setExamSession(value)}
+                <Col span={5}>
+                  <div className="shadow-lg h-full text-center ">
+                    <Card
+                      title={<span><CalendarOutlined /> THÔNG TIN</span>}
+                      bordered={false}
+                      className="h-full text-center"
+                      style={{ backgroundColor: '#fafafa' }}
                     >
-                      <Option value="ca1">Ca 1</Option>
-                      <Option value="ca2">Ca 2</Option>
-                    </Select>
+                      <div className="flex flex-col gap-3">
+                        <div className=" flex items-center gap-2">
+                          <label className="block text-sm font-semibold mb-1 ">Ca:</label>
+                          <Input
+                            placeholder="Nhập các ca thi, cách nhau bằng dấu phẩy"
+                            value={examSessions}
+                            onChange={handleExamSessionChange}
+                          />
+                        </div>
+
+                        <div className=" flex items-center gap-2">
+                          <label className="block text-sm font-semibold mb-1 ">Ngày thi:</label>
+                          <RangePicker
+                            placeholder={['Từ ngày', 'Đến ngày']}
+                            onChange={(dates) => {
+                              if (dates && dates.length === 2) {
+                                const startDate = dates[0]?.toDate();
+                                const endDate = dates[1]?.toDate();
+                                setExamDateRange({ startDate, endDate });
+                              }
+                            }}
+                          />
+                        </div>
+                      </div>
+
+                    </Card>
 
                   </div>
-                </Card>
-
-              </div>
-            </Col>
-            <Col span={6}>
-              <div className="shadow-lg text-center text-base-bold h-full">
-                <Card title="CÁN BỘ COI THI" bordered={false} className="h-full shadow-lg ">
-                  {cbo1 && (
-                    <div className="flex justify-around items-center">
-                      <div className="text-base-bold ">Cán bộ 1:</div>
-                      <div key={cbo1._id} className="flex items-center w-[68%] p-2 border border-gray-300 rounded mb-2">
-                        <UserOutlined className="text-gray-500 mr-2" style={{ fontSize: '24px' }} />
-                        <span className="text-base">{cbo1.username}</span>
-                      </div>
-                    </div>
-                  )}
-                  {cbo2 && (
-                    <div className="flex justify-around items-center">
-                      <div className="text-base-bold">Cán bộ 2:</div>
-                      <div key={cbo2._id} className="flex items-center w-[68%] p-2 border border-gray-300 rounded mb-2">
-                        <UserOutlined className="text-gray-500 mr-2" style={{ fontSize: '24px' }} />
-                        <span className="text-base">{cbo2.username}</span>
-                      </div>
-                    </div>
-                  )}
-                  <Button type="primary" onClick={handleRandom}>Random</Button>
-                </Card>
-              </div>
-            </Col>
-
-            <Col span={5}>
-              <div className="shadow-lg h-full text-center">
-                <Card title="THÔNG TIN KHÁC" bordered={false} className="h-full shadow-lg">
-                  <div className="flex justify-between flex-col gap-3">
-
-                    <div className=" flex items-center gap-2">
-                      <label className="block text-sm font-semibold mb-1 w-[30%]">Năm học:</label>
-                      <Select
-                        placeholder="Chọn năm học"
-                        onChange={(value) => setNamHoc(value)}
-                        className="w-[50%]"
-                      >
-                        <Option value="2021-2022">2021-2022</Option>
-                        <Option value="2022-2023">2022-2023</Option>
-                        <Option value="2023-2024">2023-2024</Option>
-                        <Option value="2024-2025">2024-2025</Option>
-                      </Select>
-                    </div>
-                    <div className=" flex items-center gap-2">
-                      <label className="block text-sm font-semibold mb-1 w-[30%]">Học kỳ:</label>
-                      <Select
-                        placeholder="Chọn học kỳ"
-                        onChange={(value) => setHocKy(value)}
-                        className="w-[50%]"
-                      >
-                        <Option value="1">1</Option>
-                        <Option value="2">2</Option>
-                      </Select>
-                    </div>
-
-                    <div className=" flex items-center gap-2">
-                      <label className="block text-sm font-semibold mb-1 w-[30%]">Loại kỳ thi:</label>
-                      <Select
-                        placeholder="Chọn loại kỳ thi"
-                        onChange={(value) => setLoaiKyThi(value)}
-                        className="w-[50%]"
-                      >
-                        <Option value="Học kỳ 1">Học kỳ 1</Option>
-                        <Option value="Học kỳ 1 (đợt 2)">Học kỳ 1 (đợt 2)</Option>
-                        <Option value="Học kỳ 1 (đợt 3)">Học kỳ 1 (đợt 3)</Option>
-                        <Option value="Học kỳ 2">Học kỳ 2</Option>
-                        <Option value="Học kỳ 2 (đợt 2)">Học kỳ 2 (đợt 2)</Option>
-                        <Option value="Học kỳ 2 (đợt 3)">Học kỳ 2 (đợt 3)</Option>
-                        <Option value="Kỳ thi phụ (đợt 1)">Kỳ thi phụ (đợt 1)</Option>
-                        <Option value="Kỳ thi phụ (đợt 2)">Kỳ thi phụ (đợt 2)</Option>
-                        <Option value="Kỳ thi phụ (đợt 3)">Kỳ thi phụ (đợt 3)</Option>
-                        <Option value="Học kỳ hè">Học kỳ hè</Option>
-                      </Select>
-                    </div>
+                </Col>
+                <Col span={3}>
+                  <div className="shadow-lg h-full text-center m">
+                    <Card
+                      title={<span><HomeOutlined /> PHÒNG THI</span>}
+                      bordered={false}
+                      className="h-full text-center"
+                      style={{ backgroundColor: '#f5f5f5' }} // Màu nền
+                    >
+                      {listPhong.map((phong) => (
+                        <p key={phong.tenPhong} className="text-base-bold">- {phong.tenPhong}</p>
+                      ))}
+                    </Card>
                   </div>
-                </Card>
-              </div>
-            </Col>
-          </Row>
-        </div >
+                </Col>
+                <Col span={9}>
+                  <div className="shadow-lg text-center text-base-bold h-full ">
+                    <Card
+                      title={<span><UserOutlined /> CÁN BỘ COI THI</span>}
+                      bordered={false}
+                      className="h-full text-center"
+                      style={{ backgroundColor: '#f0fff0' }} // Màu nền
+                    >
+                      <div className="flex flex-wrap gap-3">
+                        {listGV.map((gv) => (
+                          <div
+                            key={gv._id}
+                            className="flex items-center p-2 border border-gray-300 rounded-lg"
+                            style={{ backgroundColor: getRandomColor() }} // Áp dụng màu ngẫu nhiên
+                          >
+                            <UserOutlined className="text-gray-500 mr-2" style={{ fontSize: '24px' }} />
+                            <span className="text-base-bold text-white">{gv.username}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </Card>
+                  </div>
+                </Col>
+              </Row>
+            </div >
 
-        <div className="flex mt-4 gap-4">
-          <Button type="primary" onClick={handleSubmit}>Lưu</Button>
-        </div>
+            <div className="bg-white text-center rounded-md p-3">
+              <Button type="primary" onClick={handleCreate}>Tạo lịch thi</Button>
+
+            </div>
+          </TabPane>
+
+          <TabPane tab="Kết quả" key="2">
+            <TablePcCoiThi list={list} namHoc={namHoc} hocky={hocky} loaiKyThi={loaiKyThi} loaiDaoTao={loaiDaoTao} />
+          </TabPane>
+
+        </Tabs>
+
+        {/* <div>
+          <Table dataSource={list} columns={columns} rowKey="hocPhan" />
+        </div> */}
       </div >
-    </div >
+
+
+    </div>
   );
 };
 
-export default PcCoiThiTable;
+export default PcCoiThi;

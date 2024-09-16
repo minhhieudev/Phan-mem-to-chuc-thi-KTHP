@@ -8,9 +8,10 @@ import { useRouter } from "next/navigation";
 import { FileExcelOutlined } from '@ant-design/icons';
 import { useSession } from "next-auth/react";
 
-const TablePcCoiThi = ({ namHoc, ky ,listSelect}) => {
+const TablePcCoiThi = ({ list, namHoc, loaiKyThi, loaiDaoTao, hocky }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [loading, setLoading] = useState(false);
+
 
   const [current, setCurrent] = useState(1);
   const [pageSize, setPageSize] = useState(5);
@@ -37,8 +38,8 @@ const TablePcCoiThi = ({ namHoc, ky ,listSelect}) => {
     },
     {
       title: 'Nhóm/Lớp',
-      dataIndex: 'nhomLop',
-      key: 'nhomLop',
+      dataIndex: 'lop',
+      key: 'lop',
       render: (text) => (
         <span style={{ color: 'red', fontWeight: 'bold' }}>
           {Array.isArray(text) ? text.join(', ') : text}
@@ -60,57 +61,62 @@ const TablePcCoiThi = ({ namHoc, ky ,listSelect}) => {
     },
     {
       title: 'Phòng thi',
-      dataIndex: 'phongThi',
-      key: 'phongThi',
+      dataIndex: 'phong',
+      key: 'phong',
       width: 120,
       render: (text) => <span style={{ fontWeight: 'bold' }}>{text}</span>,
     },
     {
       title: 'Cán bộ coi thi 1',
-      dataIndex: 'cb1',
-      key: 'cb1',
-      width: 120,
-      render: (text) => <span style={{ fontWeight: 'bold' }}>{text}</span>,
+      dataIndex: 'cbo1',
+      key: 'cbo1',
+      render: (text) => <span style={{ fontWeight: 'bold', color: 'blue' }}>{text}</span>,
     },
     {
       title: 'Cán bộ coi thi 2',
-      dataIndex: 'cb2',
-      key: 'cb2',
-      width: 120,
-      render: (text) => <span style={{ fontWeight: 'bold' }}>{text}</span>,
+      dataIndex: 'cbo2',
+      key: 'cbo2',
+      render: (text) => <span style={{ fontWeight: 'bold', color: 'blue' }}>{text}</span>,
     },
     {
-      title: 'Thời gian (phút)',
-      dataIndex: 'time',
-      key: 'time',
-      width: 20,
+      title: 'Hình thức thi',
+      dataIndex: 'hinhThucThoiGian',
+      key: 'hinhThucThoiGian',
       render: (text) => (
         <span style={{ fontWeight: 'bold' }}>
           {Array.isArray(text) ? text.join(', ') : text}
         </span>
       ),
     },
-    {
-      title: 'Địa điểm thi',
-      dataIndex: 'diaDiem',
-      key: 'diaDiem',
-      width: 20,
-      render: (text) => <span style={{ fontWeight: 'bold' }}>{text}</span>,
-    },
-    {
-      title: 'Ghi chú',
-      dataIndex: 'ghiChu',
-      key: 'ghiChu',
-      render: (text) => <span style={{ fontWeight: 'bold' }}>{text}</span>,
-    },
   ];
 
   // Phân trang dữ liệu
-  const paginatedData = listSelect.slice(
+  const paginatedData = list?.slice(
     (current - 1) * pageSize,
     current * pageSize
   );
+  const handleSubmit = async () => {
+    console.log('Data:',list)
+    
+    //setLoading(true)
+    try {
+      const res = await fetch("/api/admin/lich-thi", {
+        method: "POST",
+        body: JSON.stringify(list),
+        headers: { "Content-Type": "application/json" },
+      });
 
+      if (res.ok) {
+        toast.success("Lưu thành công");
+        setLoading(false)
+
+      } else {
+        toast.error("Failed to save record");
+      }
+    } catch (err) {
+      toast.error("An error occurred while saving data");
+    }
+  }
   return (
     <div className="flex flex-col">
       {loading ? (
@@ -118,7 +124,12 @@ const TablePcCoiThi = ({ namHoc, ky ,listSelect}) => {
           <Spin />
         </div>
       ) : (
+
         <div className="flex-grow overflow-auto" style={{ maxHeight: 'calc(85vh - 120px)' }}>
+          <div className="text-heading3-bold text-orange-600 text-center mb-2" style={{ textTransform: "uppercase" }}>
+            BẢNG THỐNG KÊ COI THI KỲ THI KẾT THÚC HỌC PHẦN - HỆ {loaiDaoTao} - THUỘC HỌC KỲ {hocky}, NĂM HỌC {namHoc}
+          </div>
+
           <Table
             columns={columns}
             dataSource={paginatedData}
@@ -132,7 +143,7 @@ const TablePcCoiThi = ({ namHoc, ky ,listSelect}) => {
         <Pagination
           current={current}
           pageSize={pageSize}
-          total={listSelect.length}
+          total={list.length}
           onChange={(page, size) => {
             setCurrent(page);
             setPageSize(size);
@@ -141,6 +152,11 @@ const TablePcCoiThi = ({ namHoc, ky ,listSelect}) => {
           showSizeChanger
           className="flex justify-end"
         />
+      </div>
+
+      <div className="bg-white text-center rounded-md p-3">
+
+        <Button type="primary" onClick={handleSubmit}>Lưu</Button>
       </div>
     </div>
   );
