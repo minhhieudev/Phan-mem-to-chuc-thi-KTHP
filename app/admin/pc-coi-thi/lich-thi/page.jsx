@@ -177,7 +177,7 @@ const PcCoiThiTable = () => {
           </div>
         </div>
 
-        <div className="bg-white text-center rounded-md p-3">
+        <div className="bg-white text-center rounded-md p-3 ">
           <Button type="primary" onClick={handleSubmit}>Lưu</Button>
         </div>
         <div>

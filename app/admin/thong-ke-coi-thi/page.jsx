@@ -198,7 +198,7 @@ const PcCoiThiTable = () => {
         <h2 className="font-bold text-heading3-bold text-center text-green-500">DANH SÁCH PHÂN CÔNG COI THI</h2>
         <Button
           className="button-dang-day text-white font-bold shadow-md mb-2"
-          onClick={() => router.push(`/giaovu/pc-coi-thi/create`)}
+          onClick={() => router.push(`/admin/pc-coi-thi`)}
         >
           TẠO MỚI
         </Button>

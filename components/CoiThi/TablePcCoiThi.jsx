@@ -96,8 +96,8 @@ const TablePcCoiThi = ({ list, namHoc, loaiKyThi, loaiDaoTao, hocky }) => {
     current * pageSize
   );
   const handleSubmit = async () => {
-    console.log('Data:',list)
-    
+    console.log('Data:', list)
+
     //setLoading(true)
     try {
       const res = await fetch("/api/admin/lich-thi", {
@@ -139,7 +139,13 @@ const TablePcCoiThi = ({ list, namHoc, loaiKyThi, loaiDaoTao, hocky }) => {
         </div>
       )}
 
-      <div className="mt-2 ">
+      <div className="mt-2 flex justify-around">
+        <div className="b text-center rounded-md  flex justify-center gap-10">
+
+          <Button type="primary" className="button-chinh-quy" onClick={handleSubmit}>Lưu</Button>
+          <Button type="primary" className="button-lien-thong-vlvh" >Xuất Excel</Button>
+
+        </div>
         <Pagination
           current={current}
           pageSize={pageSize}
@@ -154,10 +160,7 @@ const TablePcCoiThi = ({ list, namHoc, loaiKyThi, loaiDaoTao, hocky }) => {
         />
       </div>
 
-      <div className="bg-white text-center rounded-md p-3">
 
-        <Button type="primary" onClick={handleSubmit}>Lưu</Button>
-      </div>
     </div>
   );
 };

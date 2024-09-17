@@ -10,7 +10,11 @@ import {
   BookOutlined, 
   FormOutlined, 
   FileTextOutlined, 
-  MailFilled 
+  MailFilled, 
+  SolutionOutlined, 
+  TeamOutlined, 
+  DatabaseOutlined, 
+  PieChartOutlined
 } from "@ant-design/icons";
 
 const SideBar = () => {
@@ -20,12 +24,14 @@ const SideBar = () => {
     dashboard: { color: pathname === "/admin/dashboard" ? "red" : "orange" },
     coiThi: { color: pathname === "/admin/pc-coi-thi" ? "red" : "purple" },
     chamThi: { color: pathname === "/admin/pc-cham-thi" ? "red" : "teal" },
-    hocPhanThi: { color: pathname === "/admin/hoc-phan-thi" ? "red" : "green" },
+    thongKeCoiThi: { color: pathname === "/admin/thong-ke-coi-thi" ? "red" : "lightblue" },
+    thongKeChamThi: { color: pathname === "/admin/thong-ke-cham-thi" ? "red" : "lightgreen" },
+    hocPhanThi: { color: pathname === "/admin/hoc-phan-thi" ? "red" : "darkgreen" },
     phongThi: { color: pathname === "/admin/phong-thi" ? "red" : "blue" },
-    giangVien: { color: pathname === "/admin/user" ? "red" : "blue" },
-    khoa: { color: pathname === "/admin/khoa" ? "red" : "green" },
+    giangVien: { color: pathname === "/admin/giang-vien-coi-thi" ? "red" : "darkblue" },
+    user: { color: pathname === "/admin/user" ? "red" : "violet" },
+    khoa: { color: pathname === "/admin/khoa" ? "red" : "darkorange" },
     email: { color: pathname === "/admin/email" ? "red" : "pink" },
-    nhomLop: { color: pathname === "/admin/nhom-lop" ? "red" : "brown" }, 
   };
 
   const textColor = (path) => (pathname === path ? "text-red-500" : "text-gray-800");
@@ -50,12 +56,12 @@ const SideBar = () => {
       </Link>
 
       <Link href="/admin/thong-ke-coi-thi" className={`flex items-center gap-3 p-3 rounded-lg transition border-b-2 ${textColor("/admin/thong-ke-coi-thi")}`}>
-        <FileTextOutlined style={{ fontSize: "20px", ...iconStyles.chamThi }} />
+        <PieChartOutlined style={{ fontSize: "20px", ...iconStyles.thongKeCoiThi }} />
         <span>Thống kê coi thi</span>
       </Link>
 
       <Link href="/admin/thong-ke-cham-thi" className={`flex items-center gap-3 p-3 rounded-lg transition border-b-2 ${textColor("/admin/thong-ke-cham-thi")}`}>
-        <FileTextOutlined style={{ fontSize: "20px", ...iconStyles.chamThi }} />
+        <DatabaseOutlined style={{ fontSize: "20px", ...iconStyles.thongKeChamThi }} />
         <span>Thống kê chấm thi</span>
       </Link>
       
@@ -63,24 +69,19 @@ const SideBar = () => {
         <BookOutlined style={{ fontSize: "20px", ...iconStyles.hocPhanThi }} />
         <span>Học phần thi</span>
       </Link>
-
-      {/* <Link href="/admin/nhom-lop" className={`flex items-center gap-3 p-3 rounded-lg transition border-b-2 ${textColor("/admin/nhom-lop")}`}>
-        <BookOutlined style={{ fontSize: "20px", ...iconStyles.nhomLop }} />
-        <span>Nhóm / Lớp</span>
-      </Link> */}
       
       <Link href="/admin/phong-thi" className={`flex items-center gap-3 p-3 rounded-lg transition border-b-2 ${textColor("/admin/phong-thi")}`}>
         <FormOutlined style={{ fontSize: "20px", ...iconStyles.phongThi }} />
         <span>Phòng thi</span>
       </Link>
       
-      <Link href="/admin/giang-vien-coi-thi" className={`flex items-center gap-3 p-3 rounded-lg transition border-b-2 ${textColor("/admin/user")}`}>
-        <UserOutlined style={{ fontSize: "20px", ...iconStyles.giangVien }} />
-        <span>Giảng viên </span>
+      <Link href="/admin/giang-vien-coi-thi" className={`flex items-center gap-3 p-3 rounded-lg transition border-b-2 ${textColor("/admin/giang-vien-coi-thi")}`}>
+        <SolutionOutlined style={{ fontSize: "20px", ...iconStyles.giangVien }} />
+        <span>Giảng viên</span>
       </Link>
 
       <Link href="/admin/user" className={`flex items-center gap-3 p-3 rounded-lg transition border-b-2 ${textColor("/admin/user")}`}>
-        <UserOutlined style={{ fontSize: "20px", ...iconStyles.giangVien }} />
+        <TeamOutlined style={{ fontSize: "20px", ...iconStyles.user }} />
         <span>User</span>
       </Link>
       

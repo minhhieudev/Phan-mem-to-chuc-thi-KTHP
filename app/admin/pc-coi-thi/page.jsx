@@ -174,7 +174,7 @@ const PcCoiThi = () => {
     <Loader />
   ) : (
     <div>
-      <div className="py-1 px-6 bg-white rounded-lg shadow-lg mt-3 ">
+      <div className="py-1 px-6 bg-white rounded-lg shadow-lg mt-3 h-[85vh]">
         <Tabs activeKey={activeTab} onChange={(key) => setActiveTab(key)}>
           <TabPane tab="Tạo lịch thi" key="1">
             <div className="text-heading3-bold text-blue-600 text-center ">THÔNG TIN KỲ THI</div>
@@ -243,8 +243,8 @@ const PcCoiThi = () => {
             </div>
             <div className="w-full mt-5">
               <Row gutter={16}>
-                <Col span={7}>
-                  <div className="shadow-lg h-full ">
+                <Col span={7} className="h-[55%] overflow-y-auto">
+                  <div className="shadow-lg">
                     <Card
                       title={<span><BookOutlined /> HỌC PHẦN</span>}
                       bordered={false}
@@ -262,8 +262,8 @@ const PcCoiThi = () => {
                   </div>
                 </Col>
 
-                <Col span={5}>
-                  <div className="shadow-lg h-full text-center ">
+                <Col span={5} className="h-[55%] overflow-y-auto">
+                  <div className="shadow-lg  text-center ">
                     <Card
                       title={<span><CalendarOutlined /> THÔNG TIN</span>}
                       bordered={false}
@@ -294,13 +294,11 @@ const PcCoiThi = () => {
                           />
                         </div>
                       </div>
-
                     </Card>
-
                   </div>
                 </Col>
-                <Col span={3}>
-                  <div className="shadow-lg h-full text-center m">
+                <Col span={3} className="h-[55%] overflow-y-auto">
+                  <div className="shadow-lg text-center m">
                     <Card
                       title={<span><HomeOutlined /> PHÒNG THI</span>}
                       bordered={false}
@@ -313,15 +311,15 @@ const PcCoiThi = () => {
                     </Card>
                   </div>
                 </Col>
-                <Col span={9}>
-                  <div className="shadow-lg text-center text-base-bold h-full ">
+                <Col span={9} className=" ">
+                  <div className="shadow-lg text-center text-base-bold h-[55vh] overflow-y-auto">
                     <Card
                       title={<span><UserOutlined /> CÁN BỘ COI THI</span>}
                       bordered={false}
                       className="h-full text-center"
                       style={{ backgroundColor: '#f0fff0' }} // Màu nền
                     >
-                      <div className="flex flex-wrap gap-3">
+                      <div className="flex flex-wrap gap-3 h-[20%]">
                         {listGV.map((gv) => (
                           <div
                             key={gv._id}
@@ -338,10 +336,8 @@ const PcCoiThi = () => {
                 </Col>
               </Row>
             </div >
-
             <div className="bg-white text-center rounded-md p-3">
-              <Button type="primary" onClick={handleCreate}>Tạo lịch thi</Button>
-
+              <Button type="primary" className="button-chinh-quy" onClick={handleCreate}>Tạo lịch thi</Button>
             </div>
           </TabPane>
 

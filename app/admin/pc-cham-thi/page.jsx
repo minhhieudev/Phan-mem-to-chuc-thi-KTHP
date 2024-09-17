@@ -115,6 +115,18 @@ const PcCoiThiTable = () => {
         <div className="text-heading3-bold text-blue-600 text-center mt-1">PHÂN CÔNG CHẤM THI</div>
         <div className="flex justify-between gap-3 mt-2">
           <div className=" flex items-center gap-2">
+            <label className="block text-sm font-semibold mb-1 ">Loại đào tạo:</label>
+            <Select
+              placeholder="Chọn loại đào tạo"
+              onChange={(value) => setLoaiDaoTao(value)}
+              className=""
+            >
+              <Option value="Chính quy">Chính quy</Option>
+              <Option value="Liên thông">Liên thông</Option>
+            </Select>
+          </div>
+
+          <div className=" flex items-center gap-2">
             <label className="block text-sm font-semibold mb-1 ">Năm học:</label>
             <Select
               placeholder="Chọn năm học"
@@ -159,18 +171,7 @@ const PcCoiThiTable = () => {
             </Select>
           </div>
 
-          <div className=" flex items-center gap-2">
-            <label className="block text-sm font-semibold mb-1 ">Loại đào tạo:</label>
-            <Select
-              placeholder="Chọn loại đào tạo"
-              onChange={(value) => setLoaiDaoTao(value)}
-              className=""
-            >
-              <Option value="Chính quy">Chính quy</Option>
-              <Option value="Liên thông">Liên thông</Option>
-            </Select>
-          </div>
-          <Button type="primary" >Kết quả</Button>
+
         </div>
         <div className="w-full mt-5">
           <Row gutter={16}>
@@ -220,7 +221,7 @@ const PcCoiThiTable = () => {
         </div >
 
         <div className="bg-white text-center rounded-md p-3">
-          <Button type="primary" onClick={handleCreate}>Tạo lịch thi</Button>
+          <Button type="primary" onClick={handleCreate}>Tạo lịch chấm thi</Button>
         </div>
         <div>
           <Table dataSource={list} columns={columns} rowKey="hocPhan" />

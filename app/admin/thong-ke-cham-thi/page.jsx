@@ -56,12 +56,12 @@ const PcChamThiTable = () => {
       const cb1 = item.cb1?.toLowerCase().includes(searchTerm.toLowerCase());
       const cb2 = item.cb2?.toLowerCase().includes(searchTerm.toLowerCase());
       const hocPhan = typeof item.hocPhan === 'string' && item.hocPhan.toLowerCase().includes(searchTerm.toLowerCase());
-  
+
       return cb1 || cb2 || hocPhan;
     });
     setFilteredData(filtered);
   }, [searchTerm, dataList]);
-  
+
 
   const handleDelete = async (id) => {
     try {
@@ -162,7 +162,6 @@ const PcChamThiTable = () => {
     },
   ];
 
-
   // Phân trang dữ liệu
   const paginatedData = filteredData.slice(
     (current - 1) * pageSize,
@@ -173,14 +172,8 @@ const PcChamThiTable = () => {
     <div className="py-2 px-3 shadow-xl bg-white rounded-xl mt-3 h-[85vh] flex flex-col">
 
       <div className="flex items-center justify-between mb-3">
-        <div className="flex gap-2">
-          <div className="text-heading4-bold">LOẠI:</div>
-          <Select placeholder="Chọn loại hình đào tạo..." onChange={(value) => setLoai(value)}>
-            <Option value="chinh-quy">Chính quy</Option>
-            <Option value="lien-thong-vlvh">Liên thông vừa làm vừa học</Option>
-          </Select>
-        </div>
-        <h2 className="font-bold text-heading3-bold text-center text-green-500">DANH SÁCH PHÂN CÔNG CHẤM THI</h2>
+       
+        <h2 className="font-bold text-heading3-bold text-center text-green-500 flex-grow">DANH SÁCH PHÂN CÔNG CHẤM THI</h2>
         <Button
           className="button-dang-day text-white font-bold shadow-md mb-2"
           onClick={() => router.push(`/giaovu/pc-cham-thi/create`)}
@@ -189,6 +182,15 @@ const PcChamThiTable = () => {
         </Button>
       </div>
       <div className="flex justify-between items-center mb-3">
+
+        <div className="w-[25%] flex items-center gap-2">
+          <label className="block text-sm font-semibold mb-1">Loại đào tạo:</label>
+          <Select placeholder="Chọn loại hình đào tạo..." onChange={(value) => setLoai(value)}>
+            <Option value="chinh-quy">Chính quy</Option>
+            <Option value="lien-thong-vlvh">Liên thông vừa làm vừa học</Option>
+          </Select>
+        </div>
+
         <div className="w-[25%] flex items-center gap-2">
           <label className="block text-sm font-semibold mb-1">Năm học:</label>
           <Select
