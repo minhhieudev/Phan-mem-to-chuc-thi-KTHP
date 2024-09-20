@@ -9,6 +9,9 @@ const PhongThiSchema = new mongoose.Schema({
   soCho: {
     type: Number,
   },
+  loai: {
+    type: String,
+  },
 });
 
 const PhongThi = mongoose.models.PhongThi || mongoose.model("PhongThi", PhongThiSchema);

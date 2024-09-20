@@ -14,7 +14,7 @@ const TablePcCoiThi = ({ list, namHoc, loaiKyThi, loaiDaoTao, hocky }) => {
 
 
   const [current, setCurrent] = useState(1);
-  const [pageSize, setPageSize] = useState(5);
+  const [pageSize, setPageSize] = useState(10);
 
   const { data: session } = useSession();
   const user = session?.user;
@@ -79,14 +79,16 @@ const TablePcCoiThi = ({ list, namHoc, loaiKyThi, loaiDaoTao, hocky }) => {
       render: (text) => <span style={{ fontWeight: 'bold', color: 'blue' }}>{text}</span>,
     },
     {
-      title: 'Hình thức thi',
-      dataIndex: 'hinhThucThoiGian',
-      key: 'hinhThucThoiGian',
-      render: (text) => (
-        <span style={{ fontWeight: 'bold' }}>
-          {Array.isArray(text) ? text.join(', ') : text}
-        </span>
-      ),
+      title: 'Hình thức',
+      dataIndex: 'hinhThuc',
+      key: 'hinhThuc',
+      render: (text) => <span style={{ fontWeight: 'bold' }}>{text}</span>,
+    },
+    {
+      title: 'Thời gian (phút)',
+      dataIndex: 'thoiGian',
+      key: 'thoiGian',
+      render: (text) => <span style={{ fontWeight: 'bold' }}>{text}</span>,
     },
   ];
 

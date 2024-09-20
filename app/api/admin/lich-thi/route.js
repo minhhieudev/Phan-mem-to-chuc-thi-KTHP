@@ -61,7 +61,8 @@ export const POST = async (req) => {
           ngayThi,
           lop,
           phong,
-          hinhThucThoiGian,
+          hinhThuc,
+          thoiGian,
           loaiDaoTao,
           hocky
         } = item;
@@ -77,7 +78,8 @@ export const POST = async (req) => {
               phong,
               ngayThi,
               loaiDaoTao,
-              hinhThucThoiGian,
+              hinhThuc,
+              thoiGian,
               lop
 
             }

@@ -1,236 +1,273 @@
-'use client'
-import { useState, useEffect } from "react";
-import { Select, DatePicker, Button, message, Tabs, Card, Col, Row, Checkbox, Radio, Input, Table } from "antd";
+"use client";
 
-import { UserOutlined, BookOutlined, HomeOutlined, CalendarOutlined, SettingOutlined } from '@ant-design/icons';
-import Loader from "../../../components/Loader";
+import { useState, useEffect } from "react";
+import { Select, Input, Table, Popconfirm, Spin, Button, Space, Pagination } from "antd";
+import toast from "react-hot-toast";
+import { useRouter } from "next/navigation";
+import { FileExcelOutlined } from '@ant-design/icons';
 
 
 const { Option } = Select;
-const { TabPane } = Tabs;
-const { RangePicker } = DatePicker;
 
-const PcCoiThiTable = () => {
-  const [activeTab, setActiveTab] = useState("1");
-  const [selectedItems, setSelectedItems] = useState({
-    hocPhan: [],
-    lop: [],
-    hinhThucThoiGian: [],
-    phong: [],
-  });
-  const [listHocPhan, setListHocPhan] = useState([]);
-  const [listGV, setListGV] = useState([]);
-  const [list, setList] = useState([]);
-  const [selectedGV, setSelectedGV] = useState([]);
-
-  const [cbo1, setCbo1] = useState(null); // Cán bộ 1
-  const [cbo2, setCbo2] = useState(null); // Cán bộ 2
+const PcChamThiTable = () => {
+  const [dataList, setDataList] = useState([]);
+  const [filteredData, setFilteredData] = useState([]);
   const [namHoc, setNamHoc] = useState("");
   const [loaiKyThi, setLoaiKyThi] = useState("");
-  const [loaiDaoTao, setLoaiDaoTao] = useState("");
-  const [hocky, setHocKy] = useState("");
-  const [loading, setLoading] = useState(true);
-  const [listPcCoiThi, setListPcCoiThi] = useState([]);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [loading, setLoading] = useState(false);
 
+  const [loai, setLoai] = useState("chinh-quy");
+
+  const [current, setCurrent] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+
+  const router = useRouter();
 
   useEffect(() => {
+    if (!namHoc && !loaiKyThi) return;
+
     const fetchData = async () => {
       try {
-        // Api lấy danh sách thi từ phân công coi thi
-        // const res2 = await fetch('/api/admin/pc-coi-thi');
-        // if (res2.ok) {
-        //   const data = await res1.json();
-        //   setListPcCoiThi(data);
-        // }
-
-        const res1 = await fetch('/api/admin/hoc-phan-thi');
-        if (res1.ok) {
-          const data = await res1.json();
-          setListHocPhan(data);
-        }
-
-        const res = await fetch('/api/admin/user/get-gv', {
+        setLoading(true);
+        const res = await fetch(`/api/admin/pc-cham-thi?namHoc=${namHoc}&loaiKyThi=${loaiKyThi}&loai=${loai}`, {
           method: "GET",
           headers: { "Content-Type": "application/json" },
         });
         if (res.ok) {
           const data = await res.json();
-          setListGV(data);
+          setDataList(data);
+          setFilteredData(data);
+        } else {
+          toast.error("Không thể tải dữ liệu");
         }
-
         setLoading(false);
-      } catch (error) {
-        message.error("Failed to fetch data");
+      } catch (err) {
+        toast.error("Lỗi khi tải dữ liệu");
+        setLoading(false);
       }
     };
 
     fetchData();
-  }, []);
+  }, [namHoc, loaiKyThi, loai]);
 
+  useEffect(() => {
+    const filtered = dataList.filter((item) => {
+      const cb1 = item.cb1?.toLowerCase().includes(searchTerm.toLowerCase());
+      const cb2 = item.cb2?.toLowerCase().includes(searchTerm.toLowerCase());
+      const hocPhan = typeof item.hocPhan === 'string' && item.hocPhan.toLowerCase().includes(searchTerm.toLowerCase());
+  
+      return cb1 || cb2 || hocPhan;
+    });
+    setFilteredData(filtered);
+  }, [searchTerm, dataList]);
+  
 
-  // Helper to get a random value from an array
-  const randomFromArray = (array) => {
-    return array[Math.floor(Math.random() * array.length)];
-  };
+  const handleDelete = async (id) => {
+    try {
+      const res = await fetch(`/api/admin/pc-cham-thi`, {
+        method: "DELETE",
+        body: JSON.stringify({ id }),
+        headers: { "Content-Type": "application/json" },
+      });
 
-  const handleCreate = () => {
-
-    let gvList = [...listGV];
-    // XỬ LÝ RANDOM 2 GIẢNG VIÊN
-
-  };
-
-
-  const getRandomColor = () => {
-    const randomValue = () => Math.floor(Math.random() * 128) + 64;
-
-    const r = randomValue().toString(16).padStart(2, '0');
-    const g = randomValue().toString(16).padStart(2, '0');
-    const b = randomValue().toString(16).padStart(2, '0');
-
-    return `#${r}${g}${b}`;
+      if (res.ok) {
+        setDataList((prevData) => prevData.filter((item) => item._id !== id));
+        toast.success("Xoá thành công!");
+      } else {
+        toast.error("Xoá thất bại!");
+      }
+    } catch (err) {
+      toast.error("Có lỗi xảy ra!");
+    }
   };
 
   const columns = [
     {
       title: 'STT',
-      dataIndex: 'stt',
-      key: 'stt',
-      render: (_, __, index) => index + 1,
+      dataIndex: 'index',
+      width: 10,
+      render: (text, record, index) => <span style={{ fontWeight: 'bold' }}>{index + 1}</span>,
     },
-    { title: 'Học Phần', dataIndex: 'hocPhan', key: 'hocPhan' },
-    { title: 'Lớp', dataIndex: 'lop', key: 'lop' },
-    { title: 'Cán Bộ 1', dataIndex: 'cbo1', key: 'cbo1' },
-    { title: 'Cán Bộ 2', dataIndex: 'cbo2', key: 'cbo2' },
-    { title: 'Ngày Thi', dataIndex: 'ngayThi', key: 'ngayThi' },
-    { title: 'Hình thức/Thời gian', dataIndex: 'hinhThucThoiGian', key: 'hinhThucThoiGian' },
-
+    {
+      title: 'Học phần',
+      dataIndex: 'hocPhan',
+      key: 'hocPhan',
+      render: (text) => (
+        <span style={{ color: 'green', fontWeight: 'bold' }}>
+          {text}
+        </span>
+      ),
+    },
+    {
+      title: 'Nhóm/Lớp',
+      dataIndex: 'nhomLop',
+      key: 'nhomLop',
+      render: (text) => (
+        <span style={{ color: 'red', fontWeight: 'bold' }}>
+          {text}
+        </span>
+      ),
+    },
+    {
+      title: 'Ngày thi',
+      dataIndex: 'ngayThi',
+      key: 'ngayThi',
+      render: (text) => <span style={{ fontWeight: 'bold' }}>{text}</span>,
+    },
+    {
+      title: 'Cán bộ coi thi 1',
+      dataIndex: 'cb1',
+      key: 'cb1',
+      render: (text) => <span style={{ fontWeight: 'bold' }}>{text}</span>,
+    },
+    {
+      title: 'Cán bộ coi thi 2',
+      dataIndex: 'cb2',
+      key: 'cb2',
+      render: (text) => <span style={{ fontWeight: 'bold' }}>{text}</span>,
+    },
+    {
+      title: 'Số bài',
+      dataIndex: 'soBai',
+      key: 'soBai',
+      width: 20,
+      render: (text) => <span style={{ fontWeight: 'bold' }}>{text}</span>,
+    },
+    {
+      title: 'Hình thức/Thời gian thi',
+      dataIndex: 'hinhThucThoiGianThi',
+      key: 'hinhThucThoiGianThi',
+      width: 50,
+      render: (text) => <span style={{ fontWeight: 'bold' }}>{text}</span>,
+    },
+    {
+      title: 'Hành động',
+      key: 'action',
+      render: (_, record) => (
+        <Space size="middle">
+          <Button size="small" onClick={() => router.push(`/admin/pc-cham-thi/edit/${record._id}`)} type="primary">Sửa</Button>
+          <Popconfirm
+            title="Bạn có chắc chắn muốn xoá?"
+            onConfirm={() => handleDelete(record._id)}
+            okText="Có"
+            cancelText="Không"
+          >
+            <Button size="small" type="primary" danger>Xoá</Button>
+          </Popconfirm>
+        </Space>
+      ),
+      width: 20,
+    },
   ];
 
-  return loading ? (
-    <Loader />
-  ) : (
-    <div>
-      <div className="py-4 px-6 bg-white rounded-lg shadow-lg mt-3 ">
-        <div className="text-heading3-bold text-blue-600 text-center mt-1">PHÂN CÔNG CHẤM THI</div>
-        <div className="flex justify-between gap-3 mt-2">
-          <div className=" flex items-center gap-2">
-            <label className="block text-sm font-semibold mb-1 ">Loại đào tạo:</label>
-            <Select
-              placeholder="Chọn loại đào tạo"
-              onChange={(value) => setLoaiDaoTao(value)}
-              className=""
-            >
-              <Option value="Chính quy">Chính quy</Option>
-              <Option value="Liên thông">Liên thông</Option>
-            </Select>
-          </div>
 
-          <div className=" flex items-center gap-2">
-            <label className="block text-sm font-semibold mb-1 ">Năm học:</label>
-            <Select
-              placeholder="Chọn năm học"
-              onChange={(value) => setNamHoc(value)}
-              className=""
-            >
-              <Option value="2021-2022">2021-2022</Option>
-              <Option value="2022-2023">2022-2023</Option>
-              <Option value="2023-2024">2023-2024</Option>
-              <Option value="2024-2025">2024-2025</Option>
-            </Select>
-          </div>
-          <div className=" flex items-center gap-2">
-            <label className="block text-sm font-semibold mb-1 ">Học kỳ:</label>
-            <Select
-              placeholder="Chọn học kỳ"
-              onChange={(value) => setHocKy(value)}
-              className=""
-            >
-              <Option value="1">1</Option>
-              <Option value="2">2</Option>
-            </Select>
-          </div>
+  // Phân trang dữ liệu
+  const paginatedData = filteredData.slice(
+    (current - 1) * pageSize,
+    current * pageSize
+  );
 
-          <div className=" flex items-center gap-2">
-            <label className="block text-sm font-semibold mb-1 ">Loại kỳ thi:</label>
-            <Select
-              placeholder="Chọn loại kỳ thi"
-              onChange={(value) => setLoaiKyThi(value)}
-              className=""
-            >
-              <Option value="Học kỳ 1">Học kỳ 1</Option>
-              <Option value="Học kỳ 1 (đợt 2)">Học kỳ 1 (đợt 2)</Option>
-              <Option value="Học kỳ 1 (đợt 3)">Học kỳ 1 (đợt 3)</Option>
-              <Option value="Học kỳ 2">Học kỳ 2</Option>
-              <Option value="Học kỳ 2 (đợt 2)">Học kỳ 2 (đợt 2)</Option>
-              <Option value="Học kỳ 2 (đợt 3)">Học kỳ 2 (đợt 3)</Option>
-              <Option value="Kỳ thi phụ (đợt 1)">Kỳ thi phụ (đợt 1)</Option>
-              <Option value="Kỳ thi phụ (đợt 2)">Kỳ thi phụ (đợt 2)</Option>
-              <Option value="Kỳ thi phụ (đợt 3)">Kỳ thi phụ (đợt 3)</Option>
-              <Option value="Học kỳ hè">Học kỳ hè</Option>
-            </Select>
-          </div>
+  return (
+    <div className="py-2 px-3 shadow-xl bg-white rounded-xl mt-3 h-[85vh] flex flex-col">
 
-
+      <div className="flex items-center justify-between mb-3">
+        <div className="flex gap-2">
+          <div className="text-heading4-bold">LOẠI:</div>
+          <Select placeholder="Chọn loại hình đào tạo..." onChange={(value) => setLoai(value)}>
+            <Option value="chinh-quy">Chính quy</Option>
+            <Option value="lien-thong-vlvh">Liên thông vừa làm vừa học</Option>
+          </Select>
         </div>
-        <div className="w-full mt-5">
-          <Row gutter={16}>
-            <Col span={10}>
-              <div className="shadow-lg h-full ">
-                <Card
-                  title={<span><BookOutlined /> HỌC PHẦN</span>}
-                  bordered={false}
-                  className="h-full text-center"
-                  style={{ backgroundColor: '#f0f8ff' }} // Màu nền nhẹ
-                >
-                  <ul className="list-decimal pl-5 text-left">
-                    {listHocPhan.map((hocPhan) => (
-                      <li key={hocPhan.tenHocPhan}>
-                        {hocPhan.tenHocPhan} ({hocPhan.lop?.join(', ')})
-                      </li>
-                    ))}
-                  </ul>
-                </Card>
-              </div>
-            </Col>
-
-            <Col span={14}>
-              <div className="shadow-lg text-center text-base-bold h-full ">
-                <Card
-                  title={<span><UserOutlined /> CÁN BỘ CHẤM THI</span>}
-                  bordered={false}
-                  className="h-full text-center"
-                  style={{ backgroundColor: '#f0fff0' }} // Màu nền
-                >
-                  <div className="flex flex-wrap gap-3">
-                    {listGV.map((gv) => (
-                      <div
-                        key={gv._id}
-                        className="flex items-center p-2 border border-gray-300 rounded-lg"
-                        style={{ backgroundColor: getRandomColor() }} // Áp dụng màu ngẫu nhiên
-                      >
-                        <UserOutlined className="text-gray-500 mr-2" style={{ fontSize: '24px' }} />
-                        <span className="text-base-bold text-white">{gv.username}</span>
-                      </div>
-                    ))}
-                  </div>
-                </Card>
-              </div>
-            </Col>
-          </Row>
-        </div >
-
-        <div className="bg-white text-center rounded-md p-3">
-          <Button type="primary" onClick={handleCreate}>Tạo lịch chấm thi</Button>
+        <h2 className="font-bold text-heading3-bold text-center text-green-500">DANH SÁCH PHÂN CÔNG CHẤM THI</h2>
+        <Button
+          className="button-dang-day text-white font-bold shadow-md mb-2"
+          onClick={() => router.push(`/admin/pc-cham-thi/create`)}
+        >
+          TẠO MỚI
+        </Button>
+      </div>
+      <div className="flex justify-between items-center mb-3">
+        <div className="w-[25%] flex items-center gap-2">
+          <label className="block text-sm font-semibold mb-1">Năm học:</label>
+          <Select
+            placeholder="Chọn năm học"
+            onChange={(value) => setNamHoc(value)}
+            className="w-[50%]"
+          >
+            <Option value="2021-2022">2021-2022</Option>
+            <Option value="2022-2023">2022-2023</Option>
+            <Option value="2023-2024">2023-2024</Option>
+            <Option value="2024-2025">2024-2025</Option>
+          </Select>
         </div>
-        <div>
-          <Table dataSource={list} columns={columns} rowKey="hocPhan" />
+
+        <div className="w-[25%] flex items-center gap-2">
+          <label className="block text-sm font-semibold mb-1">Loại kỳ thi:</label>
+          <Select
+            placeholder="Chọn loại kỳ thi"
+            onChange={(value) => setLoaiKyThi(value)}
+            className="w-[50%]"
+          >
+            <Option value="Học kỳ 1">Học kỳ 1</Option>
+            <Option value="Học kỳ 1 (đợt 2)">Học kỳ 1 (đợt 2)</Option>
+            <Option value="Học kỳ 1 (đợt 3)">Học kỳ 1 (đợt 3)</Option>
+            <Option value="Học kỳ 2">Học kỳ 2</Option>
+            <Option value="Học kỳ 2 (đợt 2)">Học kỳ 2 (đợt 2)</Option>
+            <Option value="Học kỳ 2 (đợt 3)">Học kỳ 2 (đợt 3)</Option>
+            <Option value="Kỳ thi phụ (đợt 1)">Kỳ thi phụ (đợt 1)</Option>
+            <Option value="Kỳ thi phụ (đợt 2)">Kỳ thi phụ (đợt 2)</Option>
+            <Option value="Kỳ thi phụ (đợt 3)">Kỳ thi phụ (đợt 3)</Option>
+            <Option value="Học kỳ hè">Học kỳ hè</Option>
+          </Select>
         </div>
-      </div >
 
+        <div className="w-[20%]">
+          <Input.Search
+            placeholder="Tìm kiếm học phần, giảng viên..."
+            allowClear
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+        </div>
+      </div>
 
+      {loading ? (
+        <div className="mx-auto text-center w-full">
+          <Spin />
+        </div>
+      ) : (
+        <div className="flex-grow overflow-auto" style={{ maxHeight: 'calc(85vh - 120px)' }}>
+          <Table
+            columns={columns}
+            dataSource={paginatedData}
+            rowKey="_id"
+            pagination={false} // Tắt phân trang trên Table
+          />
+        </div>
+      )}
+
+      <div className="mt-2 flex justify-between">
+        <Button
+          className="button-lien-thong-vlvh text-white font-bold shadow-md "
+        //onClick={() => exportToExcelTongHop() }
+        ><FileExcelOutlined />
+          Xuất file Excel
+        </Button>
+        <Pagination
+          current={current}
+          pageSize={pageSize}
+          total={filteredData.length}
+          onChange={(page, size) => {
+            setCurrent(page);
+            setPageSize(size);
+          }}
+          pageSizeOptions={['10', '25', '50', '100']}
+          showSizeChanger
+          className="flex justify-end"
+        />
+      </div>
     </div>
   );
 };
 
-export default PcCoiThiTable;
+export default PcChamThiTable;

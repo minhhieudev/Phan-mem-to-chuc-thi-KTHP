@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useForm, Controller } from "react-hook-form";
-import { Button, Input, Form, Space, Typography, Table, Popconfirm, InputNumber } from "antd";
+import { Button, Input, Form, Space, Typography, Table, Popconfirm, InputNumber, Select } from "antd";
 import toast from "react-hot-toast";
 import Loader from "../../../components/Loader";
 import { SearchOutlined } from '@ant-design/icons';
@@ -12,6 +12,7 @@ const { Title } = Typography;
 const formSchema = {
     tenPhong: "",
     soCho: "",
+    loai: ""
 };
 
 const PhongThiForm = () => {
@@ -23,7 +24,9 @@ const PhongThiForm = () => {
     });
     const [current, setCurrent] = useState(1);
     const [pageSize] = useState(5);
-    const [searchName, setSearchName] = useState("");
+    const [searchName, setSearchName] = useState(""); 
+    const [roomTypeFilter, setRoomTypeFilter] = useState("");
+    const [roomTypeFilter2, setRoomTypeFilter2] = useState("");
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
@@ -40,8 +43,24 @@ const PhongThiForm = () => {
             );
         }
 
+        // Kiểm tra loại phòng theo lựa chọn
+        if (roomTypeFilter) {
+            if (roomTypeFilter === "E") {
+                filteredData = filteredData.filter(phong => phong.tenPhong.startsWith("E"));
+            } else if (roomTypeFilter === "F") {
+                filteredData = filteredData.filter(phong => phong.tenPhong.startsWith("F"));
+            } else if (roomTypeFilter === "Khác") {
+                filteredData = filteredData.filter(phong => !phong.tenPhong.startsWith("E") && !phong.tenPhong.startsWith("F"));
+            }
+        }
+
+        // Kiểm tra loại phòng thứ hai
+        if (roomTypeFilter2) {
+            filteredData = filteredData.filter(phong => phong.loai === roomTypeFilter2);
+        }
+
         setFilteredList(filteredData);
-    }, [searchName, dataList]);
+    }, [searchName, roomTypeFilter, roomTypeFilter2, dataList]);
 
     const fetchData = async () => {
         try {
@@ -92,6 +111,7 @@ const PhongThiForm = () => {
         setEditRecord(record);
         setValue("tenPhong", record.tenPhong);
         setValue("soCho", record.soCho);
+        setValue("loai", record.loai);
     };
 
     const handleDelete = async (id) => {
@@ -129,6 +149,11 @@ const PhongThiForm = () => {
             title: 'Số chỗ',
             dataIndex: 'soCho',
             key: 'soCho',
+        },
+        {
+            title: 'Loại',
+            dataIndex: 'loai',
+            key: 'loai',
         },
         {
             title: 'Hành động',
@@ -182,6 +207,24 @@ const PhongThiForm = () => {
                         />
                     </Form.Item>
 
+                    <Form.Item
+                        label={<span className="font-bold text-xl">Loại phòng</span>}
+                        validateStatus={errors.loai ? 'error' : ''}
+                        help={errors.loai?.message}
+                    >
+                        <Controller
+                            name="loai"
+                            control={control}
+                            render={({ field }) => (
+                                <Select {...field} placeholder="Chọn loại" className="w-full">
+                                    <Select.Option value="Phòng thường">Phòng thường</Select.Option>
+                                    <Select.Option value="Phòng máy">Phòng máy</Select.Option>
+                                    <Select.Option value="Phòng GDTC">Phòng GDTC</Select.Option>
+                                </Select>
+                            )}
+                        />
+                    </Form.Item>
+
                     <Space size="middle">
                         <Button className="bg-blue-500 hover:bg-blue-700" loading={isSubmitting} type="primary" htmlType="submit">
                             {editRecord ? "Lưu chỉnh sửa" : "Thêm mới"}
@@ -197,13 +240,35 @@ const PhongThiForm = () => {
                 <div className="flex flex-col gap-2 justify-between items-center mb-4">
                     <Title level={4} className="mt-1">DANH SÁCH PHÒNG THI</Title>
 
-                    <div className="flex gap-2 items-center">
+                    <div className="flex gap-2 items-center mb-4">
                         <Input
-                            placeholder="Tìm kiếm phòng"
-                            value={searchName}
-                            onChange={(e) => setSearchName(e.target.value)}
+                            placeholder="Tìm kiếm theo tên phòng..."
                             prefix={<SearchOutlined />}
+                            onChange={(e) => setSearchName(e.target.value)}
+                            style={{ width: 300 }}
                         />
+
+                        <Select
+                            placeholder="Chọn tên phòng"
+                            onChange={(value) => setRoomTypeFilter(value)}
+                            style={{ width: 200 }}
+                        >
+                            <Select.Option value="">Tất cả</Select.Option>
+                            <Select.Option value="E">Phòng E</Select.Option>
+                            <Select.Option value="F">Phòng F</Select.Option>
+                            <Select.Option value="Khác">Khác</Select.Option>
+                        </Select>
+
+                        <Select
+                            placeholder="Chọn loại phòng"
+                            onChange={(value) => setRoomTypeFilter2(value)}
+                            style={{ width: 200 }}
+                        >
+                            <Select.Option value="">Tất cả</Select.Option>
+                            <Select.Option value="Phòng thường">Phòng thường</Select.Option>
+                            <Select.Option value="Phòng máy">Phòng máy</Select.Option>
+                            <Select.Option value="Phòng GDTC">Phòng GDTC</Select.Option>
+                        </Select>
                     </div>
                 </div>
 
@@ -211,16 +276,10 @@ const PhongThiForm = () => {
                     <Loader />
                 ) : (
                     <Table
-                        bordered
-                        dataSource={filteredList.map((item, index) => ({ ...item, key: item._id, stt: index + 1 }))}
                         columns={columns}
-                        pagination={{
-                            current,
-                            pageSize,
-                            total: filteredList.length,
-                            onChange: (page) => setCurrent(page),
-                            showSizeChanger: false,
-                        }}
+                        dataSource={filteredList}
+                        pagination={{ current, pageSize, total: filteredList.length, onChange: page => setCurrent(page) }}
+                        rowKey="_id"
                     />
                 )}
             </div>

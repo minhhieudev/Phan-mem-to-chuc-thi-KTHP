@@ -141,15 +141,18 @@ const PcCoiThiTable = () => {
       render: (text) => <span style={{ fontWeight: 'bold' }}>{text}</span>,
     },
     {
-      title: 'Thời gian (phút)',
-      dataIndex: 'hinhThucThoiGian',
-      key: 'hinhThucThoiGian',
+      title: 'Hình thức',
+      dataIndex: 'hinhThuc',
+      key: 'hinhThuc',
       width: 20,
-      render: (text) => (
-        <span style={{ fontWeight: 'bold' }}>
-          {Array.isArray(text) ? text.join(', ') : text}
-        </span>
-      ),
+      render: (text) => <span style={{ fontWeight: 'bold' }}>{text}</span>,
+    },
+    {
+      title: 'Thời gian',
+      dataIndex: 'thoiGian',
+      key: 'thoiGian',
+      width: 20,
+      render: (text) => <span style={{ fontWeight: 'bold' }}>{text}</span>,
     },
     // {
     //   title: 'Ghi chú',

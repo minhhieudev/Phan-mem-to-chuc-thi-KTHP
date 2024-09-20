@@ -12,15 +12,17 @@ const { Search } = Input;
 
 const Dashboard = () => {
 
+    // Thống kê học phần đã hoàn thành :   Query theo năm rồi đếm xem có bao nhiêu tên khác
+
     const dataSource = [
-        { key: "1", username: "John Doe", tongGioChinhQuy: 32, status: "10 Downing Street" },
-        { key: "2", username: "Jane Smith", atongGioChinhQuyge: 28, status: "221B Baker Street" },
+        { key: "1", username: "John Doe", soBuoiCoiThi: 32, soBuoiChamThi: 12 },
+        { key: "2", username: "Jane Smith", soBuoiCoiThi: 28, soBuoiChamThi: 10 },
     ];
 
     const columns = [
         { title: "Họ tên giảng viên", dataIndex: "username", key: "username" },
-        { title: "Tổng giờ", dataIndex: "tongGioChinhQuy", key: "tongGioChinhQuy" },
-        { title: "Trạng thái", dataIndex: "status", key: "status" },
+        { title: "Số buổi coi thi", dataIndex: "soBuoiCoiThi", key: "soBuoiCoiThi" },
+        { title: "Số buổi chấm thi", dataIndex: "soBuoiChamThi", key: "soBuoiChamThi" },
     ];
 
     const listNam = ["2021-2022","2022-2023","2023-2024", "2024-2025"];
@@ -63,7 +65,7 @@ const Dashboard = () => {
                     <div className="flex items-center">
                         <CheckCircleOutlined style={{ fontSize: "90px" }} className="mr-4 text-green-500" />
                         <div>
-                            <h2 className="text-xl font-bold mb-2">55/600</h2>
+                            <h2 className="text-xl font-bold mb-2">55 Học phần</h2>
                             <p>Đã hoàn thành</p>
                         </div>
                     </div>
@@ -80,8 +82,8 @@ const Dashboard = () => {
                     <div className="flex items-center">
                         <FolderOutlined style={{ fontSize: "90px" }} className="mr-4 text-purple-500" />
                         <div>
-                            <h2 className="text-xl font-bold mb-2">Box 3</h2>
-                            <p>Some content here...</p>
+                            <h2 className="text-xl font-bold mb-2">40 Bài thi</h2>
+                            <p>Đã chấm</p>
                         </div>
                     </div>
                     <Progress

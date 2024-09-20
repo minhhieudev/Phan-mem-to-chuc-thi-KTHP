@@ -7,17 +7,29 @@ const HocPhanThiSchema = new mongoose.Schema({
   },
   tenHocPhan: {
     type: String,
-    required: true,
   },
   soTinChi: {
     type: Number,
   },
-  lop: {
-    type: [String],  
+  soSVDK: {
+    type: Number,
   },
-  hinhThucThoiGian: {
+  lop: {
+    type: [String],
+  },
+  hinhThuc: {
     type: String,
   },
+  thoiGian: {
+    type: String,
+  },
+  giangVien: {
+    type: String,
+  },
+  thiT7CN: {
+    type: Boolean
+  }
+
 });
 
 const HocPhanThi = mongoose.models.HocPhanThi || mongoose.model("HocPhanThi", HocPhanThiSchema);

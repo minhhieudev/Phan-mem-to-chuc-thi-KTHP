@@ -25,7 +25,10 @@ const PcCoiThiSchema = new mongoose.Schema({
   cbo2: {
     type: String,  
   },
-  hinhThucThoiGian: {
+  hinhThuc: {
+    type: String,  
+  },
+  thoiGian: {
     type: String,  
   },
   phong: {
@@ -56,3 +59,4 @@ const PcCoiThiSchema = new mongoose.Schema({
 const PcCoiThi = mongoose.models.PcCoiThi || mongoose.model('PcCoiThi', PcCoiThiSchema);
 
 export default PcCoiThi;
+

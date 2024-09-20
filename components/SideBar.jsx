@@ -60,10 +60,10 @@ const SideBar = () => {
         <span>Thống kê coi thi</span>
       </Link>
 
-      <Link href="/admin/thong-ke-cham-thi" className={`flex items-center gap-3 p-3 rounded-lg transition border-b-2 ${textColor("/admin/thong-ke-cham-thi")}`}>
+      {/* <Link href="/admin/thong-ke-cham-thi" className={`flex items-center gap-3 p-3 rounded-lg transition border-b-2 ${textColor("/admin/thong-ke-cham-thi")}`}>
         <DatabaseOutlined style={{ fontSize: "20px", ...iconStyles.thongKeChamThi }} />
         <span>Thống kê chấm thi</span>
-      </Link>
+      </Link> */}
       
       <Link href="/admin/hoc-phan-thi" className={`flex items-center gap-3 p-3 rounded-lg transition border-b-2 ${textColor("/admin/hoc-phan-thi")}`}>
         <BookOutlined style={{ fontSize: "20px", ...iconStyles.hocPhanThi }} />
@@ -75,11 +75,6 @@ const SideBar = () => {
         <span>Phòng thi</span>
       </Link>
       
-      <Link href="/admin/giang-vien-coi-thi" className={`flex items-center gap-3 p-3 rounded-lg transition border-b-2 ${textColor("/admin/giang-vien-coi-thi")}`}>
-        <SolutionOutlined style={{ fontSize: "20px", ...iconStyles.giangVien }} />
-        <span>Giảng viên</span>
-      </Link>
-
       <Link href="/admin/user" className={`flex items-center gap-3 p-3 rounded-lg transition border-b-2 ${textColor("/admin/user")}`}>
         <TeamOutlined style={{ fontSize: "20px", ...iconStyles.user }} />
         <span>User</span>

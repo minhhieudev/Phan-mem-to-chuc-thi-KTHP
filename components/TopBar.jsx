@@ -39,8 +39,8 @@ const TopBar = () => {
             Admin
           </Link>}
         <Link
-          href="/work-hours"
-          className={`${pathname === "/work-hours" ? "text-red-1" : ""
+          href="/home"
+          className={`${pathname === "/home" ? "text-red-1" : ""
             } text-heading4-bold`}
         >
           Home
