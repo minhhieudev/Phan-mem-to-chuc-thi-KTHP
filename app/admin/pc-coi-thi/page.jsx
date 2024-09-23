@@ -334,7 +334,7 @@ const PcCoiThi = () => {
           randomCbo2 = gvList.splice(Math.floor(Math.random() * gvList.length), 1)[0];
         }
 
-        const availableCaSessions = examSessions.split(",").filter(ca => ca.trim() !== "");
+        const availableCaSessions = examSessions;
         const randomCa = availableCaSessions.length > 0 ? randomFromArray(availableCaSessions) : "Không có dữ liệu";
 
         const randomDate = getRandomDate(examDateRange.startDate, examDateRange.endDate, usedDates, randomHocPhan, allowSatSun);
@@ -504,11 +504,15 @@ const PcCoiThi = () => {
                     >
                       <div className="flex flex-col gap-3">
                         <div className=" flex items-center gap-2">
-                          <label className="block text-sm font-semibold mb-1 ">Ca:</label>
-                          <Input
-                            placeholder="Nhập các ca thi, cách nhau bằng dấu phẩy"
+                          <label className="block text-sm font-semibold mb-1">Ca:</label>
+                          <Checkbox.Group
+                            options={[
+                              { label: "1", value: 1 },
+                              { label: "3", value: 3 },
+                              { label: "5", value: 5 },
+                            ]}
                             value={examSessions}
-                            onChange={handleExamSessionChange}
+                            onChange={(checkedValues) => setExamSessions(checkedValues)}
                           />
                         </div>
 

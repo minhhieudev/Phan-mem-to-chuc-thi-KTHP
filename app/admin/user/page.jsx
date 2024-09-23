@@ -27,7 +27,7 @@ const UserForm = () => {
         defaultValues: formSchema,
     });
     const [current, setCurrent] = useState(1);
-    const [pageSize] = useState(5);
+    const [pageSize] = useState(7);
     const [searchName, setSearchName] = useState("");
     const [selectedKhoa, setSelectedKhoa] = useState("");
     const [selectedRole, setSelectedRole] = useState("");

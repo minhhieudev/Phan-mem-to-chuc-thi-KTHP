@@ -92,7 +92,7 @@ const Form = ({ type }) => {
           <div>
             <div className="input">
               <input
-                defaultValue=""
+                defaultValue="admin@gmail.com"
                 {...register("email", { required: "Email is required" })}
                 type="email"
                 placeholder="Email"
@@ -108,7 +108,7 @@ const Form = ({ type }) => {
           <div>
             <div className="input">
               <input
-                defaultValue=""
+                defaultValue="123456@"
                 {...register("password", {
                   required: "Password is required",
                   validate: (value) => {

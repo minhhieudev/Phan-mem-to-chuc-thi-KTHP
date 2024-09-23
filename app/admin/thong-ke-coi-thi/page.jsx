@@ -20,7 +20,7 @@ const PcCoiThiTable = () => {
   const [loai, setLoai] = useState("chinh-quy");
 
   const [current, setCurrent] = useState(1);
-  const [pageSize, setPageSize] = useState(5);
+  const [pageSize, setPageSize] = useState(10);
 
   const router = useRouter();
 
@@ -280,7 +280,7 @@ const PcCoiThiTable = () => {
             setCurrent(page);
             setPageSize(size);
           }}
-          pageSizeOptions={['5', '10', '25', '50', '100']}
+          pageSizeOptions={[ '10', '25', '50', '100', '200']}
           showSizeChanger
           className="flex justify-end"
         />

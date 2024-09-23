@@ -9,6 +9,7 @@ import {
   ClockCircleOutlined,
   HomeOutlined,
 } from "@ant-design/icons";
+import Loader from "@components/Loader";
 
 const { Option } = Select;
 
@@ -24,10 +25,11 @@ const Home = () => {
   const [listData, setListData] = useState([]);
   const [loading, setLoading] = useState(true);
 
+
   const fetchData = async () => {
     try {
       const res = await fetch(
-        `/api/users/get-lich?namHoc=${selectNamHoc}&ky=${selectKy}&user=${gv}`,
+        `/api/users/get-lich?namHoc=${selectNamHoc}&ky=${selectKy}&user=${user.username}`,
         {
           method: "GET",
           headers: { "Content-Type": "application/json" },
@@ -62,10 +64,12 @@ const Home = () => {
     "#e67e22", // Cam
   ];
 
-  return (
+  return loading ? (
+    <Loader />
+  ) : (
     <div className="bg-white w-[80%] rounded-md shadow-md mx-auto p-4 mt-5 h-[75vh]">
       <h1 className="text-heading3-bold mb-4 text-center text-2xl font-bold">
-        DANH SÁCH MÔN THI
+        LỊCH COI THI
       </h1>
 
       {/* Select cho năm học và kỳ */}
@@ -144,3 +148,9 @@ const Home = () => {
 };
 
 export default Home;
+
+
+//  Hỏi trang phân công: ràng buộc giảng viên , phải thêm cột người dạy môn đó
+//  chỗ ca với ngày thi (  1 ngày thi mấy môn )
+
+
