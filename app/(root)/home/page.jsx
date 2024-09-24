@@ -10,6 +10,7 @@ import {
   HomeOutlined,
 } from "@ant-design/icons";
 import Loader from "@components/Loader";
+import moment from "moment";
 
 const { Option } = Select;
 
@@ -17,14 +18,10 @@ const Home = () => {
   const { data: session } = useSession();
   const user = session?.user;
 
-  const gv = "Nguyễn Quốc Dũng";
-
   const [selectNamHoc, setSelectNamHoc] = useState("2024-2025");
   const [selectKy, setSelectKy] = useState("1");
-
   const [listData, setListData] = useState([]);
   const [loading, setLoading] = useState(true);
-
 
   const fetchData = async () => {
     try {
@@ -54,25 +51,65 @@ const Home = () => {
     }
   }, [selectNamHoc, selectKy, user]);
 
-  // Danh sách màu cố định
-  const colorList = [
-    "#3498db", // Xanh dương
-    "#e74c3c", // Đỏ
-    "#2ecc71", // Xanh lá
-    "#f1c40f", // Vàng
-    "#9b59b6", // Tím
-    "#e67e22", // Cam
-  ];
+  const getCardColor = (ngayThi) => {
+    const today = moment();
+    const examDate = moment(ngayThi, "DD/MM/YYYY");
+
+    if (examDate.isBefore(today, "day")) {
+      return "#d0d0d0"; // Màu nhạt hơn cho ngày đã qua
+    } else if (examDate.isSame(today, "day")) {
+      return "#4a90e2"; // Màu xanh dương nhạt
+    } else {
+      return "#c9e7a0"; // Màu xanh lá nhạt hơn
+    }
+  };
+
+  // Nhóm dữ liệu theo màu
+  const groupByColor = () => {
+    const groups = {
+      past: [],
+      today: [],
+      upcoming: [],
+    };
+
+    listData.forEach((item) => {
+      const examDate = moment(item.ngayThi, "DD/MM/YYYY");
+      if (examDate.isBefore(moment(), "day")) {
+        groups.past.push(item);
+      } else if (examDate.isSame(moment(), "day")) {
+        groups.today.push(item);
+      } else {
+        groups.upcoming.push(item);
+      }
+    });
+
+    return groups;
+  };
+
+  const groupedData = groupByColor();
+
+  const sortedGroupedData = {
+    past: groupedData.past.sort((a, b) =>
+      moment(a.ngayThi, "DD/MM/YYYY").diff(moment(b.ngayThi, "DD/MM/YYYY"))
+    ),
+    today: groupedData.today.sort((a, b) =>
+      moment(a.ngayThi, "DD/MM/YYYY").diff(moment(b.ngayThi, "DD/MM/YYYY"))
+    ),
+    upcoming: groupedData.upcoming.sort((a, b) =>
+      moment(a.ngayThi, "DD/MM/YYYY").diff(moment(b.ngayThi, "DD/MM/YYYY"))
+    ),
+  };
 
   return loading ? (
     <Loader />
   ) : (
-    <div className="bg-white w-[80%] rounded-md shadow-md mx-auto p-4 mt-5 h-[75vh]">
-      <h1 className="text-heading3-bold mb-4 text-center text-2xl font-bold">
-        LỊCH COI THI
-      </h1>
+    <div className="bg-white w-[95%] rounded-md shadow-md mx-auto p-4 mt-5 h-fit">
+      <div className="flex justify-center items-center mb-3">
+        <h1 className="text-heading3-bold text-center text-3xl font-bold">
+          LỊCH COI THI
+        </h1>
+      </div>
 
-      {/* Select cho năm học và kỳ */}
       <div className="flex justify-center gap-4 mb-6">
         <div className="font-bold flex gap-3">
           <label htmlFor="namHoc" className="block text-sm text-gray-700 mb-1">
@@ -108,49 +145,130 @@ const Home = () => {
         </div>
       </div>
 
-      {/* Hiển thị danh sách các môn thi */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        {listData.map((exam, index) => (
-          <Card
-            key={index}
-            title={exam.hocPhan.toUpperCase()} 
-            className="rounded-lg shadow-lg overflow-hidden"
-            style={{
-              backgroundColor: colorList[index % colorList.length], // Áp dụng màu từ danh sách màu
-              borderRadius: "12px",
-              transition: "transform 0.3s ease",
-            }}
-            hoverable
-            onClick={() => alert(`Bạn đã chọn môn: ${exam.hocPhan}`)}
-          >
-            <div className="p-4">
-              <p className="text-white mb-1 text-lg font-bold">
-                <CalendarOutlined /> Ngày thi: {exam.ngayThi}
-              </p>
-              <p className="text-white mb-1 text-lg font-bold">
-                <TeamOutlined /> Cán bộ coi thi 1: {exam.cbo1}
-              </p>
-              <p className="text-white mb-1 text-lg font-bold">
-                <TeamOutlined /> Cán bộ coi thi 2: {exam.cbo2}
-              </p>
-              <p className="text-white mb-1 text-lg font-bold">
-                <ClockCircleOutlined /> Ca thi: {exam.ca}
-              </p>
-              <p className="text-white text-lg font-bold">
-                <HomeOutlined /> Phòng thi: {exam.phong}
-              </p>
+      <div className="space-y-6">
+        {sortedGroupedData.today.length > 0 && (
+          <div>
+            <h3 className="text-lg font-bold mb-1 ">HÔM NAY</h3>
+            <div className="flex justify-center space-x-4 ">
+              {sortedGroupedData.today.map((exam, index) => (
+                <Card
+                  key={index}
+                  title={exam.hocPhan.toUpperCase()}
+                  className="rounded-lg shadow-lg overflow-hidden"
+                  style={{
+                    backgroundColor: getCardColor(exam.ngayThi),
+                    borderRadius: "12px",
+                    transition: "transform 0.3s ease",
+                    text: "white"
+                  }}
+                  hoverable
+                  onClick={() => alert(`Bạn đã chọn môn: ${exam.hocPhan}`)}
+                >
+                  <div className="p-4">
+                    <p className="text-black mb-1 text-lg font-bold">
+                      <CalendarOutlined /> Ngày thi: {exam.ngayThi}
+                    </p>
+                    <p className="text-black mb-1 text-lg font-bold">
+                      <TeamOutlined /> Cán bộ coi thi 1: {exam.cbo1}
+                    </p>
+                    <p className="text-black mb-1 text-lg font-bold">
+                      <TeamOutlined /> Cán bộ coi thi 2: {exam.cbo2}
+                    </p>
+                    <p className="text-black mb-1 text-lg font-bold">
+                      <ClockCircleOutlined /> Ca thi: {exam.ca}
+                    </p>
+                    <p className="text-black text-lg font-bold">
+                      <HomeOutlined /> Phòng thi: {exam.phong}
+                    </p>
+                  </div>
+                </Card>
+              ))}
             </div>
-          </Card>
-        ))}
+          </div>
+        )}
+
+        {sortedGroupedData.upcoming.length > 0 && (
+          <div>
+            <h3 className="text-lg font-bold mb-1">SẮP DIỄN RA</h3>
+            <div className="flex justify-center space-x-4">
+              {sortedGroupedData.upcoming.map((exam, index) => (
+                <Card
+                  key={index}
+                  title={exam.hocPhan.toUpperCase()}
+                  className="rounded-lg shadow-lg overflow-hidden"
+                  style={{
+                    backgroundColor: getCardColor(exam.ngayThi),
+                    borderRadius: "12px",
+                    transition: "transform 0.3s ease",
+                  }}
+                  hoverable
+                  onClick={() => alert(`Bạn đã chọn môn: ${exam.hocPhan}`)}
+                >
+                  <div className="p-4">
+                    <p className="text-black mb-1 text-lg font-bold">
+                      <CalendarOutlined /> Ngày thi: {exam.ngayThi}
+                    </p>
+                    <p className="text-black mb-1 text-lg font-bold">
+                      <TeamOutlined /> Cán bộ coi thi 1: {exam.cbo1}
+                    </p>
+                    <p className="text-black mb-1 text-lg font-bold">
+                      <TeamOutlined /> Cán bộ coi thi 2: {exam.cbo2}
+                    </p>
+                    <p className="text-black mb-1 text-lg font-bold">
+                      <ClockCircleOutlined /> Ca thi: {exam.ca}
+                    </p>
+                    <p className="text-black text-lg font-bold">
+                      <HomeOutlined /> Phòng thi: {exam.phong}
+                    </p>
+                  </div>
+                </Card>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {sortedGroupedData.past.length > 0 && (
+          <div>
+            <h3 className="text-lg font-bold mb-1 text-[">ĐÃ QUA</h3>
+            <div className="flex justify-center space-x-4">
+              {sortedGroupedData.past.map((exam, index) => (
+                <Card
+                  key={index}
+                  title={exam.hocPhan.toUpperCase()}
+                  className="rounded-lg shadow-lg overflow-hidden"
+                  style={{
+                    backgroundColor: getCardColor(exam.ngayThi),
+                    borderRadius: "12px",
+                    transition: "transform 0.3s ease",
+                  }}
+                  hoverable
+                  onClick={() => alert(`Bạn đã chọn môn: ${exam.hocPhan}`)}
+                >
+                  <div className="p-0">
+                    <p className="text-black mb-1 text-lg font-bold">
+                      <CalendarOutlined /> Ngày thi: {exam.ngayThi}
+                    </p>
+                    <p className="text-black mb-1 text-lg font-bold">
+                      <TeamOutlined /> Cán bộ coi thi 1: {exam.cbo1}
+                    </p>
+                    <p className="text-black mb-1 text-lg font-bold">
+                      <TeamOutlined /> Cán bộ coi thi 2: {exam.cbo2}
+                    </p>
+                    <p className="text-black mb-1 text-lg font-bold">
+                      <ClockCircleOutlined /> Ca thi: {exam.ca}
+                    </p>
+                    <p className="text-black text-lg font-bold">
+                      <HomeOutlined /> Phòng thi: {exam.phong}
+                    </p>
+                  </div>
+                </Card>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
 };
 
 export default Home;
-
-
-//  Hỏi trang phân công: ràng buộc giảng viên , phải thêm cột người dạy môn đó
-//  chỗ ca với ngày thi (  1 ngày thi mấy môn )
-
-

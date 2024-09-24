@@ -71,9 +71,9 @@ const Dashboard = () => {
     };
 
     return (
-        <div className="p-6">
-            <div className="grid grid-cols-3 gap-6 mb-6">
-                <div className="bg-white p-6 rounded-lg shadow-xl flex items-center">
+        <div className="py-4 px-0">
+            <div className="grid grid-cols-3 gap-6 mb-3 ">
+                <div className="bg-white p-4 rounded-lg shadow-xl flex items-center">
                     <CalendarOutlined style={{ fontSize: "90px" }} className="mr-4 text-blue-500" />
                     <div>
                         <h2 className="text-xl font-bold mb-2">
@@ -89,7 +89,7 @@ const Dashboard = () => {
                     </div>
                 </div>
 
-                <div className="bg-white p-6 rounded-lg shadow-xl flex items-center justify-between">
+                <div className="bg-white p-4 rounded-lg shadow-xl flex items-center justify-between">
                     <div className="flex items-center">
                         <CheckCircleOutlined style={{ fontSize: "90px" }} className="mr-4 text-green-500" />
                         <div>
@@ -106,7 +106,7 @@ const Dashboard = () => {
                     />
                 </div>
 
-                <div className="bg-white p-6 rounded-lg shadow-xl flex items-center justify-between">
+                <div className="bg-white p-4 rounded-lg shadow-xl flex items-center justify-between">
                     <div className="flex items-center">
                         <FileOutlined style={{ fontSize: "90px" }} className="mr-4 text-purple-500" /> {/* Đổi icon */}
                         <div>
@@ -124,7 +124,7 @@ const Dashboard = () => {
                 </div>
             </div>
 
-            <div className="grid grid-cols-5 gap-6 h-[63vh]">
+            <div className="grid grid-cols-5 gap-4 ">
                 <div className="col-span-3 bg-white p-6 rounded-lg shadow-md">
                     <h2 className="text-xl font-bold mb-4">Biểu đồ</h2>
                     <ResponsiveContainer width="100%" height={300}>
@@ -140,7 +140,7 @@ const Dashboard = () => {
                     </ResponsiveContainer>
                 </div>
 
-                <div className="col-span-2 bg-white p-6 rounded-lg shadow-md h-full">
+                <div className="col-span-2 bg-white p-6 rounded-lg shadow-md">
                     <div className="flex justify-between mb-4">
                         <h2 className="text-xl font-bold">Danh sách</h2>
                         <div className="flex space-x-4 w-[70%]">
@@ -180,7 +180,7 @@ const Dashboard = () => {
                             </Select>
                         </div>
                     </div>
-                    <div style={{ maxHeight: '400px', overflowY: 'auto' }}> {/* Thêm scroll */}
+                    <div style={{ maxHeight: '355px', overflowY: 'auto' }}> {/* Thêm scroll */}
                         <Table columns={columns} dataSource={filteredData} pagination={{ pageSize }} rowKey="key" />
                     </div>
                 </div>

@@ -23,7 +23,7 @@ const PhongThiForm = () => {
         defaultValues: formSchema,
     });
     const [current, setCurrent] = useState(1);
-    const [pageSize] = useState(7);
+    const [pageSize] = useState(5);
     const [searchName, setSearchName] = useState(""); 
     const [roomTypeFilter, setRoomTypeFilter] = useState("");
     const [roomTypeFilter2, setRoomTypeFilter2] = useState("");

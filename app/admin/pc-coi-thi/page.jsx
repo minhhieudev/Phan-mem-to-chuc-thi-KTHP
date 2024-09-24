@@ -188,7 +188,7 @@ const PcCoiThi = () => {
       filteredData = filteredData.filter(gv => gv.khoa == selectKhoa);
     }
     setFilteredListGV(filteredData);
-  }, [selectKhoa, listGV]);
+  }, [selectKhoa, listGV,searchGV]);
 
   const formatDate = (dateString) => {
     const date = new Date(dateString);
@@ -370,10 +370,6 @@ const PcCoiThi = () => {
     setList(randomSchedules);
     setActiveTab("2");
   };
-
-
-
-
 
 
   const handleExamSessionChange = (e) => {
@@ -561,7 +557,7 @@ const PcCoiThi = () => {
                   </div>
                 </Col>
                 <Col span={9} className=" ">
-                  <div className="shadow-lg text-center text-base-bold h-[55vh] overflow-y-auto">
+                  <div className="shadow-lg text-center text-base-bold h-[49vh] overflow-y-auto">
                     <Card
                       title={<span><UserOutlined /> CÁN BỘ COI THI</span>}
                       bordered={false}
