@@ -37,7 +37,7 @@ const SideBar = () => {
   const textColor = (path) => (pathname === path ? "text-red-500" : "text-gray-800");
 
   return (
-    <div className="flex flex-col gap-4 bg-white shadow-xl p-6 rounded-xl mt-3 h-[85vh] font-semibold overflow-y-auto">
+    <div className="flex flex-col gap-3 bg-white shadow-xl py-3 px-2 rounded-xl mt-3 h-[85vh] font-semibold overflow-y-auto text-[14px]">
       <h2 className="text-xl font-bold text-gray-800 mb-4">ADMIN</h2>
       
       <Link href="/admin/dashboard" className={`flex items-center gap-3 p-3 rounded-lg transition border-b-2 ${textColor("/admin/dashboard")}`}>

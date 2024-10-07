@@ -19,8 +19,8 @@ export default function RootLayout({ children }) {
         <Provider>
           <TopBar />
           <div className="flex justify-between h-[45vh] ml-3">
-            <div className="w-[17%]"><SideBar /></div>
-            <div className="w-[82%] mx-auto">{children}</div>
+            <div className="w-[15%]"><SideBar /></div>
+            <div className="w-[84%] mx-auto">{children}</div>
           </div>
           <Toaster />
         </Provider>
