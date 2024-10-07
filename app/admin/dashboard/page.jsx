@@ -75,17 +75,31 @@ const Dashboard = () => {
             <div className="grid grid-cols-3 gap-6 mb-3 ">
                 <div className="bg-white p-4 rounded-lg shadow-xl flex items-center">
                     <CalendarOutlined style={{ fontSize: "90px" }} className="mr-4 text-blue-500" />
-                    <div>
-                        <h2 className="text-xl font-bold mb-2">
-                            <Select defaultValue={"2023-2024"} style={{ width: 120 }} allowClear>
-                                {["2021-2022", "2022-2023", "2023-2024", "2024-2025"].map((nam, index) => (
-                                    <Option key={index} value={nam}>
-                                        {nam}
-                                    </Option>
-                                ))}
-                            </Select>
-                        </h2>
-                        <p>Năm học</p>
+                    <div className="font-bold">
+                        <div className="flex gap-3">
+                            <p>Năm học: </p>
+                            <h2 className="text-xl font-bold mb-2">
+                                <Select defaultValue={"2023-2024"} style={{ width: 120 }} allowClear>
+                                    {["2021-2022", "2022-2023", "2023-2024", "2024-2025"].map((nam, index) => (
+                                        <Option key={index} value={nam}>
+                                            {nam}
+                                        </Option>
+                                    ))}
+                                </Select>
+                            </h2>
+                        </div>
+                        <div className="flex gap-3">
+                            <p>Học kỳ: </p>
+                            <h2 className="text-xl font-bold mb-2">
+                                <Select defaultValue={"1"} style={{ width: 120 }} allowClear>
+                                    {["1", "2"].map((nam, index) => (
+                                        <Option key={index} value={nam}>
+                                            {nam}
+                                        </Option>
+                                    ))}
+                                </Select>
+                            </h2>
+                        </div>
                     </div>
                 </div>
 
@@ -135,7 +149,7 @@ const Dashboard = () => {
                             <Tooltip />
                             <Legend />
                             <Bar dataKey="soBuoiCoiThi" fill="#82ca9d" name="Số buổi coi thi" />
-                            <Bar dataKey="soBuoiChamThi" fill="#ff6347" name="Số buổi chấm thi" />
+                            <Bar dataKey="soBuoiChamThi" fill="#ff6347" name="Số bài đã chấm" />
                         </BarChart>
                     </ResponsiveContainer>
                 </div>

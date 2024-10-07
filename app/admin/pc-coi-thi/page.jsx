@@ -5,6 +5,8 @@ import { Select, DatePicker, Button, message, Tabs, Card, Col, Row, Checkbox, Ra
 import { UserOutlined, BookOutlined, HomeOutlined, CalendarOutlined, DeleteOutlined } from '@ant-design/icons';
 import Loader from "../../../components/Loader";
 import TablePcCoiThi from "@components/CoiThi/TablePcCoiThi";
+import { useSession } from "next-auth/react";
+import { v4 as uuidv4 } from "uuid";
 
 const { Option } = Select;
 const { TabPane } = Tabs;
@@ -47,6 +49,16 @@ const PcCoiThi = () => {
   const [selectKhoa, setSelectKhoa] = useState("");
   const [khoaOptions, setKhoaOptions] = useState([]);
 
+  const [listGVKhoa, setListGVKhoa] = useState([]);
+
+
+  const [GVToGetKhoa, setGVToGetKhoa] = useState('');
+  const [fetchs, setFetchs] = useState(false);
+
+  const { data: session } = useSession();
+  const user = session?.user;
+
+  const [isDisplay, setIsDisplay] = useState(false);
 
   const handleCancel = () => {
     setOpen(false);
@@ -125,8 +137,6 @@ const PcCoiThi = () => {
           setListGV(data);
         }
 
-
-
         setLoading(false);
       } catch (error) {
         console.log("Error:", error)
@@ -188,7 +198,7 @@ const PcCoiThi = () => {
       filteredData = filteredData.filter(gv => gv.khoa == selectKhoa);
     }
     setFilteredListGV(filteredData);
-  }, [selectKhoa, listGV,searchGV]);
+  }, [selectKhoa, listGV, searchGV]);
 
   const formatDate = (dateString) => {
     const date = new Date(dateString);
@@ -199,6 +209,7 @@ const PcCoiThi = () => {
   const randomFromArray = (array) => {
     return array[Math.floor(Math.random() * array.length)];
   };
+
 
   const handleCreate = () => {
     // Check data
@@ -241,9 +252,6 @@ const PcCoiThi = () => {
 
       return date;
     };
-
-
-
     const handleSplitHocPhan = (hocPhan, phong, cbo1, cbo2, ca, ngayThi) => {
       const halfSV = Math.ceil(hocPhan.soSVDK / 2);
       const hocPhan1 = {
@@ -270,6 +278,7 @@ const PcCoiThi = () => {
 
       return [
         {
+          _id: uuidv4(),
           hocPhan: hocPhan1.tenHocPhan,
           lop: hocPhan.lop.join(", "),
           hinhThuc: hocPhan.hinhThuc,
@@ -277,7 +286,7 @@ const PcCoiThi = () => {
           phong: phong.tenPhong,
           cbo1: cbo1.username,
           cbo2: cbo2.username,
-          ca: ca,
+          ca: 1,
           ngayThi: ngayThi,
           namHoc,
           loaiKyThi,
@@ -285,14 +294,15 @@ const PcCoiThi = () => {
           loaiDaoTao
         },
         {
+          _id: uuidv4(),
           hocPhan: hocPhan2.tenHocPhan,
           lop: hocPhan.lop.join(", "),
           hinhThuc: hocPhan.hinhThuc,
           thoiGian: hocPhan.thoiGian,
-          phong: randomPhong.tenPhong,
-          cbo1: randomCbo1.username,
-          cbo2: randomCbo2.username,
-          ca: ca,
+          phong: phong.tenPhong,
+          cbo1: cbo1.username,
+          cbo2: cbo2.username,
+          ca: 3,
           ngayThi: ngayThi,
           namHoc,
           loaiKyThi,
@@ -301,6 +311,9 @@ const PcCoiThi = () => {
         }
       ];
     };
+
+
+
 
     let hocPhanListNonT7CN = listHocPhanSelect.filter(hp => !hp.thiT7CN);
     let hocPhanListT7CN = listHocPhanSelect.filter(hp => hp.thiT7CN);
@@ -314,9 +327,33 @@ const PcCoiThi = () => {
     const randomSchedules = [];
     const usedDates = new Set();
 
-    const scheduleHocPhanList = (hocPhanList, allowSatSun) => {
+    const scheduleHocPhanList = async (hocPhanList, allowSatSun) => {
+
       while (hocPhanList.length > 0) {
         const randomHocPhan = hocPhanList.splice(Math.floor(Math.random() * hocPhanList.length), 1)[0];
+
+        // Lấy danh sách giảng viên theo khoa
+        let gvKhoa = []
+        if (randomHocPhan) {
+          console.log('GV:', randomHocPhan.giangVien)
+          setGVToGetKhoa(randomHocPhan.giangVien)
+          setFetchs(!fetchs)
+          try {
+            const res5 = await fetch(`/api/admin/get-gv-khoa?khoa=${randomHocPhan.giangVien}`);
+            if (res5.ok) {
+              const data = await res5.json();
+              gvKhoa = data;
+            }
+
+          } catch (error) {
+            console.log("Error:", error)
+            message.error("Failed to fetch data");
+          }
+        }
+        ////////////////////////
+
+
+        // Random lấy phòng
         let randomPhong;
 
         if (randomHocPhan.hinhThuc === "GDTC") {
@@ -326,24 +363,77 @@ const PcCoiThi = () => {
         } else {
           randomPhong = phongThuongList.length > 0 ? phongThuongList.splice(Math.floor(Math.random() * phongThuongList.length), 1)[0] : { tenPhong: "Hết phòng !!!" };
         }
+        /////////////////////
 
-        let randomCbo1 = gvList.length > 0 ? gvList.splice(Math.floor(Math.random() * gvList.length), 1)[0] : { username: "Hết giảng viên !!!!" };
-        let randomCbo2 = gvList.length > 0 ? gvList.splice(Math.floor(Math.random() * gvList.length), 1)[0] : { username: "Hết giảng viên !!!!" };
 
-        if (randomCbo2.username === randomCbo1.username && gvList.length > 0) {
-          randomCbo2 = gvList.splice(Math.floor(Math.random() * gvList.length), 1)[0];
+        // Random lấy cán bộ /////////////
+
+        let randomCbo1, randomCbo2;
+
+        if (randomHocPhan.hinhThuc == "TH") {
+          // Nếu hinhThuc là 'TH', cbo1 là giảng viên của học phần đó
+          randomCbo1 = { username: randomHocPhan.giangVien };
+
+          // cbo2 được lấy từ danh sách listGVKhoa
+          if (gvKhoa.length > 0) {
+            randomCbo2 = gvKhoa.splice(Math.floor(Math.random() * gvKhoa.length), 1)[0];
+          } else {
+            randomCbo2 = { username: "Hết giảng viên khoa!" };
+          }
+
+          if (randomCbo2.username === randomCbo1.username && gvKhoa.length > 0) {
+            randomCbo2 = gvKhoa.splice(Math.floor(Math.random() * gvKhoa.length), 1)[0];
+          }
+          gvKhoa = []
+
+        } else {
+          let gvList = [...listGVSelect]; /// KHÔNG HIỂU CHỖ NÀY 
+
+          console.log(JSON.stringify(gvList, null, 2));
+
+          // Nếu hinhThuc khác 'TH', cbo1 và cbo2 không được là giảng viên giảng dạy môn đó hoặc giảng viên trong khoa
+          const filterGVList = gvList.filter(gv => gv.username != randomHocPhan.giangVien && !gvKhoa.some(gvKhoa => gvKhoa.username == gv.username));
+
+
+          if (filterGVList.length > 0) {
+            randomCbo1 = filterGVList.splice(Math.floor(Math.random() * filterGVList.length), 1)[0];
+          } else {
+            randomCbo1 = { username: "Hết giảng viên!!!!" };
+          }
+
+          if (filterGVList.length > 0) {
+            randomCbo2 = filterGVList.splice(Math.floor(Math.random() * filterGVList.length), 1)[0];
+          } else {
+            randomCbo2 = { username: "Hết giảng viên!!!!" };
+          }
+
+          if (randomCbo2.username === randomCbo1.username && gvList.length > 0) {
+            randomCbo2 = gvList.splice(Math.floor(Math.random() * gvList.length), 1)[0];
+          }
+          gvKhoa = []
         }
 
+        // Nếu cbo1 và cbo2 bị trùng, chọn lại cbo2
+
+
+        /////////////////////////////////
+
+        //// CA THI  
         const availableCaSessions = examSessions;
         const randomCa = availableCaSessions.length > 0 ? randomFromArray(availableCaSessions) : "Không có dữ liệu";
+        ////////////
 
+        ////// NGÀY THI 
         const randomDate = getRandomDate(examDateRange.startDate, examDateRange.endDate, usedDates, randomHocPhan, allowSatSun);
+        //////////
 
         if (randomHocPhan.soSVDK > randomPhong.soCho) {
           const splitSchedules = handleSplitHocPhan(randomHocPhan, randomPhong, randomCbo1, randomCbo2, randomCa, randomDate);
           randomSchedules.push(...splitSchedules);
-        } else {
+        }
+        else {
           const schedule = {
+            _id: uuidv4(),
             hocPhan: randomHocPhan.tenHocPhan,
             lop: randomHocPhan.lop.join(", "),
             hinhThuc: randomHocPhan.hinhThuc,
@@ -361,6 +451,8 @@ const PcCoiThi = () => {
 
           randomSchedules.push(schedule);
         }
+        setGVToGetKhoa('')
+
       }
     };
 
@@ -368,7 +460,9 @@ const PcCoiThi = () => {
     scheduleHocPhanList(hocPhanListT7CN, true);
 
     setList(randomSchedules);
+
     setActiveTab("2");
+
   };
 
 
@@ -753,8 +847,23 @@ const PcCoiThi = () => {
           </TabPane>
 
           <TabPane tab="Kết quả" key="2">
-            <TablePcCoiThi list={list} namHoc={namHoc} hocky={hocky} loaiKyThi={loaiKyThi} loaiDaoTao={loaiDaoTao} />
+            <TablePcCoiThi
+              list={list.sort((a, b) => {
+                const [dayA, monthA, yearA] = a.ngayThi.split("/").map(Number);
+                const [dayB, monthB, yearB] = b.ngayThi.split("/").map(Number);
+
+                const dateA = new Date(yearA, monthA - 1, dayA);
+                const dateB = new Date(yearB, monthB - 1, dayB);
+
+                return dateA - dateB;
+              })}
+              namHoc={namHoc}
+              hocky={hocky}
+              loaiKyThi={loaiKyThi}
+              loaiDaoTao={loaiDaoTao}
+            />
           </TabPane>
+
 
         </Tabs>
 

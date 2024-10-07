@@ -47,7 +47,7 @@ const SideBar = () => {
       
       <Link href="/admin/pc-coi-thi" className={`flex items-center gap-3 p-3 rounded-lg transition border-b-2 ${textColor("/admin/pc-coi-thi")}`}>
         <ClockCircleOutlined style={{ fontSize: "20px", ...iconStyles.coiThi }} />
-        <span>Phân công coi thi</span>
+        <span>Tạo lịch thi</span>
       </Link>
       
       <Link href="/admin/pc-cham-thi" className={`flex items-center gap-3 p-3 rounded-lg transition border-b-2 ${textColor("/admin/pc-cham-thi")}`}>
@@ -57,7 +57,7 @@ const SideBar = () => {
 
       <Link href="/admin/thong-ke-coi-thi" className={`flex items-center gap-3 p-3 rounded-lg transition border-b-2 ${textColor("/admin/thong-ke-coi-thi")}`}>
         <PieChartOutlined style={{ fontSize: "20px", ...iconStyles.thongKeCoiThi }} />
-        <span>Thống kê coi thi</span>
+        <span>Quản lý coi thi</span>
       </Link>
 
       {/* <Link href="/admin/thong-ke-cham-thi" className={`flex items-center gap-3 p-3 rounded-lg transition border-b-2 ${textColor("/admin/thong-ke-cham-thi")}`}>
