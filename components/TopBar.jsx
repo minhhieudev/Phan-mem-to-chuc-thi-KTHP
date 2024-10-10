@@ -24,8 +24,8 @@ const TopBar = () => {
           <img src="https://upload.wikimedia.org/wikipedia/vi/2/2e/Dai_hoc_phu_yen_logo.png" alt="logo" className="logo" />
         </Link>
         <div className="max-sm:hidden">
-          <div className="text-heading4-bold">TRƯỜNG ĐẠI HỌC PHÚ YÊN</div>
-          <p className="text-small-bold ml-1">PHẦN MỀM HỖ TRỢ TỔ CHỨC THI KTHP</p>
+          <div className="font-bold">TRƯỜNG ĐẠI HỌC PHÚ YÊN</div>
+          <p className="text-[12px] ml-1">PHẦN MỀM HỖ TRỢ TỔ CHỨC THI KTHP</p>
         </div>
       </div>
 

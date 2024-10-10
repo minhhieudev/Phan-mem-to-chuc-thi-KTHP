@@ -8,6 +8,10 @@ import TablePcCoiThi from "@components/CoiThi/TablePcCoiThi";
 import { useSession } from "next-auth/react";
 import { v4 as uuidv4 } from "uuid";
 
+const CheckboxGroup = Checkbox.Group;
+
+
+
 const { Option } = Select;
 const { TabPane } = Tabs;
 const { RangePicker } = DatePicker;
@@ -59,6 +63,16 @@ const PcCoiThi = () => {
   const user = session?.user;
 
   const [isDisplay, setIsDisplay] = useState(false);
+
+  const onCheckAllChange = (e) => {
+    setListHocPhanSelect(e.target.checked ? listHocPhan : []);
+  };
+  const onCheckAllChangePhong = (e) => {
+    setListPhongSelect(e.target.checked ? listHocPhan : []);
+  };
+  const onCheckAllChangeGV = (e) => {
+    setListGVSelect(e.target.checked ? listHocPhan : []);
+  };
 
   const handleCancel = () => {
     setOpen(false);
@@ -485,7 +499,7 @@ const PcCoiThi = () => {
     <Loader />
   ) : (
     <div>
-      <div className="py-1 px-6 bg-white rounded-lg shadow-lg mt-3 h-[85vh]">
+      <div className="py-1 px-6 bg-white rounded-lg shadow-lg mt-3 h-[90vh]">
         <Tabs activeKey={activeTab} onChange={(key) => setActiveTab(key)}>
           <TabPane tab="Tạo lịch thi" key="1">
             <div className="text-heading3-bold text-blue-600 text-center ">THÔNG TIN KỲ THI</div>
@@ -552,17 +566,17 @@ const PcCoiThi = () => {
               </div>
 
             </div>
-            <div className="w-full mt-5">
-              <Row gutter={16}>
-                <Col span={7} className="h-[55%] overflow-y-auto">
-                  <div className="shadow-lg">
+            <div className="w-full mt-2">
+              <Row gutter={10}>
+                <Col span={7} className="h-[60%] overflow-y-auto">
+                  <div className="shadow-lg ">
                     <Card
                       title={<span><BookOutlined /> HỌC PHẦN</span>}
                       bordered={false}
                       className="h-full text-center"
                       style={{ backgroundColor: '#f0f8ff' }} // Màu nền nhẹ
                     >
-                      <ul className="list-decimal pl-5 text-left">
+                      <ul className="list-decimal pl-5 text-left max-h-[300px] overflow-auto bg-[#f0f8ff]">
                         {listHocPhanSelect.map((hocPhan, index) => (
                           <li key={hocPhan.tenHocPhan} className="flex justify-between items-center">
                             <span>{index + 1}. {hocPhan.tenHocPhan} ({hocPhan.lop?.join(', ')})</span>
@@ -573,8 +587,6 @@ const PcCoiThi = () => {
                           </li>
                         ))}
                       </ul>
-
-
                       <div className="flex justify-around mt-3">
                         <Button className="button-lien-thong-chinh-quy text-white" onClick={() => { setOpen(true); setTitle('Chọn học phần') }}>Chọn học phần</Button>
                         <Button className="button-lien-thong-vlvh text-white">Import</Button>
@@ -582,6 +594,7 @@ const PcCoiThi = () => {
                     </Card>
 
                   </div>
+
                 </Col>
 
                 <Col span={5} className="h-[55%] overflow-y-auto">
@@ -686,7 +699,7 @@ const PcCoiThi = () => {
                 </Col>
               </Row>
             </div >
-            <div className="bg-white text-center rounded-md p-3">
+            <div className="bg-white text-center rounded-md p-0">
               <Button type="primary" className="button-chinh-quy" onClick={handleCreate}>Tạo lịch thi</Button>
             </div>
 
@@ -712,6 +725,10 @@ const PcCoiThi = () => {
                     style={{ marginBottom: '16px' }}
                   />
                 </div>
+
+                <Checkbox onChange={onCheckAllChange} >
+                  Chọn tất cả
+                </Checkbox>
 
                 <ul className="list-decimal pl-5 text-left">
                   {filteredListHocPhan.map((hocPhan) => (
@@ -753,6 +770,10 @@ const PcCoiThi = () => {
                     <Select.Option value="F">Phòng F</Select.Option>
                     <Select.Option value="Khác">Phòng khác</Select.Option>
                   </Select>
+
+                  <Checkbox onChange={onCheckAllChangePhong} >
+                    Chọn tất cả
+                  </Checkbox>
 
                   <Input.Search
                     className="w-[30%]"
@@ -804,6 +825,11 @@ const PcCoiThi = () => {
                     onChange={(e) => setSearchGV(e.target.value)}
                     style={{ marginBottom: '16px' }}
                   />
+
+                  <Checkbox onChange={onCheckAllChangeGV} >
+                    Chọn tất cả
+                  </Checkbox>
+
 
                   <div className="flex gap-3">
                     <div className="text-base-bold">Khoa:</div>

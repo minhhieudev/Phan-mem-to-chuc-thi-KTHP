@@ -71,7 +71,7 @@ const Dashboard = () => {
     };
 
     return (
-        <div className="py-4 px-0">
+        <div className="py-4 px-0 h-full">
             <div className="grid grid-cols-3 gap-6 mb-3 ">
                 <div className="bg-white p-4 rounded-lg shadow-xl flex items-center">
                     <CalendarOutlined style={{ fontSize: "90px" }} className="mr-4 text-blue-500" />

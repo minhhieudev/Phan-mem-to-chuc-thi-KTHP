@@ -171,9 +171,9 @@ const PcChamThiTable = () => {
   return (
     <div className="py-2 px-3 shadow-xl bg-white rounded-xl mt-3 h-[85vh] flex flex-col">
 
-      <div className="flex items-center justify-between mb-3">
+      <div className="flex items-center justify-between mb-2">
        
-        <h2 className="font-bold text-heading3-bold text-center text-green-500 flex-grow">DANH SÁCH PHÂN CÔNG CHẤM THI</h2>
+        <h2 className="font-bold text-heading4-bold text-center text-green-500 flex-grow">DANH SÁCH PHÂN CÔNG CHẤM THI</h2>
         <Button
           className="button-dang-day text-white font-bold shadow-md mb-2"
           onClick={() => router.push(`/giaovu/pc-cham-thi/create`)}

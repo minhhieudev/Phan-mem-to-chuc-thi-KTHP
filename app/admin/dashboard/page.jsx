@@ -71,7 +71,7 @@ const Dashboard = () => {
     };
 
     return (
-        <div className="py-4 px-0">
+        <div className="py-4 px-0 h-[90vh]">
             <div className="grid grid-cols-3 gap-6 mb-3 ">
                 <div className="bg-white p-4 rounded-lg shadow-xl flex items-center">
                     <CalendarOutlined style={{ fontSize: "90px" }} className="mr-4 text-blue-500" />
@@ -138,7 +138,7 @@ const Dashboard = () => {
                 </div>
             </div>
 
-            <div className="grid grid-cols-5 gap-4 ">
+            <div className="grid grid-cols-5 gap-4 h-[66vh]">
                 <div className="col-span-3 bg-white p-6 rounded-lg shadow-md">
                     <h2 className="text-xl font-bold mb-4">Biểu đồ</h2>
                     <ResponsiveContainer width="100%" height={300}>
@@ -154,7 +154,7 @@ const Dashboard = () => {
                     </ResponsiveContainer>
                 </div>
 
-                <div className="col-span-2 bg-white p-6 rounded-lg shadow-md">
+                <div className="col-span-2 bg-white p-6 rounded-lg shadow-md ">
                     <div className="flex justify-between mb-4">
                         <h2 className="text-xl font-bold">Danh sách</h2>
                         <div className="flex space-x-4 w-[70%]">
@@ -194,7 +194,7 @@ const Dashboard = () => {
                             </Select>
                         </div>
                     </div>
-                    <div style={{ maxHeight: '355px', overflowY: 'auto' }}> {/* Thêm scroll */}
+                    <div style={{ maxHeight: '360px', overflowY: 'auto' }}> {/* Thêm scroll */}
                         <Table columns={columns} dataSource={filteredData} pagination={{ pageSize }} rowKey="key" />
                     </div>
                 </div>

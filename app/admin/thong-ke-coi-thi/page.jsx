@@ -123,21 +123,19 @@ const PcCoiThiTable = () => {
       title: 'Phòng thi',
       dataIndex: 'phong',
       key: 'phong',
-      width: 120,
+      width: 90,
       render: (text) => <span style={{ fontWeight: 'bold' }}>{text}</span>,
     },
     {
       title: 'Cán bộ coi thi 1',
       dataIndex: 'cbo1',
       key: 'cbo1',
-      width: 120,
       render: (text) => <span style={{ fontWeight: 'bold' }}>{text}</span>,
     },
     {
       title: 'Cán bộ coi thi 2',
       dataIndex: 'cbo2',
       key: 'cbo2',
-      width: 120,
       render: (text) => <span style={{ fontWeight: 'bold' }}>{text}</span>,
     },
     {
@@ -188,17 +186,17 @@ const PcCoiThiTable = () => {
   );
 
   return (
-    <div className="py-2 px-3 shadow-xl bg-white rounded-xl mt-3 h-[85vh] flex flex-col">
+    <div className="py-2 px-3 shadow-xl bg-white rounded-xl mt-3 h-full flex flex-col">
 
       <div className="flex items-center justify-between mb-3">
         <div className="flex gap-2">
-          <div className="text-heading4-bold">LOẠI:</div>
+          <div className="font-bold">LOẠI:</div>
           <Select placeholder="Chọn loại hình đào tạo..." onChange={(value) => setLoai(value)}>
             <Option value="chinh-quy">Chính quy</Option>
             <Option value="lien-thong-vlvh">Liên thông vừa làm vừa học</Option>
           </Select>
         </div>
-        <h2 className="font-bold text-heading3-bold text-center text-green-500">DANH SÁCH PHÂN CÔNG COI THI</h2>
+        <h2 className="font-bold text-heading4-bold text-center text-green-500">DANH SÁCH PHÂN CÔNG COI THI</h2>
         <Button
           className="button-dang-day text-white font-bold shadow-md mb-2"
           onClick={() => router.push(`/admin/thong-ke-coi-thi/create`)}
@@ -206,8 +204,8 @@ const PcCoiThiTable = () => {
           TẠO MỚI
         </Button>
       </div>
-      <div className="flex justify-between items-center mb-3">
-        <div className="w-[25%] flex items-center gap-2">
+      <div className="flex justify-between items-center mb-2">
+        <div className="w-[25%] flex items-center gap-2 h-[10px]">
           <label className="block text-sm font-semibold mb-1">Năm học:</label>
           <Select
             placeholder="Chọn năm học"

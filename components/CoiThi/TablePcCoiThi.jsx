@@ -272,8 +272,8 @@ const TablePcCoiThi = ({ list, namHoc, loaiKyThi, loaiDaoTao, hocky }) => {
         </div>
       ) : (
         <div className="flex-grow overflow-auto" style={{ maxHeight: 'calc(85vh - 120px)' }}>
-          <div className="text-heading3-bold text-orange-600 text-center mb-2" style={{ textTransform: "uppercase" }}>
-            BẢNG THỐNG KÊ COI THI KỲ THI KẾT THÚC HỌC PHẦN - HỆ {loaiDaoTao} - THUỘC HỌC KỲ {hocky}, NĂM HỌC {namHoc}
+          <div className="text-heading4-bold text-orange-600 text-center mb-2" style={{ textTransform: "uppercase" }}>
+            KẾT QUẢ PHÂN CÔNG COI THI KỲ THI KẾT THÚC HỌC PHẦN - HỆ {loaiDaoTao} - THUỘC HỌC KỲ {hocky}, NĂM HỌC {namHoc}
           </div>
           <div className="mb-4   flex justify-end">
             <Input.Search

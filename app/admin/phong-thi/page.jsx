@@ -176,7 +176,7 @@ const PhongThiForm = () => {
     ];
 
     return (
-        <div className="flex gap-5 max-sm:flex-col mt-4 h-[83vh]">
+        <div className="flex gap-5 max-sm:flex-col mt-3 h-full">
             <div className="p-4 shadow-xl bg-white rounded-xl flex-[25%]">
                 <Title className="text-center" level={3}>QUẢN LÝ PHÒNG THI</Title>
 

@@ -1,10 +1,11 @@
 "use client";
 import { useState, useEffect } from "react";
 import { useForm, Controller } from "react-hook-form";
-import { Button, Input, Form, Space, Typography, Table, Popconfirm, InputNumber, Select, Checkbox, Row, Col } from "antd";
+import { Button, Input, Form, Space, Typography, Table, Popconfirm, InputNumber, Select, Checkbox, Row, Col, Pagination } from "antd";
 import toast from "react-hot-toast";
 import Loader from "../../../components/Loader";
 import { SearchOutlined } from '@ant-design/icons';
+import { FileExcelOutlined } from '@ant-design/icons';
 
 const { Title } = Typography;
 
@@ -28,10 +29,18 @@ const HocPhanThiForm = () => {
         defaultValues: formSchema,
     });
     const [current, setCurrent] = useState(1);
-    const [pageSize] = useState(5);
+    const [pageSize, setPageSize] = useState(10);
+
     const [searchName, setSearchName] = useState("");
     const [loading, setLoading] = useState(true);
     const [formVisible, setFormVisible] = useState(false); // Trạng thái ẩn hiện form
+    const [filteredData, setFilteredData] = useState([]);
+
+
+    const paginatedData = filteredData.slice(
+        (current - 1) * pageSize,
+        current * pageSize
+    );
 
     useEffect(() => {
         fetchData();
@@ -45,7 +54,7 @@ const HocPhanThiForm = () => {
                 hocPhan.maHocPhan.toLowerCase().includes(searchName.toLowerCase())
             );
         }
-        setFilteredList(filteredData);
+        setFilteredData(filteredData);
     }, [searchName, dataList]);
 
     const fetchData = async () => {
@@ -58,6 +67,8 @@ const HocPhanThiForm = () => {
                 const data = await res.json();
                 setDataList(data);
                 setFilteredList(data);
+                setFilteredData(data);
+
                 setLoading(false);
             } else {
                 toast.error("Failed to fetch data");
@@ -219,7 +230,7 @@ const HocPhanThiForm = () => {
     ];
 
     return (
-        <div className="flex gap-5 max-sm:flex-col mt-4 h-[83vh]">
+        <div className="flex gap-2 max-sm:flex-col mt-3 h-full">
 
 
             {/* Form Section */}
@@ -354,8 +365,8 @@ const HocPhanThiForm = () => {
             )}
 
             {/* Table Section */}
-            <div className="bg-white p-6 shadow-xl rounded-xl overflow-auto flex-[75%]">
-                <div className="mb-4 flex justify-between">
+            <div className="bg-white p-3 shadow-xl rounded-xl overflow-auto flex-[75%]">
+                <div className="mb-2 flex justify-between">
                     <Input
                         placeholder="Tìm kiếm học phần"
                         value={searchName}
@@ -363,24 +374,44 @@ const HocPhanThiForm = () => {
                         prefix={<SearchOutlined />}
                         className="w-[30%]"
                     />
+                    <div className="font-bold text-[20px] text-green-500">
+                        DANH SÁCH HỌC PHẦN
+                    </div>
                     <Button type="primary" onClick={() => setFormVisible(!formVisible)}>
                         {formVisible ? "Ẩn Form" : "Hiện Form"}
                     </Button>
                 </div>
                 {loading ? <Loader /> : (
-                    <Table
-                        rowKey="_id"
-                        columns={columns}
-                        dataSource={filteredList.slice((current - 1) * pageSize, current * pageSize)}
-                        pagination={{
-                            current,
-                            pageSize,
-                            total: filteredList.length,
-                            onChange: (page) => setCurrent(page),
-                        }}
-                        scroll={{ y: 350 }} // Bảng cuộn khi vượt quá chiều cao
-                    />
+
+                    <div className="flex-grow overflow-auto" style={{ maxHeight: 'calc(90vh - 110px)' }}>
+                        <Table
+                            columns={columns}
+                            dataSource={paginatedData}
+                            rowKey="_id"
+                            pagination={false} // Tắt phân trang trên Table
+                        />
+                    </div>
                 )}
+                <div className="mt-2 flex justify-between">
+                    <Button
+                        className="button-lien-thong-vlvh text-white font-bold shadow-md "
+                    //onClick={() => exportToExcelTongHop() }
+                    ><FileExcelOutlined />
+                        Xuất file Excel
+                    </Button>
+                    <Pagination
+                        current={current}
+                        pageSize={pageSize}
+                        total={filteredData.length}
+                        onChange={(page, size) => {
+                            setCurrent(page);
+                            setPageSize(size);
+                        }}
+                        pageSizeOptions={['10', '25', '50', '100', '200']}
+                        showSizeChanger
+                        className="flex justify-end"
+                    />
+                </div>
             </div>
         </div>
     );

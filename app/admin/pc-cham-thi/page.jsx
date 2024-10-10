@@ -169,17 +169,17 @@ const PcChamThiTable = () => {
   );
 
   return (
-    <div className="py-2 px-3 shadow-xl bg-white rounded-xl mt-3 h-[85vh] flex flex-col">
+    <div className="py-2 px-3 shadow-xl bg-white rounded-xl mt-2 h-full flex flex-col">
 
-      <div className="flex items-center justify-between mb-3">
+      <div className="flex items-center justify-between mb-1">
         <div className="flex gap-2">
           <div className="text-heading4-bold">LOẠI:</div>
-          <Select placeholder="Chọn loại hình đào tạo..." onChange={(value) => setLoai(value)}>
+          <Select size="small" placeholder="Chọn loại hình đào tạo..." onChange={(value) => setLoai(value)}>
             <Option value="chinh-quy">Chính quy</Option>
             <Option value="lien-thong-vlvh">Liên thông vừa làm vừa học</Option>
           </Select>
         </div>
-        <h2 className="font-bold text-heading3-bold text-center text-green-500">DANH SÁCH PHÂN CÔNG CHẤM THI</h2>
+        <h2 className="font-bold text-heading4-bold text-center text-green-500">DANH SÁCH PHÂN CÔNG CHẤM THI</h2>
         <Button
           className="button-dang-day text-white font-bold shadow-md mb-2"
           onClick={() => router.push(`/admin/pc-cham-thi/create`)}
@@ -190,7 +190,7 @@ const PcChamThiTable = () => {
       <div className="flex justify-between items-center mb-3">
         <div className="w-[25%] flex items-center gap-2">
           <label className="block text-sm font-semibold mb-1">Năm học:</label>
-          <Select
+          <Select size="small"
             placeholder="Chọn năm học"
             onChange={(value) => setNamHoc(value)}
             className="w-[50%]"
@@ -204,7 +204,7 @@ const PcChamThiTable = () => {
 
         <div className="w-[25%] flex items-center gap-2">
           <label className="block text-sm font-semibold mb-1">Loại kỳ thi:</label>
-          <Select
+          <Select size="small"
             placeholder="Chọn loại kỳ thi"
             onChange={(value) => setLoaiKyThi(value)}
             className="w-[50%]"
@@ -223,7 +223,7 @@ const PcChamThiTable = () => {
         </div>
 
         <div className="w-[20%]">
-          <Input.Search
+          <Input.Search size="small"
             placeholder="Tìm kiếm học phần, giảng viên..."
             allowClear
             onChange={(e) => setSearchTerm(e.target.value)}

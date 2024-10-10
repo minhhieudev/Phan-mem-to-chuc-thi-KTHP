@@ -255,8 +255,8 @@ const UserForm = () => {
     return loading ? (
         <Loader />
     ) : (
-        <div className="flex gap-5 max-sm:flex-col mt-4 h-[83vh]">
-            <div className="p-4 shadow-xl bg-white rounded-xl flex-[35%]">
+        <div className="flex gap-2 max-sm:flex-col mt-3 h-full">
+            <div className="p-4 shadow-xl bg-white rounded-xl flex-[30%]">
                 <Title className="text-center" level={3}>QUẢN LÝ NGƯỜI DÙNG</Title>
 
                 <Form onFinish={handleSubmit(onSubmit)} layout="vertical" className="space-y-5 mt-6">
@@ -317,14 +317,12 @@ const UserForm = () => {
 
                             <div className="w-[40%]">
                                 <Form.Item
-                                    label={<span className="font-bold text-xl">Quyền <span className="text-red-600">*</span></span>}
+                                    label={<span className="font-bold text-xl">Quyền</span>}
                                     validateStatus={errors.role ? 'error' : ''}
-                                    help={errors.role?.message}
                                 >
                                     <Controller
                                         name="role"
                                         control={control}
-                                        rules={{ required: "Quyền là bắt buộc" }}
                                         render={({ field }) => (
                                             <Select className="w-full" placeholder="Chọn quyền" {...field}>
                                                 {quyenOptions.map(role => (
@@ -379,8 +377,8 @@ const UserForm = () => {
             </div>
 
             <div className="p-3 shadow-xl bg-white rounded-xl flex-[65%]">
-                <div className="flex flex-col gap-2 justify-between items-center mb-4">
-                    <Title level={3} className="text-center">DANH SÁCH NGƯỜI DÙNG</Title>
+                <div className="flex flex-col gap-2 justify-between items-center mb-2">
+                    <Title level={4} className="text-center">DANH SÁCH NGƯỜI DÙNG</Title>
                     <div className="flex gap-3 justify-between w-full">
                         <div className="flex flex-1">
                             <Input
