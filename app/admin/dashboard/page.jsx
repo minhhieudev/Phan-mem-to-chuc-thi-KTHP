@@ -1,6 +1,6 @@
 'use client';
 import React, { useState, useEffect, useMemo } from "react";
-import { Table, Select, Progress, Input } from "antd";
+import { Table, Select, Progress, Input, Pagination } from "antd";
 import {
     CheckCircleOutlined,
     CalendarOutlined,
@@ -35,9 +35,10 @@ const Dashboard = () => {
         }
     ];
 
-    const [selectedKhoa, setSelectedKhoa] = useState(null);
+    const [selectedKhoa, setSelectedKhoa] = useState('');
     const [khoaList, setKhoaList] = useState([]);
-    const [pageSize, setPageSize] = useState(5);
+    const [current, setCurrent] = useState(1);
+    const [pageSize, setPageSize] = useState(10);
     const [namHoc, setNamHoc] = useState('2024-2025');
     const [hocKy, setHocKy] = useState('1');
 
@@ -127,7 +128,7 @@ const Dashboard = () => {
     }, [namHoc, hocKy]);
 
     useEffect(() => {
-        if (!selectedKhoa) return
+        if (selectedKhoa == '') return
         fetchDataThongKe2();
     }, [namHoc, hocKy, selectedKhoa]);
 
@@ -139,16 +140,15 @@ const Dashboard = () => {
         setSearchTerm(value.toLowerCase());
     };
 
-    const filteredData = useMemo(() => {
-        if (!searchTerm) return listCount;
-        return listCount.filter(item =>
-            item.username.toLowerCase().includes(searchTerm)
-        );
-    }, [listCount, searchTerm]);
+  // Phân trang dữ liệu
+  const paginatedData = listCount.slice(
+    (current - 1) * pageSize,
+    current * pageSize
+  );
 
     return (
-        <div className="py-2 px-0 h-[92vh]">
-            <div className="grid grid-cols-3 gap-4 mb-3 ">
+        <div className="py-4 px-0 h-[90vh]">
+            <div className="grid grid-cols-3 gap-6 mb-3 ">
                 <div className="bg-white p-4 rounded-lg shadow-xl flex items-center">
                     <CalendarOutlined style={{ fontSize: "90px" }} className="mr-4 text-blue-500" />
                     <div className="text-base-bold space-y-3">
@@ -214,10 +214,10 @@ const Dashboard = () => {
                 </div>
             </div>
 
-            <div className="grid grid-cols-5 gap-3 h-[67vh]">
+            <div className="grid grid-cols-5 gap-4 h-[66vh]">
                 <div className="col-span-3 bg-white p-6 rounded-lg shadow-md">
                     <h2 className="text-xl font-bold mb-4">Biểu đồ</h2>
-                    <ResponsiveContainer width="100%" height={300}>
+                    {/* <ResponsiveContainer width="100%" height={300}>
                         <BarChart data={filteredData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
                             <CartesianGrid strokeDasharray="3 3" />
                             <XAxis dataKey="username" />
@@ -227,7 +227,7 @@ const Dashboard = () => {
                             <Bar dataKey="soBuoiCoiThi" fill="#82ca9d" name="Số buổi coi thi" />
                             <Bar dataKey="soBuoiChamThi" fill="#ff6347" name="Số bài đã chấm" />
                         </BarChart>
-                    </ResponsiveContainer>
+                    </ResponsiveContainer> */}
                 </div>
 
                 <div className="col-span-2 bg-white p-6 rounded-lg shadow-md ">
@@ -235,7 +235,6 @@ const Dashboard = () => {
                         <h2 className="text-xl font-bold">Danh sách</h2>
                         <div className="flex space-x-4 w-[70%]">
                             <Select
-                                size="small"
                                 placeholder="Chọn khoa"
                                 style={{ width: 200 }}
                                 value={selectedKhoa}
@@ -257,22 +256,25 @@ const Dashboard = () => {
                                 //onSearch={handleSearch}
                                 onChange={(e) => handleSearch(e.target.value)}
                             />
-                            <Select
-                                value={pageSize}
-                                defaultValue={5}
-                                style={{ width: 100 }}
-                                onChange={(value) => setPageSize(value)}
-                            >
-                                {[5, 10, 15, 20].map((size) => (
-                                    <Option key={size} value={size}>
-                                        {size}
-                                    </Option>
-                                ))}
-                            </Select>
                         </div>
                     </div>
-                    <div style={{ maxHeight: '360px', overflowY: 'auto' }}>
-                        <Table columns={columns} dataSource={filteredData} pagination={{ pageSize }} rowKey="key" />
+                    <div>
+                        <div style={{ maxHeight: '360px', overflowY: 'auto' }}>
+                            <Table columns={columns} dataSource={paginatedData} pagination={false} rowKey="key" />
+                        </div>
+                        <Pagination
+                            current={current}
+                            pageSize={pageSize}
+                            total={listCount.length}
+                            onChange={(page, size) => {
+                                setCurrent(page);
+                                setPageSize(size);
+                            }}
+                            pageSizeOptions={['10', '25', '50', '100', '200']}
+                            showSizeChanger
+                            className="flex justify-end"
+                        />
+                       
                     </div>
                 </div>
             </div>
