@@ -38,7 +38,6 @@
     "react-highlight-words": "^0.20.0",
     "react-hook-form": "^7.52.1",
     "react-hot-toast": "^2.4.1",
-    "react-random": "^1.1.2",
     "recharts": "^2.12.7",
     "uuid": "^10.0.0",
     "xlsx": "^0.18.5"
