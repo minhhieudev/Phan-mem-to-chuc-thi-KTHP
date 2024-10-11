@@ -40,3 +40,11 @@ export default WorkHours;
 
 
 // Giải quyết chỗ lấy gv của khoa để random , hiện tại lấy trên khoa, phải sửa lại lấy trong danh sách select
+
+
+
+
+
+
+
+// dashboard , chấm thi ko có kì và ngày chấm nên k biết thống kê

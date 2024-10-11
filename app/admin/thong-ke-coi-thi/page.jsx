@@ -12,12 +12,13 @@ const { Option } = Select;
 const PcCoiThiTable = () => {
   const [dataList, setDataList] = useState([]);
   const [filteredData, setFilteredData] = useState([]);
-  const [namHoc, setNamHoc] = useState("");
+  const [namHoc, setNamHoc] = useState("2024-2025");
+  const [hocKy, setHocKy] = useState("");
   const [loaiKyThi, setLoaiKyThi] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const [loai, setLoai] = useState("chinh-quy");
+  const [loai, setLoai] = useState("Chính quy");
 
   const [current, setCurrent] = useState(1);
   const [pageSize, setPageSize] = useState(10);
@@ -30,7 +31,7 @@ const PcCoiThiTable = () => {
     const fetchData = async () => {
       try {
         setLoading(true);
-        const res = await fetch(`/api/admin/pc-coi-thi?namHoc=${namHoc}&loaiKyThi=${loaiKyThi}&loai=${loai}`, {
+        const res = await fetch(`/api/admin/pc-coi-thi?namHoc=${namHoc}&loaiKyThi=${loaiKyThi}&loai=${loai}&hocKy=${hocKy}`, {
           method: "GET",
           headers: { "Content-Type": "application/json" },
         });
@@ -49,7 +50,7 @@ const PcCoiThiTable = () => {
     };
 
     fetchData();
-  }, [namHoc, loaiKyThi, loai]);
+  }, [namHoc, loaiKyThi, loai,hocKy]);
 
   useEffect(() => {
     const filtered = dataList.filter((item) =>
@@ -127,26 +128,26 @@ const PcCoiThiTable = () => {
       render: (text) => <span style={{ fontWeight: 'bold' }}>{text}</span>,
     },
     {
-      title: 'Cán bộ coi thi 1',
+      title: 'Cán bộ 1',
       dataIndex: 'cbo1',
       key: 'cbo1',
-      render: (text) => <span style={{ fontWeight: 'bold' }}>{text}</span>,
+      render: (text) => <span style={{ fontWeight: 'bold', color: 'blue' }}>{text}</span>,
     },
     {
-      title: 'Cán bộ coi thi 2',
+      title: 'Cán bộ 2',
       dataIndex: 'cbo2',
       key: 'cbo2',
-      render: (text) => <span style={{ fontWeight: 'bold' }}>{text}</span>,
+      render: (text) => <span style={{ fontWeight: 'bold',color: 'blue' }}>{text}</span>,
     },
     {
-      title: 'Hình thức',
+      title: 'HT',
       dataIndex: 'hinhThuc',
       key: 'hinhThuc',
       width: 20,
       render: (text) => <span style={{ fontWeight: 'bold' }}>{text}</span>,
     },
     {
-      title: 'Thời gian',
+      title: 'TG',
       dataIndex: 'thoiGian',
       key: 'thoiGian',
       width: 20,
@@ -162,7 +163,7 @@ const PcCoiThiTable = () => {
       title: 'Hành động',
       key: 'action',
       render: (_, record) => (
-        <Space size="middle">
+        <Space size="small">
           <Button size="small" onClick={() => router.push(`/admin/thong-ke-coi-thi/edit/${record._id}`)} type="primary">Sửa</Button>
           <Popconfirm
             title="Bạn có chắc chắn muốn xoá?"
@@ -186,28 +187,28 @@ const PcCoiThiTable = () => {
   );
 
   return (
-    <div className="py-2 px-3 shadow-xl bg-white rounded-xl mt-3 h-full flex flex-col">
+    <div className="py-1 px-3 shadow-xl bg-white rounded-xl mt-2 h-full flex flex-col">
 
-      <div className="flex items-center justify-between mb-3">
+      <div className="flex items-center justify-between mb-1">
         <div className="flex gap-2">
-          <div className="font-bold">LOẠI:</div>
-          <Select placeholder="Chọn loại hình đào tạo..." onChange={(value) => setLoai(value)}>
-            <Option value="chinh-quy">Chính quy</Option>
-            <Option value="lien-thong-vlvh">Liên thông vừa làm vừa học</Option>
+          <div className="font-bold text-small-bold">LOẠI:</div>
+          <Select size="small" value={loai} placeholder="Chọn loại hình đào tạo..." onChange={(value) => setLoai(value)}>
+            <Option value="Chính quy">Chính quy</Option>
+            <Option value="Liên thông vừa làm vừa học">Liên thông vừa làm vừa học</Option>
           </Select>
         </div>
         <h2 className="font-bold text-heading4-bold text-center text-green-500">DANH SÁCH PHÂN CÔNG COI THI</h2>
         <Button
-          className="button-dang-day text-white font-bold shadow-md mb-2"
+          className="button-dang-day text-white font-bold shadow-md mb-1"
           onClick={() => router.push(`/admin/thong-ke-coi-thi/create`)}
         >
           TẠO MỚI
         </Button>
       </div>
-      <div className="flex justify-between items-center mb-2">
+      <div className="flex justify-between items-center mb-1 text-small-bold">
         <div className="w-[25%] flex items-center gap-2 h-[10px]">
           <label className="block text-sm font-semibold mb-1">Năm học:</label>
-          <Select
+          <Select value={namHoc} size="small" allowClear
             placeholder="Chọn năm học"
             onChange={(value) => setNamHoc(value)}
             className="w-[50%]"
@@ -219,9 +220,22 @@ const PcCoiThiTable = () => {
           </Select>
         </div>
 
+        <div className="w-[25%] flex items-center gap-2 h-[10px]">
+          <label className="block text-sm font-semibold mb-1">Kỳ:</label>
+          <Select value={hocKy} size="small" allowClear
+            placeholder="Chọn học kỳ"
+            onChange={(value) => setHocKy(value)}
+            className="w-[50%]"
+          >
+            <Option value="1">1</Option>
+            <Option value="2">2</Option>
+           
+          </Select>
+        </div>
+
         <div className="w-[25%] flex items-center gap-2">
           <label className="block text-sm font-semibold mb-1">Loại kỳ thi:</label>
-          <Select
+          <Select size="small" allowClear
             placeholder="Chọn loại kỳ thi"
             onChange={(value) => setLoaiKyThi(value)}
             className="w-[50%]"
@@ -240,7 +254,7 @@ const PcCoiThiTable = () => {
         </div>
 
         <div className="w-[20%]">
-          <Input.Search
+          <Input.Search size="small"
             placeholder="Tìm kiếm học phần, giảng viên..."
             allowClear
             onChange={(e) => setSearchTerm(e.target.value)}
@@ -253,7 +267,7 @@ const PcCoiThiTable = () => {
           <Spin />
         </div>
       ) : (
-        <div className="flex-grow overflow-auto" style={{ maxHeight: 'calc(85vh - 120px)' }}>
+        <div className="flex-grow overflow-auto" style={{ maxHeight: 'calc(85vh - 75px)' }}>
           <Table
             columns={columns}
             dataSource={paginatedData}

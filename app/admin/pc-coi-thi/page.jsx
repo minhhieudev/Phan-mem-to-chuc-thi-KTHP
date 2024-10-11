@@ -31,9 +31,9 @@ const PcCoiThi = () => {
   const [list, setList] = useState([]);
 
   const [namHoc, setNamHoc] = useState("2024-2025");
-  const [loaiKyThi, setLoaiKyThi] = useState("Học kỳ 1");
+  const [loaiKyThi, setLoaiKyThi] = useState("1");
   const [loaiDaoTao, setLoaiDaoTao] = useState("Chính quy");
-  const [hocky, setHocKy] = useState("1");
+  const [hocKy, setHocKy] = useState("1");
   const [examDateRange, setExamDateRange] = useState({});
   const [loading, setLoading] = useState(true);
 
@@ -68,10 +68,10 @@ const PcCoiThi = () => {
     setListHocPhanSelect(e.target.checked ? listHocPhan : []);
   };
   const onCheckAllChangePhong = (e) => {
-    setListPhongSelect(e.target.checked ? listHocPhan : []);
+    setListPhongSelect(e.target.checked ? listPhong : []);
   };
   const onCheckAllChangeGV = (e) => {
-    setListGVSelect(e.target.checked ? listHocPhan : []);
+    setListGVSelect(e.target.checked ? listGV : []);
   };
 
   const handleCancel = () => {
@@ -227,7 +227,7 @@ const PcCoiThi = () => {
 
   const handleCreate = () => {
     // Check data
-    if (!examDateRange.startDate || !examDateRange.endDate || !examSessions.length || !namHoc || !loaiKyThi || !hocky || !loaiDaoTao) {
+    if (!examDateRange.startDate || !examDateRange.endDate || !examSessions.length || !namHoc || !loaiKyThi || !hocKy || !loaiDaoTao) {
       message.error("Vui lòng nhập đầy đủ thông tin");
       return;
     }
@@ -304,7 +304,7 @@ const PcCoiThi = () => {
           ngayThi: ngayThi,
           namHoc,
           loaiKyThi,
-          hocky,
+          hocKy,
           loaiDaoTao
         },
         {
@@ -320,7 +320,7 @@ const PcCoiThi = () => {
           ngayThi: ngayThi,
           namHoc,
           loaiKyThi,
-          hocky,
+          hocKy,
           loaiDaoTao
         }
       ];
@@ -459,7 +459,7 @@ const PcCoiThi = () => {
             ngayThi: randomDate instanceof Date ? randomDate.toLocaleDateString() : randomDate,
             namHoc,
             loaiKyThi,
-            hocky,
+            hocKy,
             loaiDaoTao
           };
 
@@ -507,18 +507,19 @@ const PcCoiThi = () => {
               <div className=" flex items-center gap-2">
                 <label className="block text-sm font-semibold mb-1 ">Loại đào tạo:</label>
                 <Select
+                  size="small"
                   value={loaiDaoTao}
                   placeholder="Chọn loại đào tạo"
                   onChange={(value) => setLoaiDaoTao(value)}
                   className=""
                 >
                   <Option value="Chính quy">Chính quy</Option>
-                  <Option value="Liên thông">Liên thông</Option>
+                  <Option value="Liên thông vừa làm vừa học">Liên thông vừa làm vừa học</Option>
                 </Select>
               </div>
               <div className=" flex items-center gap-2">
                 <label className="block text-sm font-semibold mb-1 ">Năm học:</label>
-                <Select
+                <Select size="small"
                   value={namHoc}
                   placeholder="Chọn năm học"
                   onChange={(value) => setNamHoc(value)}
@@ -532,8 +533,8 @@ const PcCoiThi = () => {
               </div>
               <div className=" flex items-center gap-2">
                 <label className="block text-sm font-semibold mb-1 ">Học kỳ:</label>
-                <Select
-                  value={hocky}
+                <Select size="small"
+                  value={hocKy}
                   placeholder="Chọn học kỳ"
                   onChange={(value) => setHocKy(value)}
                   className=""
@@ -544,13 +545,13 @@ const PcCoiThi = () => {
 
               </div>
 
-              <div className=" flex items-center gap-2">
+              <div className=" flex items-center gap-2 w-[13%]">
                 <label className="block text-sm font-semibold mb-1 ">Loại kỳ thi:</label>
-                <Select
+                <Select size="small"
                   value={loaiKyThi}
                   placeholder="Chọn loại kỳ thi"
                   onChange={(value) => setLoaiKyThi(value)}
-                  className=""
+                  className="w-[60%]"
                 >
                   <Option value="Học kỳ 1">Học kỳ 1</Option>
                   <Option value="Học kỳ 1 (đợt 2)">Học kỳ 1 (đợt 2)</Option>
@@ -771,9 +772,7 @@ const PcCoiThi = () => {
                     <Select.Option value="Khác">Phòng khác</Select.Option>
                   </Select>
 
-                  <Checkbox onChange={onCheckAllChangePhong} >
-                    Chọn tất cả
-                  </Checkbox>
+
 
                   <Input.Search
                     className="w-[30%]"
@@ -785,8 +784,11 @@ const PcCoiThi = () => {
                     style={{ marginBottom: '16px' }}
                   />
                 </div>
-
+                <Checkbox onChange={onCheckAllChangePhong} >
+                  Chọn tất cả
+                </Checkbox>
                 <div className="flex gap-3 flex-wrap">
+
                   {filteredListPhong.map((phong) => (
                     <div >
                       <Checkbox
@@ -826,11 +828,6 @@ const PcCoiThi = () => {
                     style={{ marginBottom: '16px' }}
                   />
 
-                  <Checkbox onChange={onCheckAllChangeGV} >
-                    Chọn tất cả
-                  </Checkbox>
-
-
                   <div className="flex gap-3">
                     <div className="text-base-bold">Khoa:</div>
                     <Select
@@ -849,7 +846,9 @@ const PcCoiThi = () => {
                     </Select>
                   </div>
                 </div>
-
+                <Checkbox onChange={onCheckAllChangeGV} >
+                  Chọn tất cả
+                </Checkbox>
                 <div className="flex  flex-wrap gap-3 h-[20%]">
                   {filteredListGV.map((gv) => (
                     <div
@@ -884,7 +883,7 @@ const PcCoiThi = () => {
                 return dateA - dateB;
               })}
               namHoc={namHoc}
-              hocky={hocky}
+              hocKy={hocKy}
               loaiKyThi={loaiKyThi}
               loaiDaoTao={loaiDaoTao}
             />

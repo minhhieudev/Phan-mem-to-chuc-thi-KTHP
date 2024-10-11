@@ -64,7 +64,7 @@ export const POST = async (req) => {
       diaDiem: data.diaDiem || 0,
       namHoc,
       soBai,
-      hinhThucThoiGian,
+      hinhThucThoiGianThi,
       loaiKyThi:data.loaiKyThi,
       loai: data.loai || ""
     });

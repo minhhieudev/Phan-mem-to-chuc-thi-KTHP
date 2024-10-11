@@ -13,17 +13,19 @@ const { Option } = Select;
 
 const formSchema = {
   hocPhan: [],
-  nhomLop: [],
+  //lop: [],
+  lop: '',
   ngayThi: '',
   ca: 0,
-  cb1: '',
-  cb2: "",
-  time: [],
-  phongThi: '',
+  cbo1: '',
+  cbo2: "",
+  thoiGian: [],
+  phong: '',
   diaDiem: '',
   ghiChu: "",
   namHoc: "",
-  loaiKyThi: ""
+  loaiKyThi: "",
+  hocKy: ''
 };
 
 const PcCoiThiForm = () => {
@@ -37,55 +39,15 @@ const PcCoiThiForm = () => {
   const router = useRouter();
   const { id } = useParams();
 
-  const [loai, setLoai] = useState('');
-
-
-  useEffect(() => {
-    if (id) {
-      const fetchRecord = async () => {
-        try {
-          const res = await fetch(`/api/admin/pc-coi-thi/edit?id=${id}`);
-          if (res.ok) {
-            const data = await res.json();
-            console.log("Ngày thi trước khi format:", data.ngayThi); // Kiểm tra giá trị trả về từ API
-  
-            // Format ngày với dayjs
-            const formattedNgayThi = dayjs(data.ngayThi, 'D/M/YYYY', true); // Sử dụng D/M/YYYY để hỗ trợ ngày/tháng một chữ số
-  
-            if (formattedNgayThi.isValid()) {  // Kiểm tra ngày hợp lệ
-              const dataFormat = {
-                ...data, 
-                ngayThi: formattedNgayThi.format('DD/MM/YYYY') // Format lại thành YYYY/MM/DD
-              };
-  
-              setEditRecord(dataFormat);
-              setLoai(dataFormat?.loai);
-              console.log("Data đã format:", dataFormat);
-              reset(dataFormat);
-            } else {
-              toast.error("Ngày thi không hợp lệ!");
-            }
-          } else {
-            toast.error("Không thể tải dữ liệu!");
-          }
-        } catch (error) {
-          toast.error("Có lỗi xảy ra khi tải dữ liệu!");
-        }
-      };
-  
-      fetchRecord();
-    }
-  }, [id, reset]);
-  
-
+  const [loai, setLoai] = useState('Chính quy');
 
   const onSubmit = async (data) => {
     // Chuyển đổi chuỗi nhập vào thành mảng
     const transformedData = {
       ...data,
       // hocPhan: typeof data.hocPhan === 'string' ? data.hocPhan.split(',').map(item => item.trim()) : data.hocPhan,
-      // nhomLop: typeof data.nhomLop === 'string' ? data.nhomLop.split(',').map(item => item.trim()) : data.nhomLop,
-      //time: typeof data.time === 'string' ? data.time.split(',').map(item => parseInt(item.trim(), 10)) : data.time
+      // lop: typeof data.lop === 'string' ? data.lop.split(',').map(item => item.trim()) : data.lop,
+      //thoiGian: typeof data.thoiGian === 'string' ? data.thoiGian.split(',').map(item => parseInt(item.trim(), 10)) : data.thoiGian
     };
 
     // Tiếp tục logic gửi dữ liệu
@@ -93,16 +55,16 @@ const PcCoiThiForm = () => {
       const url = `/api/admin/pc-coi-thi`;
 
       const res = await fetch(url, {
-        method: "PUT",
-        body: JSON.stringify({ ...transformedData, id: id, loai }),
+        method: "POST",
+        body: JSON.stringify({ ...transformedData, loai }),
         headers: { "Content-Type": "application/json" },
       });
 
       if (res.ok) {
-        toast.success("Cập nhật thành công!");
+        toast.success("Thêm mới thành công!");
         //router.push("/admin/pc-coi-thi");
       } else {
-        toast.error("Cập nhật thất bại!");
+        toast.error("Thêm mới thất bại!");
       }
     } catch (err) {
       toast.error("Có lỗi xảy ra!");
@@ -123,12 +85,12 @@ const PcCoiThiForm = () => {
         >
           <ArrowLeftOutlined style={{ color: 'white', fontSize: '18px' }} /> QUAY LẠI
         </Button>
-        <h2 className="font-bold text-heading3-bold flex-grow text-center text-green-500">CHỈNH SỬA PHÂN CÔNG COI THI</h2>
-        <div className="flex gap-2">
+        <h2 className="font-bold text-heading3-bold flex-grow text-center text-green-500">PHÂN CÔNG COI THI</h2>
+        <div className="flex gap-2 ">
           <div className="text-heading4-bold">LOẠI:</div>
-          <Select placeholder="Chọn loại hình đào tạo..." value={loai} onChange={(value) => setLoai(value)}>
-            <Option value="chinh-quy">Chính quy</Option>
-            <Option value="lien-thong-vlvh">Liên thông vừa làm vừa học</Option>
+          <Select className="w-[200px]" placeholder="Chọn loại hình đào tạo..." value={loai} onChange={(value) => setLoai(value)}>
+            <Option value="Chính quy">Chính quy</Option>
+            <Option value="Liên thông vừa làm vừa học">Liên thông vừa làm vừa học</Option>
           </Select>
         </div>
       </div>
@@ -146,7 +108,7 @@ const PcCoiThiForm = () => {
             </Form.Item>
           </Col>
           <Col span={12}>
-            <Form.Item label="Nhóm / lớp" validateStatus={errors.nhomLop ? 'error' : ''} help={errors.nhomLop?.message}>
+            <Form.Item label="Nhóm / lớp" validateStatus={errors.lop ? 'error' : ''} help={errors.lop?.message}>
               <Controller
                 name="lop"
                 control={control}
@@ -179,7 +141,7 @@ const PcCoiThiForm = () => {
             </Form.Item>
           </Col>
           <Col span={6}>
-            <Form.Item label="Phòng thi" validateStatus={errors.phongThi ? 'error' : ''} help={errors.phongThi?.message}>
+            <Form.Item label="Phòng thi" validateStatus={errors.phong ? 'error' : ''} help={errors.phong?.message}>
               <Controller
                 name="phong"
                 control={control}
@@ -201,44 +163,31 @@ const PcCoiThiForm = () => {
           </Col>
 
           <Col span={6}>
-            <Form.Item label="Thời gian thi (phút)" validateStatus={errors.time ? 'error' : ''} help={errors.time?.message}>
+            <Form.Item label="Thời gian " validateStatus={errors.thoiGian ? 'error' : ''} help={errors.thoiGian?.message}>
               <Controller
-                name="time"
+                name="thoiGian"
                 control={control}
                 rules={{ required: "Vui lòng nhập thời gian thi" }}
                 render={({ field }) => <Input placeholder="Nhập thời gian thi, cách nhau bởi dấu phẩy" {...field} />}
               />
             </Form.Item>
           </Col>
+
         </Row>
+
+
         <Row gutter={16}>
-          <Col span={12}>
-            <Form.Item label="Cán bộ coi thi 1" validateStatus={errors.cb1 ? 'error' : ''} help={errors.cb1?.message}>
+          <Col span={8}>
+            <Form.Item label="Hình thức" validateStatus={errors.thoiGian ? 'error' : ''} help={errors.hinhThuc?.message}>
               <Controller
-                name="cbo1"
+                name="hinhThuc"
                 control={control}
-                rules={{ required: "Vui lòng nhập cán bộ coi thi 1" }}
-                render={({ field }) => <Input placeholder="Nhập cán bộ coi thi 1..." {...field} />}
+                rules={{ required: "Vui lòng nhập hình thức thi" }}
+                render={({ field }) => <Input placeholder="Nhập hình thức thi, cách nhau bởi dấu phẩy" {...field} />}
               />
             </Form.Item>
           </Col>
-          <Col span={12}>
-            <Form.Item label="Cán bộ coi thi 2" validateStatus={errors.cb2 ? 'error' : ''} help={errors.cb2?.message}>
-              <Controller
-                name="cbo2"
-                control={control}
-                rules={{ required: "Vui lòng nhập cán bộ coi thi 2" }}
-                render={({ field }) => <Input placeholder="Nhập cán bộ coi thi 2..." {...field} />}
-              />
-            </Form.Item>
-          </Col>
-        </Row>
-        <Row gutter={16}>
-
-
-        </Row>
-        <Row gutter={16}>
-          <Col span={12}>
+          <Col span={8}>
             <Form.Item label="Địa điểm thi" validateStatus={errors.diaDiem ? 'error' : ''} help={errors.diaDiem?.message}>
               <Controller
                 name="diaDiem"
@@ -248,7 +197,7 @@ const PcCoiThiForm = () => {
               />
             </Form.Item>
           </Col>
-          <Col span={12}>
+          <Col span={8}>
             <Form.Item label="Ghi chú" validateStatus={errors.ghiChu ? 'error' : ''} help={errors.ghiChu?.message}>
               <Controller
                 name="ghiChu"
@@ -260,16 +209,61 @@ const PcCoiThiForm = () => {
         </Row>
         <Row gutter={16}>
           <Col span={12}>
+            <Form.Item label="Cán bộ coi thi 1" validateStatus={errors.cbo1 ? 'error' : ''} help={errors.cbo1?.message}>
+              <Controller
+                name="cbo1"
+                control={control}
+                rules={{ required: "Vui lòng nhập cán bộ coi thi 1" }}
+                render={({ field }) => <Input placeholder="Nhập cán bộ coi thi 1..." {...field} />}
+              />
+            </Form.Item>
+          </Col>
+          <Col span={12}>
+            <Form.Item label="Cán bộ coi thi 2" validateStatus={errors.cbo2 ? 'error' : ''} help={errors.cbo2?.message}>
+              <Controller
+                name="cbo2"
+                control={control}
+                rules={{ required: "Vui lòng nhập cán bộ coi thi 2" }}
+                render={({ field }) => <Input placeholder="Nhập cán bộ coi thi 2..." {...field} />}
+              />
+            </Form.Item>
+          </Col>
+        </Row>
+        <Row gutter={16}>
+          <Col span={8}>
             <Form.Item label="Năm học" validateStatus={errors.namHoc ? 'error' : ''} help={errors.namHoc?.message}>
               <Controller
                 name="namHoc"
                 control={control}
                 rules={{ required: "Vui lòng nhập năm học" }}
-                render={({ field }) => <Input placeholder="Nhập năm học..." {...field} />}
+                render={({ field }) => (<Select size="small"
+                  placeholder="Chọn năm học" {...field}
+                >
+                  <Option value="2021-2022">2021-2022</Option>
+                  <Option value="2022-2023">2022-2023</Option>
+                  <Option value="2023-2024">2023-2024</Option>
+                  <Option value="2024-2025">2024-2025</Option>
+                </Select>
+                )}
               />
             </Form.Item>
           </Col>
-          <Col span={12}>
+          <Col span={8}>
+            <Form.Item label="Kỳ" validateStatus={errors.hocKy ? 'error' : ''} help={errors.hocKy?.message}>
+              <Controller
+                name="hocKy"
+                control={control}
+                rules={{ required: "Vui lòng học kỳ" }}
+                render={({ field }) => (
+                  <Select placeholder="Chọn học kỳ..." {...field}>
+                    <Option value="1">1</Option>
+                    <Option value="2">2</Option>
+                  </Select>
+                )}
+              />
+            </Form.Item>
+          </Col>
+          <Col span={8}>
             <Form.Item label="Loại kỳ thi" validateStatus={errors.loaiKyThi ? 'error' : ''} help={errors.loaiKyThi?.message}>
               <Controller
                 name="loaiKyThi"
@@ -277,18 +271,26 @@ const PcCoiThiForm = () => {
                 rules={{ required: "Vui lòng chọn loại kỳ thi" }}
                 render={({ field }) => (
                   <Select placeholder="Chọn loại kỳ thi..." {...field}>
-                    <Option value="Chính thức">Chính thức</Option>
-                    <Option value="Phụ">Phụ</Option>
-                    <Option value="Hè">Hè</Option>
+                    <Option value="Học kỳ 1">Học kỳ 1</Option>
+                    <Option value="Học kỳ 1 (đợt 2)">Học kỳ 1 (đợt 2)</Option>
+                    <Option value="Học kỳ 1 (đợt 3)">Học kỳ 1 (đợt 3)</Option>
+                    <Option value="Học kỳ 2">Học kỳ 2</Option>
+                    <Option value="Học kỳ 2 (đợt 2)">Học kỳ 2 (đợt 2)</Option>
+                    <Option value="Học kỳ 2 (đợt 3)">Học kỳ 2 (đợt 3)</Option>
+                    <Option value="Kỳ thi phụ (đợt 1)">Kỳ thi phụ (đợt 1)</Option>
+                    <Option value="Kỳ thi phụ (đợt 2)">Kỳ thi phụ (đợt 2)</Option>
+                    <Option value="Kỳ thi phụ (đợt 3)">Kỳ thi phụ (đợt 3)</Option>
+                    <Option value="Học kỳ hè">Học kỳ hè</Option>
                   </Select>
                 )}
               />
             </Form.Item>
           </Col>
+
         </Row>
         <div className="flex justify-end space-x-2">
           <Button type="default" onClick={resetForm} danger>Reset</Button>
-          <Button type="primary" htmlType="submit" loading={isSubmitting} >Submit</Button>
+          <Button type="primary" htmlType="submit" loading={isSubmitting} >Tạo mới</Button>
         </div>
       </Form>
     </div>

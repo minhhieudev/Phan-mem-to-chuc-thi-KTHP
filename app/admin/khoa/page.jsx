@@ -158,7 +158,7 @@ const KhoaForm = () => {
     return loading ? (
         <Loader />
     ) : (
-        <div className="flex gap-2 max-sm:flex-col mt-3 h-full">
+        <div className="flex gap-2 max-sm:flex-col mt-2 h-full">
             <div className="p-4 shadow-xl bg-white rounded-xl flex-[20%]">
                 <Title className="text-center" level={3}>QUẢN LÝ KHOA</Title>
 

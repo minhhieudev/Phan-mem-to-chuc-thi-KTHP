@@ -330,3 +330,12 @@
   padding: 16px; /* Add padding inside the card */
   margin: 8px; /* Add margin around the card */
 }
+
+.ant-table-thead .ant-table-cell {
+  padding: 1px !important; 
+  text-align: center;
+}
+
+.ant-tabs-tab{
+  padding: 4px !important; 
+}

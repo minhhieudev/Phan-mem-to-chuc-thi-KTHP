@@ -110,6 +110,7 @@ const HocPhanThiForm = () => {
     };
 
     const handleEdit = (record) => {
+        setFormVisible(true)
         setEditRecord(record);
         setValue("maHocPhan", record.maHocPhan);
         setValue("tenHocPhan", record.tenHocPhan);
@@ -154,7 +155,8 @@ const HocPhanThiForm = () => {
             title: 'Mã học phần',
             dataIndex: 'maHocPhan',
             key: 'maHocPhan',
-            width: 100
+            width: 100,
+            render: (text) => <span style={{ fontWeight: 'bold', color: 'green' }}>{text}</span>,
 
         },
         {
@@ -186,7 +188,8 @@ const HocPhanThiForm = () => {
             title: 'Hình thức',
             dataIndex: 'hinhThuc',
             key: 'hinhThuc',
-            width: 70
+            width: 70,
+            render: (text) => <span style={{ fontWeight: 'bold', color: 'red' }}>{text}</span>,
 
         },
         {
@@ -213,7 +216,7 @@ const HocPhanThiForm = () => {
             title: 'Hành động',
             key: 'action',
             render: (_, record) => (
-                <Space size="middle">
+                <Space size="small">
                     <Button size="small" onClick={() => handleEdit(record)} type="primary">Sửa</Button>
                     <Popconfirm
                         title="Bạn có chắc chắn muốn xoá?"
@@ -225,17 +228,17 @@ const HocPhanThiForm = () => {
                     </Popconfirm>
                 </Space>
             ),
-            width: 140
+            width: 20
         },
     ];
 
     return (
-        <div className="flex gap-2 max-sm:flex-col mt-3 h-full">
+        <div className="flex gap-2 max-sm:flex-col mt-2 h-full">
 
 
             {/* Form Section */}
             {formVisible && (
-                <div className="p-4 shadow-xl bg-white rounded-xl flex-[25%]">
+                <div className="px-3 py-2 shadow-xl bg-white rounded-xl flex-[25%]">
                     <Title className="text-center" level={3}>QUẢN LÝ HỌC PHẦN THI</Title>
                     {/* Form toggle button */}
 
@@ -356,8 +359,8 @@ const HocPhanThiForm = () => {
                             <Button type="primary" htmlType="submit" loading={isSubmitting} className="bg-blue-500">
                                 {editRecord ? "Chỉnh sửa" : "Thêm mới"}
                             </Button>
-                            <Button htmlType="button" onClick={onReset} className="ml-4">
-                                Đặt lại
+                            <Button htmlType="button" onClick={onReset} className="ml-4"  type="primary" danger>
+                                Reset
                             </Button>
                         </Form.Item>
                     </Form>
@@ -365,14 +368,14 @@ const HocPhanThiForm = () => {
             )}
 
             {/* Table Section */}
-            <div className="bg-white p-3 shadow-xl rounded-xl overflow-auto flex-[75%]">
-                <div className="mb-2 flex justify-between">
+            <div className="bg-white px-2 py-3 shadow-xl rounded-xl overflow-auto flex-[75%]">
+                <div className="mb-1 flex justify-between">
                     <Input
                         placeholder="Tìm kiếm học phần"
                         value={searchName}
                         onChange={(e) => setSearchName(e.target.value)}
                         prefix={<SearchOutlined />}
-                        className="w-[30%]"
+                        className="w-[10%]"
                     />
                     <div className="font-bold text-[20px] text-green-500">
                         DANH SÁCH HỌC PHẦN

@@ -49,7 +49,7 @@ const PcCoiThiSchema = new mongoose.Schema({
   loaiDaoTao: {
     type: String,  
   },
-  hocky: {
+  ky: {
     type: String,
   },
 }, {

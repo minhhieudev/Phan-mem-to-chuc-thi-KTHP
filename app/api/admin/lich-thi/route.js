@@ -38,17 +38,13 @@ export const POST = async (req) => {
   try {
     await connectToDB();
 
-    // Lấy dữ liệu từ body của yêu cầu
     // Nhận toàn bộ body
     const list = await req.json();
-
-    console.log('Data:', list);
 
     if (!list || !Array.isArray(list)) {
       return new Response(JSON.stringify({ message: "Invalid data format" }), { status: 400 });
     }
 
-    // Duyệt qua danh sách và xử lý từng phần tử
     const processedItems = await Promise.all(
       list.map(async (item) => {
         const {
@@ -64,12 +60,12 @@ export const POST = async (req) => {
           hinhThuc,
           thoiGian,
           loaiDaoTao,
-          hocky
+          hocKy
         } = item;
 
         // Tìm và cập nhật nếu tồn tại, nếu không thì tạo mới
         const updatedItem = await PcCoiThi.findOneAndUpdate(
-          { namHoc, loaiKyThi, ngayThi, phong, hocPhan, lop, hocky },
+          { namHoc, loaiKyThi, ngayThi, phong, hocPhan, lop, ky:hocKy },
           {
             $set: {
               ca,

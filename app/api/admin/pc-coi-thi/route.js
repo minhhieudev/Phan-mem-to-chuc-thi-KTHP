@@ -10,6 +10,7 @@ export const GET = async (req) => {
     const namHoc = searchParams.get('namHoc');
     const loaiKyThi = searchParams.get('loaiKyThi');
     const loai = searchParams.get('loai');
+    const hocKy = searchParams.get('hocKy');
 
     // Tạo đối tượng điều kiện tìm kiếm
     let filter = {};
@@ -25,12 +26,15 @@ export const GET = async (req) => {
     }
 
     if (loai) {
-      filter.loai = loai;
+      filter.loaiDaoTao = loai;
+    }
+    if (hocKy) {
+      filter.ky = hocKy;
     }
 
 
     // Tìm kiếm các bản ghi phân công giảng dạy theo điều kiện filter
-    const assignments = await PcCoiThi.find();
+    const assignments = await PcCoiThi.find(filter);
 
     // Trả về phản hồi thành công
     return new Response(JSON.stringify(assignments), { status: 200 });
@@ -48,28 +52,33 @@ export const POST = async (req) => {
 
     // Lấy dữ liệu từ request
     const data = await req.json();
+    console.log('da',data)
 
     // Kiểm tra xem dữ liệu có hợp lệ không
-    const { hocPhan, nhomLop, ngayThi, namHoc, loaiKyThi } = data;
-    if (!hocPhan || !nhomLop || !ngayThi || !namHoc || !loaiKyThi) {
+    const { hocPhan, lop, ngayThi, namHoc, loaiKyThi } = data;
+    if (!hocPhan || !lop || !ngayThi || !namHoc || !loaiKyThi) {
       return new Response(JSON.stringify({ message: "Dữ liệu không hợp lệ, vui lòng điền đầy đủ các trường bắt buộc." }), { status: 400 });
     }
 
     // Tạo một bản ghi mới cho Phân Công Giảng Dạy
     const newAssignment = new PcCoiThi({
-      hocPhan: Array.isArray(hocPhan) ? hocPhan : [hocPhan],
-      nhomLop: Array.isArray(nhomLop) ? nhomLop : [nhomLop],
+      hocPhan,
+      lop: data.lop,
+      // hocPhan: Array.isArray(hocPhan) ? hocPhan : [hocPhan],
+      // lop: Array.isArray(lop) ? lop : [lop],
       ngayThi,
       ca: data.ca || 0,
-      cb1: data.cb1 || '',
-      cb2: data.cb2 || '',
-      time: Array.isArray(data.time) ? data.time : [data.time] || '',
-      diaDiem: data.diaDiem || 0,
+      cbo1: data.cbo1 || '',
+      cbo2: data.cbo2 || '',
+      thoiGian: data.thoiGian,
+      diaDiem: data.diaDiem || '',
       ghiChu: data.ghiChu || '',
-      phongThi:data.phongThi,
+      phong:data.phong,
       namHoc,
       loaiKyThi:data.loaiKyThi,
-      loai: data.loai || ""
+      loaiDaoTao: data.loai || "",
+      hinhThuc: data.hinhThuc,
+      ky: data.hocKy
     });
 
     // Lưu bản ghi mới vào database

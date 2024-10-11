@@ -2,7 +2,7 @@
 
 import { useState, useMemo, useEffect, useRef } from "react";
 import { useForm, Controller } from "react-hook-form";
-import { Button, Input, Form, Space, Typography, Select, Table, Popconfirm, Spin } from "antd";
+import { Button, Input, Form, Space, Typography, Select, Table, Popconfirm, Spin, Pagination } from "antd";
 import { UploadOutlined } from '@ant-design/icons';
 import toast from "react-hot-toast";
 import Loader from "../../../components/Loader";
@@ -27,7 +27,6 @@ const UserForm = () => {
         defaultValues: formSchema,
     });
     const [current, setCurrent] = useState(1);
-    const [pageSize] = useState(7);
     const [searchName, setSearchName] = useState("");
     const [selectedKhoa, setSelectedKhoa] = useState("");
     const [selectedRole, setSelectedRole] = useState("");
@@ -38,11 +37,19 @@ const UserForm = () => {
 
     const fileInputRef = useRef(null);
     const [isUploading, setIsUploading] = useState(false); // Trạng thái upload
+    const [pageSize, setPageSize] = useState(5);
 
+    // Phân trang dữ liệu
+    const paginatedData = filteredList.slice(
+        (current - 1) * pageSize,
+        current * pageSize
+    );
+    
     useEffect(() => {
         fetchData();
         getListKhoa()
     }, []);
+
 
     useEffect(() => {
         let filteredData = dataList;
@@ -157,7 +164,7 @@ const UserForm = () => {
     };
 
     const createManyUser = async (ListDataUser) => {
-        setIsUploading(true); // Bắt đầu hiển thị hiệu ứng xoay
+        setIsUploading(true);
         try {
             const method = "POST";
             const res = await fetch("/api/admin/user/create", {
@@ -199,8 +206,6 @@ const UserForm = () => {
             } else {
                 toast.error("No user data found in file.");
             }
-
-            console.log("Dữ liệu từ file Excel đã lọc:", ListDataUser);
         };
 
         reader.onerror = () => {
@@ -209,7 +214,6 @@ const UserForm = () => {
 
         reader.readAsBinaryString(file);
     };
-
 
     const columns = [
         {
@@ -255,8 +259,8 @@ const UserForm = () => {
     return loading ? (
         <Loader />
     ) : (
-        <div className="flex gap-2 max-sm:flex-col mt-3 h-full">
-            <div className="p-4 shadow-xl bg-white rounded-xl flex-[30%]">
+        <div className="flex gap-2 max-sm:flex-col mt-2 h-full">
+            <div className="p-4 shadow-xl bg-white rounded-xl flex-[20%]">
                 <Title className="text-center" level={3}>QUẢN LÝ NGƯỜI DÙNG</Title>
 
                 <Form onFinish={handleSubmit(onSubmit)} layout="vertical" className="space-y-5 mt-6">
@@ -275,6 +279,22 @@ const UserForm = () => {
                                     render={({ field }) => <Input className="input-text" placeholder="Nhập tên giảng viên ..." {...field} />}
                                 />
                             </Form.Item>
+
+                            <Form.Item
+                                label={<span className="font-bold text-xl">Mã GV: <span className="text-red-600">*</span></span>}
+                                className="w-[40%]"
+                                validateStatus={errors.maGV ? 'error' : ''}
+                                help={errors.maGV?.message}
+                            >
+                                <Controller
+                                    name="maGV"
+                                    control={control}
+                                    rules={{ required: "Mã GV là bắt buộc" }}
+                                    render={({ field }) => <Input className="input-text" placeholder="Nhập mã GV ..." {...field} />}
+                                />
+                            </Form.Item>
+                        </div>
+                        <div className="flex justify-between">
 
                             <Form.Item
                                 label={<span className="font-bold text-xl">Email <span className="text-red-600">*</span></span>}
@@ -388,7 +408,7 @@ const UserForm = () => {
                                 onChange={(e) => setSearchName(e.target.value)}
                                 prefix={<SearchOutlined />}
                             />
-                            
+
                         </div>
                         <div className="flex flex-1 gap-1">
                             <div className="text-base-bold">Khoa:</div>
@@ -427,16 +447,25 @@ const UserForm = () => {
                     </div>
                 </div>
 
-                <Table
-                    dataSource={filteredList}
-                    columns={columns}
-                    rowKey="_id"
-                    pagination={{
-                        current,
-                        pageSize,
-                        total: filteredList.length,
-                        onChange: (page) => setCurrent(page),
+                <div className="flex-grow overflow-auto" style={{ maxHeight: 'calc(85vh - 120px)' }}>
+                    <Table
+                        dataSource={paginatedData}
+                        columns={columns}
+                        rowKey="_id"
+                        pagination={false}
+                    />
+                </div>
+                <Pagination
+                    current={current}
+                    pageSize={pageSize}
+                    total={filteredList.length}
+                    onChange={(page, size) => {
+                        setCurrent(page);
+                        setPageSize(size);
                     }}
+                    pageSizeOptions={['5', '10', '25', '50', '100']}
+                    showSizeChanger
+                    className="flex justify-end"
                 />
             </div>
         </div>

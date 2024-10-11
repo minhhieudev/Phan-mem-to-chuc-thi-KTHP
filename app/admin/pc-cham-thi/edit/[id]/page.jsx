@@ -153,7 +153,7 @@ const PcCoiThiForm = () => {
           </Col>
 
           <Col span={12}>
-            <Form.Item label="soBai" validateStatus={errors.soBai? 'error' : ''} help={errors.soBai?.message}>
+            <Form.Item label="Số bài" validateStatus={errors.soBai? 'error' : ''} help={errors.soBai?.message}>
               <Controller
                 name="soBai"
                 control={control}
@@ -227,7 +227,7 @@ const PcCoiThiForm = () => {
         </Row>
         <div className="flex justify-end space-x-2">
           <Button type="default" onClick={resetForm} danger>Reset</Button>
-          <Button type="primary" htmlType="submit" loading={isSubmitting} >Submit</Button>
+          <Button type="primary" htmlType="submit" loading={isSubmitting} >Lưu</Button>
         </div>
       </Form>
     </div>

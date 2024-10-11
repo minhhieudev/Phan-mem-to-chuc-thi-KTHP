@@ -22,7 +22,7 @@ const formSchema = {
   namHoc: "",
   loaiKyThi: "",
   loai: "",
-  hinhThucThoiGianThi:''
+  hinhThucThoiGianThi: ''
 };
 
 const TeachingAssignmentForm = () => {
@@ -35,7 +35,7 @@ const TeachingAssignmentForm = () => {
   const currentUser = session?.user;
   const router = useRouter();
 
-  const [loai, setLoai] = useState("");
+  const [loai, setLoai] = useState("Chính quy");
 
   const fileInputRef = useRef(null);
   const [isUploading, setIsUploading] = useState(false);
@@ -185,9 +185,9 @@ const TeachingAssignmentForm = () => {
         <h2 className="font-bold text-heading3-bold flex-grow text-center text-green-500">PHÂN CÔNG CHẤM THI</h2>
         <div className="flex gap-2">
           <div className="text-heading4-bold">LOẠI:</div>
-          <Select placeholder="Chọn loại hình đào tạo..." onChange={(value) => setLoai(value)}>
-            <Option value="chinh-quy">Chính quy</Option>
-            <Option value="lien-thong-vlvh">Liên thông vừa làm vừa học</Option>
+          <Select value={loai} placeholder="Chọn loại hình đào tạo..." onChange={(value) => setLoai(value)}>
+            <Option value="Chính quy">Chính quy</Option>
+            <Option value="Liên thông vừa làm vừa học">Liên thông vừa làm vừa học</Option>
           </Select>
         </div>
       </div>
@@ -232,9 +232,15 @@ const TeachingAssignmentForm = () => {
                   {...field}
                 >
                   <Option value="Học kỳ 1">Học kỳ 1</Option>
+                  <Option value="Học kỳ 1 (đợt 2)">Học kỳ 1 (đợt 2)</Option>
+                  <Option value="Học kỳ 1 (đợt 3)">Học kỳ 1 (đợt 3)</Option>
                   <Option value="Học kỳ 2">Học kỳ 2</Option>
+                  <Option value="Học kỳ 2 (đợt 2)">Học kỳ 2 (đợt 2)</Option>
+                  <Option value="Học kỳ 2 (đợt 3)">Học kỳ 2 (đợt 3)</Option>
+                  <Option value="Kỳ thi phụ (đợt 1)">Kỳ thi phụ (đợt 1)</Option>
+                  <Option value="Kỳ thi phụ (đợt 2)">Kỳ thi phụ (đợt 2)</Option>
+                  <Option value="Kỳ thi phụ (đợt 3)">Kỳ thi phụ (đợt 3)</Option>
                   <Option value="Học kỳ hè">Học kỳ hè</Option>
-                  <Option value="Kỳ thi phụ">Kỳ thi phụ</Option>
                 </Select>
               )}
             />

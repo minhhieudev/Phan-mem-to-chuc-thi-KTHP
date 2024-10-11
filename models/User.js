@@ -23,6 +23,11 @@ const UserSchema = new mongoose.Schema({
     type: String,
     default: "user",
   },
+
+  
+  maGV: {
+    type: String,
+  },
 });
 
 const User = mongoose.models.User || mongoose.model("User", UserSchema);

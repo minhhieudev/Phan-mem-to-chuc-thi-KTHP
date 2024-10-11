@@ -13,17 +13,18 @@ const { Option } = Select;
 
 const formSchema = {
   hocPhan: [],
-  nhomLop: [],
+  lop: [],
   ngayThi: '',
   ca: 0,
-  cb1: '',
-  cb2: "",
-  time: [],
-  phongThi: '',
+  cbo1: '',
+  cbo2: "",
+  thoiGian: [],
+  phong: '',
   diaDiem: '',
   ghiChu: "",
   namHoc: "",
-  loaiKyThi: ""
+  loaiKyThi: "",
+  hocKy: ''
 };
 
 const PcCoiThiForm = () => {
@@ -47,19 +48,24 @@ const PcCoiThiForm = () => {
           const res = await fetch(`/api/admin/pc-coi-thi/edit?id=${id}`);
           if (res.ok) {
             const data = await res.json();
-            console.log("Ngày thi trước khi format:", data.ngayThi); // Kiểm tra giá trị trả về từ API
+            console.log("Ngày thi trước khi format:", data.ngayThi);
   
-            // Format ngày với dayjs
-            const formattedNgayThi = dayjs(data.ngayThi, 'D/M/YYYY', true); // Sử dụng D/M/YYYY để hỗ trợ ngày/tháng một chữ số
+            // Kiểm tra và xử lý định dạng ngày
+            let formattedNgayThi = dayjs(data.ngayThi, 'DD/MM/YYYY', true);
   
-            if (formattedNgayThi.isValid()) {  // Kiểm tra ngày hợp lệ
+            // Nếu không đúng định dạng, thử lại với một định dạng khác
+            if (!formattedNgayThi.isValid()) {
+              formattedNgayThi = dayjs(data.ngayThi, 'YYYY-MM-DD', true); // Ví dụ định dạng khác
+            }
+  
+            if (formattedNgayThi.isValid()) {
               const dataFormat = {
                 ...data, 
-                ngayThi: formattedNgayThi.format('DD/MM/YYYY') // Format lại thành YYYY/MM/DD
+                ngayThi: formattedNgayThi.format('DD/MM/YYYY'),
               };
   
               setEditRecord(dataFormat);
-              setLoai(dataFormat?.loai);
+              setLoai(dataFormat?.loaiDaoTao);
               console.log("Data đã format:", dataFormat);
               reset(dataFormat);
             } else {
@@ -69,6 +75,8 @@ const PcCoiThiForm = () => {
             toast.error("Không thể tải dữ liệu!");
           }
         } catch (error) {
+          console.log("Data đã format:", error);
+
           toast.error("Có lỗi xảy ra khi tải dữ liệu!");
         }
       };
@@ -77,6 +85,7 @@ const PcCoiThiForm = () => {
     }
   }, [id, reset]);
   
+  
 
 
   const onSubmit = async (data) => {
@@ -84,8 +93,8 @@ const PcCoiThiForm = () => {
     const transformedData = {
       ...data,
       // hocPhan: typeof data.hocPhan === 'string' ? data.hocPhan.split(',').map(item => item.trim()) : data.hocPhan,
-      // nhomLop: typeof data.nhomLop === 'string' ? data.nhomLop.split(',').map(item => item.trim()) : data.nhomLop,
-      //time: typeof data.time === 'string' ? data.time.split(',').map(item => parseInt(item.trim(), 10)) : data.time
+      // lop: typeof data.lop === 'string' ? data.lop.split(',').map(item => item.trim()) : data.lop,
+      //thoiGian: typeof data.thoiGian === 'string' ? data.thoiGian.split(',').map(item => parseInt(item.trim(), 10)) : data.thoiGian
     };
 
     // Tiếp tục logic gửi dữ liệu
@@ -146,7 +155,7 @@ const PcCoiThiForm = () => {
             </Form.Item>
           </Col>
           <Col span={12}>
-            <Form.Item label="Nhóm / lớp" validateStatus={errors.nhomLop ? 'error' : ''} help={errors.nhomLop?.message}>
+            <Form.Item label="Nhóm / lớp" validateStatus={errors.lop ? 'error' : ''} help={errors.lop?.message}>
               <Controller
                 name="lop"
                 control={control}
@@ -179,7 +188,7 @@ const PcCoiThiForm = () => {
             </Form.Item>
           </Col>
           <Col span={6}>
-            <Form.Item label="Phòng thi" validateStatus={errors.phongThi ? 'error' : ''} help={errors.phongThi?.message}>
+            <Form.Item label="Phòng thi" validateStatus={errors.phong ? 'error' : ''} help={errors.phong?.message}>
               <Controller
                 name="phong"
                 control={control}
@@ -201,9 +210,9 @@ const PcCoiThiForm = () => {
           </Col>
 
           <Col span={6}>
-            <Form.Item label="Thời gian thi (phút)" validateStatus={errors.time ? 'error' : ''} help={errors.time?.message}>
+            <Form.Item label="Thời gian thi (phút)" validateStatus={errors.thoiGian ? 'error' : ''} help={errors.thoiGian?.message}>
               <Controller
-                name="time"
+                name="thoiGian"
                 control={control}
                 rules={{ required: "Vui lòng nhập thời gian thi" }}
                 render={({ field }) => <Input placeholder="Nhập thời gian thi, cách nhau bởi dấu phẩy" {...field} />}
@@ -213,7 +222,7 @@ const PcCoiThiForm = () => {
         </Row>
         <Row gutter={16}>
           <Col span={12}>
-            <Form.Item label="Cán bộ coi thi 1" validateStatus={errors.cb1 ? 'error' : ''} help={errors.cb1?.message}>
+            <Form.Item label="Cán bộ coi thi 1" validateStatus={errors.cbo1 ? 'error' : ''} help={errors.cbo1?.message}>
               <Controller
                 name="cbo1"
                 control={control}
@@ -223,7 +232,7 @@ const PcCoiThiForm = () => {
             </Form.Item>
           </Col>
           <Col span={12}>
-            <Form.Item label="Cán bộ coi thi 2" validateStatus={errors.cb2 ? 'error' : ''} help={errors.cb2?.message}>
+            <Form.Item label="Cán bộ coi thi 2" validateStatus={errors.cbo2 ? 'error' : ''} help={errors.cbo2?.message}>
               <Controller
                 name="cbo2"
                 control={control}
@@ -259,7 +268,7 @@ const PcCoiThiForm = () => {
           </Col>
         </Row>
         <Row gutter={16}>
-          <Col span={12}>
+          <Col span={8}>
             <Form.Item label="Năm học" validateStatus={errors.namHoc ? 'error' : ''} help={errors.namHoc?.message}>
               <Controller
                 name="namHoc"
@@ -269,7 +278,22 @@ const PcCoiThiForm = () => {
               />
             </Form.Item>
           </Col>
-          <Col span={12}>
+          <Col span={8}>
+            <Form.Item label="Kỳ" validateStatus={errors.hocKy ? 'error' : ''} help={errors.hocKy?.message}>
+              <Controller
+                name="hocKy"
+                control={control}
+                rules={{ required: "Vui lòng học kỳ" }}
+                render={({ field }) => (
+                  <Select placeholder="Chọn học kỳ..." {...field}>
+                    <Option value="1">1</Option>
+                    <Option value="2">2</Option>
+                  </Select>
+                )}
+              />
+            </Form.Item>
+          </Col>
+          <Col span={8}>
             <Form.Item label="Loại kỳ thi" validateStatus={errors.loaiKyThi ? 'error' : ''} help={errors.loaiKyThi?.message}>
               <Controller
                 name="loaiKyThi"
@@ -288,7 +312,7 @@ const PcCoiThiForm = () => {
         </Row>
         <div className="flex justify-end space-x-2">
           <Button type="default" onClick={resetForm} danger>Reset</Button>
-          <Button type="primary" htmlType="submit" loading={isSubmitting} >Submit</Button>
+          <Button type="primary" htmlType="submit" loading={isSubmitting} >Lưu</Button>
         </div>
       </Form>
     </div>
