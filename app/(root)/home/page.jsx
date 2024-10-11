@@ -3,9 +3,6 @@
 import React from 'react';
 import { Button, Space } from 'antd';
 import { useRouter } from "next/navigation";
-import { useState } from 'react';
-import { ArrowLeftOutlined } from '@ant-design/icons';
-
 
 const WorkHours = () => {
   const router = useRouter();
@@ -15,22 +12,22 @@ const WorkHours = () => {
   };
 
   return (
-    <div className=' bg-white rounded-xl h-[70vh] mx-auto w-[70%]  mt-6 max-sm:h-[70vh] shadow-xl'>
+    <div className='bg-white rounded-xl h-[70vh] mx-auto w-[90%] mt-6 max-md:h-[70vh] shadow-xl'>
       <div className="flex items-center h-full">
-          <Space size="middle" className='flex flex-1 justify-around items-center max-md:flex-col'>
-            <Button
-              className={`custom-button-1 button-chinh-quy`}
-              onClick={() => handlePage('coi-thi')}
-            >
-              <div className='text'>LỊCH COI THI</div>
-            </Button>
-            <Button
-              className={`custom-button-1 button-chinh-quy-khac`}
-              onClick={() => handlePage('cham-thi')}
-            >
-              <div className='text'>LỊCH CHẤM THI</div>
-            </Button>
-          </Space>
+        <Space size="middle" className='flex flex-1 justify-around items-center flex-col md:flex-row'>
+          <Button
+            className={`custom-button-1 button-chinh-quy w-full max-w-[300px]`}
+            onClick={() => handlePage('coi-thi')}
+          >
+            <div className='text'>LỊCH COI THI</div>
+          </Button>
+          <Button
+            className={`custom-button-1 button-chinh-quy-khac w-full max-w-[300px]`}
+            onClick={() => handlePage('cham-thi')}
+          >
+            <div className='text'>LỊCH CHẤM THI</div>
+          </Button>
+        </Space>
       </div>
     </div>
   );

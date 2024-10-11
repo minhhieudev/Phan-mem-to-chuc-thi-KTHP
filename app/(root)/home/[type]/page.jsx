@@ -87,11 +87,11 @@ const Pages = () => {
     const examDate = moment(ngayThi, "DD/MM/YYYY");
 
     if (examDate.isBefore(today, "day")) {
-      return "#d0d0d0"; 
+      return "#d0d0d0";
     } else if (examDate.isSame(today, "day")) {
-      return "#4a90e2"; 
+      return "#4a90e2";
     } else {
-      return "#c9e7a0"; 
+      return "#c9e7a0";
     }
   };
 
@@ -181,15 +181,15 @@ const Pages = () => {
         /> QUAY LẠI</div>
       </Button>
       {type == 'coi-thi' && (
-        <div>
+        <div className="px-4">
           <div className="flex justify-center items-center mb-3">
             <h1 className="text-heading3-bold text-center text-3xl font-bold">
               LỊCH COI THI
             </h1>
           </div>
 
-          <div className="flex justify-center gap-4 mb-6">
-            <div className="font-bold flex gap-3">
+          <div className="flex flex-col md:flex-row justify-center gap-4 mb-6">
+            <div className="font-bold flex flex-col">
               <label htmlFor="namHoc" className="block text-sm text-gray-700 mb-1">
                 Năm học
               </label>
@@ -197,7 +197,7 @@ const Pages = () => {
                 id="namHoc"
                 value={selectNamHoc}
                 onChange={(value) => setSelectNamHoc(value)}
-                className="w-48"
+                className="w-full md:w-48"
                 placeholder="Chọn năm học"
               >
                 <Option value="2024-2025">2024-2025</Option>
@@ -206,7 +206,7 @@ const Pages = () => {
               </Select>
             </div>
 
-            <div className="font-bold flex gap-3">
+            <div className="font-bold flex flex-col">
               <label htmlFor="ky" className="block text-sm text-gray-700 mb-1">
                 Kỳ
               </label>
@@ -214,7 +214,7 @@ const Pages = () => {
                 id="ky"
                 value={selectKy}
                 onChange={(value) => setSelectKy(value)}
-                className="w-32"
+                className="w-full md:w-32"
                 placeholder="Chọn kỳ"
               >
                 <Option value="1">Kỳ 1</Option>
@@ -226,18 +226,17 @@ const Pages = () => {
           <div className="space-y-6">
             {sortedGroupedData.today.length > 0 && (
               <div>
-                <h3 className="text-lg font-bold mb-1 ">HÔM NAY</h3>
-                <div className="flex justify-center space-x-4 ">
+                <h3 className="text-lg font-bold mb-1">HÔM NAY</h3>
+                <div className="flex flex-col md:flex-row justify-center gap-4">
                   {sortedGroupedData.today.map((exam, index) => (
                     <Card
                       key={index}
                       title={exam.hocPhan.toUpperCase()}
-                      className="rounded-lg shadow-lg overflow-hidden"
+                      className="rounded-lg shadow-lg overflow-hidden w-full md:w-60"
                       style={{
                         backgroundColor: getCardColor(exam.ngayThi),
                         borderRadius: "12px",
                         transition: "transform 0.3s ease",
-                        text: "white"
                       }}
                       hoverable
                       onClick={() => alert(`Bạn đã chọn môn: ${exam.hocPhan}`)}
@@ -268,12 +267,12 @@ const Pages = () => {
             {sortedGroupedData.upcoming.length > 0 && (
               <div>
                 <h3 className="text-lg font-bold mb-1">SẮP DIỄN RA</h3>
-                <div className="flex justify-center space-x-4">
+                <div className="flex flex-col md:flex-row justify-center gap-4">
                   {sortedGroupedData.upcoming.map((exam, index) => (
                     <Card
                       key={index}
                       title={exam.hocPhan.toUpperCase()}
-                      className="rounded-lg shadow-lg overflow-hidden"
+                      className="rounded-lg shadow-lg overflow-hidden w-full md:w-60"
                       style={{
                         backgroundColor: getCardColor(exam.ngayThi),
                         borderRadius: "12px",
@@ -307,13 +306,13 @@ const Pages = () => {
 
             {sortedGroupedData.past.length > 0 && (
               <div>
-                <h3 className="text-lg font-bold mb-1 text-[">ĐÃ QUA</h3>
-                <div className="flex justify-center space-x-4">
+                <h3 className="text-lg font-bold mb-1">ĐÃ QUA</h3>
+                <div className="flex flex-col md:flex-row justify-center gap-4">
                   {sortedGroupedData.past.map((exam, index) => (
                     <Card
                       key={index}
                       title={exam.hocPhan.toUpperCase()}
-                      className="rounded-lg shadow-lg overflow-hidden"
+                      className="rounded-lg shadow-lg overflow-hidden w-full md:w-60"
                       style={{
                         backgroundColor: getCardColor(exam.ngayThi),
                         borderRadius: "12px",
@@ -322,7 +321,7 @@ const Pages = () => {
                       hoverable
                       onClick={() => alert(`Bạn đã chọn môn: ${exam.hocPhan}`)}
                     >
-                      <div className="p-0">
+                      <div className="p-4">
                         <p className="text-black mb-1 text-lg font-bold">
                           <CalendarOutlined /> Ngày thi: {exam.ngayThi}
                         </p>
@@ -345,18 +344,21 @@ const Pages = () => {
               </div>
             )}
           </div>
+          {listData == 0 && (
+            <h2 className="font-bold text-center">Chưa có lịch </h2>
+
+          )}
         </div>
       )}
-      {type == 'cham-thi' && (
+
+      {type === 'cham-thi' && (
         <div>
           <div className="flex justify-center items-center mb-3">
-            <h1 className="text-heading3-bold text-center text-3xl font-bold">
-              LỊCH CHẤM THI
-            </h1>
+            <h1 className="text-heading3-bold text-center text-3xl font-bold">LỊCH CHẤM THI</h1>
           </div>
 
-          <div className="flex justify-center gap-4 mb-6">
-            <div className="font-bold flex gap-3">
+          <div className="flex flex-col md:flex-row justify-center gap-4 mb-6">
+            <div className="font-bold flex flex-col">
               <label htmlFor="namHoc" className="block text-sm text-gray-700 mb-1">
                 Năm học
               </label>
@@ -364,17 +366,16 @@ const Pages = () => {
                 id="namHoc"
                 value={selectNamHoc}
                 onChange={(value) => setSelectNamHoc(value)}
-                className="w-48"
+                className="w-full md:w-48"
                 placeholder="Chọn năm học"
               >
                 <Option value="2024-2025">2024-2025</Option>
                 <Option value="2023-2024">2023-2024</Option>
                 <Option value="2022-2023">2022-2023</Option>
-                <Option value="2021-2022">2021-2022</Option>
               </Select>
             </div>
 
-            <div className="font-bold flex gap-3">
+            <div className="font-bold flex flex-col">
               <label htmlFor="ky" className="block text-sm text-gray-700 mb-1">
                 Kỳ
               </label>
@@ -382,7 +383,7 @@ const Pages = () => {
                 id="ky"
                 value={selectKy}
                 onChange={(value) => setSelectKy(value)}
-                className="w-32"
+                className="w-full md:w-32"
                 placeholder="Chọn kỳ"
               >
                 <Option value="1">Kỳ 1</Option>
@@ -394,18 +395,17 @@ const Pages = () => {
           <div className="space-y-6">
             {sortedGroupedData2.today.length > 0 && (
               <div>
-                <h3 className="text-lg font-bold mb-1 ">HÔM NAY</h3>
-                <div className="flex justify-center space-x-4 ">
+                <h3 className="text-lg font-bold mb-1">HÔM NAY</h3>
+                <div className="flex justify-center space-x-4">
                   {sortedGroupedData2.today.map((exam, index) => (
                     <Card
                       key={index}
-                      title={exam.hocPhan.join(',').toUpperCase()}
+                      title={exam.hocPhan.join(', ').toUpperCase()}
                       className="rounded-lg shadow-lg overflow-hidden"
                       style={{
                         backgroundColor: getCardColor(exam.ngayThi),
                         borderRadius: "12px",
                         transition: "transform 0.3s ease",
-                        text: "white"
                       }}
                       hoverable
                     >
@@ -439,7 +439,7 @@ const Pages = () => {
                   {sortedGroupedData2.upcoming.map((exam, index) => (
                     <Card
                       key={index}
-                      title={exam.hocPhan.join(',').toUpperCase()}
+                      title={exam.hocPhan.join(', ').toUpperCase()}
                       className="rounded-lg shadow-lg overflow-hidden"
                       style={{
                         backgroundColor: getCardColor(exam.ngayThi),
@@ -447,7 +447,7 @@ const Pages = () => {
                         transition: "transform 0.3s ease",
                       }}
                       hoverable
-                      onClick={() => alert(`Bạn đã chọn môn: ${exam.hocPhan}`)}
+                      onClick={() => alert(`Bạn đã chọn môn: ${exam.hocPhan.join(', ')}`)}
                     >
                       <div className="p-4">
                         <p className="text-black mb-1 text-lg font-bold">
@@ -474,12 +474,12 @@ const Pages = () => {
 
             {sortedGroupedData2.past.length > 0 && (
               <div>
-                <h3 className="text-lg font-bold mb-1 text-[">ĐÃ QUA</h3>
+                <h3 className="text-lg font-bold mb-1">ĐÃ QUA</h3>
                 <div className="flex justify-center space-x-4">
                   {sortedGroupedData2.past.map((exam, index) => (
                     <Card
                       key={index}
-                      title={exam.hocPhan.join(',').toUpperCase()}
+                      title={exam.hocPhan.join(', ').toUpperCase()}
                       className="rounded-lg shadow-lg overflow-hidden"
                       style={{
                         backgroundColor: getCardColor(exam.ngayThi),
@@ -487,7 +487,7 @@ const Pages = () => {
                         transition: "transform 0.3s ease",
                       }}
                       hoverable
-                      onClick={() => alert(`Bạn đã chọn môn: ${exam.hocPhan}`)}
+                      onClick={() => alert(`Bạn đã chọn môn: ${exam.hocPhan.join(', ')}`)}
                     >
                       <div className="p-4">
                         <p className="text-black mb-1 text-lg font-bold">
@@ -512,8 +512,14 @@ const Pages = () => {
               </div>
             )}
           </div>
+
+          {listData2 == 0 && (
+            <h2 className="font-bold text-center">Chưa có lịch </h2>
+
+          )}
         </div>
       )}
+
     </div>
   );
 };
