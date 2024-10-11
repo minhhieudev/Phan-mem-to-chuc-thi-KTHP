@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import Loader from "@components/Loader";
 import { PersonOutline } from "@mui/icons-material";
@@ -6,28 +6,40 @@ import { useSession } from "next-auth/react";
 import { CldUploadButton } from "next-cloudinary";
 import React, { useEffect, useState } from "react";
 import { useForm, Controller } from "react-hook-form";
-import { Table, Select, Progress, Input } from "antd";
+import { Select, Input } from "antd";
+import toast from "react-hot-toast"; // Đảm bảo bạn import toast
 
 const { Option } = Select;
+const { Search } = Input;
 
 const Profile = () => {
   const { data: session } = useSession();
   const user = session?.user;
 
   const [loading, setLoading] = useState(true);
+  const [khoaList, setKhoaList] = useState([]);
 
-  const listKhoa = ['KTCN', 'XHNV'];
+  const fetchKhoaData = async () => {
+    try {
+      const res = await fetch(`/api/admin/khoa`, {
+        method: "GET",
+        headers: { "Content-Type": "application/json" },
+      });
+      if (res.ok) {
+        const data = await res.json();
+        console.log('Khoa List:', data);
+        setKhoaList(data);
+      } else {
+        toast.error("Failed to fetch khoa data");
+      }
+    } catch (err) {
+      toast.error("An error occurred while fetching khoa data");
+    }
+  };
 
   useEffect(() => {
-    if (user) {
-      reset({
-        username: user?.username,
-        profileImage: user?.profileImage,
-        khoa: user?.khoa || listKhoa[0]
-      });
-    }
-    setLoading(false);
-  }, [user]);
+    fetchKhoaData();
+  }, []);
 
   const {
     register,
@@ -36,8 +48,20 @@ const Profile = () => {
     reset,
     handleSubmit,
     control,
-    formState: { error },
+    formState: { errors }, // Sửa 'error' thành 'errors'
   } = useForm();
+
+  useEffect(() => {
+    if (user) {
+      console.log('User khoa:', user.khoa);
+      reset({
+        username: user?.username,
+        profileImage: user?.profileImage,
+        khoa: user?.khoa, 
+      });
+    }
+    setLoading(false);
+  }, [user, reset]);
 
   const uploadPhoto = (result) => {
     setValue("profileImage", result?.info?.secure_url);
@@ -59,13 +83,17 @@ const Profile = () => {
       window.location.reload();
     } catch (error) {
       console.log(error);
+      setLoading(false);
+      toast.error("Cập nhật người dùng thất bại");
     }
   };
 
-  return loading ? (
-    <Loader />
-  ) : (
-    <div className="profile-page bg-gray-200 w-[40%] rounded-md shadow-md mx-auto p-4">
+  if (loading) {
+    return <Loader />;
+  }
+
+  return (
+    <div className="profile-page bg-white w-[40%] rounded-md shadow-md mx-auto p-4">
       <h1 className="text-heading3-bold">CHỈNH SỬA THÔNG TIN</h1>
 
       <form className="edit-profile" onSubmit={handleSubmit(updateUser)}>
@@ -85,25 +113,32 @@ const Profile = () => {
           />
           <PersonOutline sx={{ color: "#737373" }} />
         </div>
-        {error?.username && (
-          <p className="text-red-500">{error.username.message}</p>
+        {errors?.username && (
+          <p className="text-red-500">{errors.username.message}</p>
         )}
 
         {/* Select Khoa */}
         <Controller
           name="khoa"
           control={control}
-          defaultValue={listKhoa[0]} 
+          rules={{ required: "Khoa là bắt buộc" }}
           render={({ field }) => (
-            <Select {...field} style={{ width: 180 }}>
-              {listKhoa.map((khoa, index) => (
-                <Option key={index} value={khoa}>
-                  {khoa}
-                </Option>
-              ))}
+            <Select className="w-full" placeholder="Chọn khoa" {...field}>
+              {khoaList.length > 0 ? (
+                khoaList.map(khoa => (
+                  <Option key={khoa._id} value={khoa.maKhoa}>
+                    {khoa.tenKhoa}
+                  </Option>
+                ))
+              ) : (
+                <Option disabled>Không có khoa nào</Option>
+              )}
             </Select>
           )}
         />
+        {errors?.khoa && (
+          <p className="text-red-500">{errors.khoa.message}</p>
+        )}
 
         <div className="flex items-center justify-between">
           <img
