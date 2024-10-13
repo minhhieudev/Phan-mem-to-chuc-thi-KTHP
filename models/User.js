@@ -13,7 +13,6 @@ const UserSchema = new mongoose.Schema({
   },
   password: {
     type: String,
-    default: "123456@",
   },
   profileImage: {
     type: String,

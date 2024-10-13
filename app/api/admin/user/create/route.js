@@ -1,5 +1,6 @@
 import User from "@models/User";
 import { connectToDB } from "@mongodb";
+import { hash } from 'bcryptjs'; 
 
 export const POST = async (req) => {
   try {
@@ -14,6 +15,7 @@ export const POST = async (req) => {
       return new Response(JSON.stringify({ message: "Invalid data format" }), { status: 400 });
     }
 
+    const hashedPassword = await hash('123456@', 10)
     // Duyệt qua danh sách users và xử lý từng user
     const processedUsers = await Promise.all(
       users.map(async (user) => {
@@ -25,7 +27,8 @@ export const POST = async (req) => {
           {
             username: user[1], // Cập nhật các trường thông tin
             khoa: user[2],
-            email: `${maGV}@gmail.com`
+            email: `${maGV}@gmail.com`,
+            password:hashedPassword
           },
           { new: true, upsert: true } // Nếu không tìm thấy thì tạo mới
         );

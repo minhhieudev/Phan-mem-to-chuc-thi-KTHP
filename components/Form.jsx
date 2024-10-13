@@ -136,7 +136,7 @@ const Form = ({ type }) => {
           </button>
         </form>
 
-        {type === "register" ? (
+        {/* {type === "register" ? (
           <Link href="/" className="link flex gap-1">
             <p className="text-center">Bạn đã có tài khoản? </p>
             <p className="text-red-400">Đăng nhập</p>
@@ -146,7 +146,7 @@ const Form = ({ type }) => {
             <p className="text-center">Bạn chưa có tài khoản? </p>
             <p className="text-red-400">Đăng ký ngay</p>
           </Link>
-        )}
+        )} */}
       </div>
     </div>
   );

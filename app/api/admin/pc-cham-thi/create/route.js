@@ -25,7 +25,8 @@ export const POST = async (req) => {
           nhomLop, 
           loai,
           soBai,
-          hinhThucThoiGianThi
+          hinhThucThoiGianThi,
+          ky
         } = item;
 
         
@@ -37,7 +38,8 @@ export const POST = async (req) => {
               cb1,
               cb2,
               hinhThucThoiGianThi,
-              loai
+              loai,
+              ky
             }
           }, 
           { new: true, upsert: true } // Nếu không tìm thấy thì tạo mới

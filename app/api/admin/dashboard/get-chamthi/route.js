@@ -16,8 +16,9 @@ export const GET = async (req) => {
     if (namHoc) {
       filter.namHoc = namHoc;
     }
-    if (hocKy) {
-      filter.ky = hocKy;
+    // Chỉ thêm 'hocKy' nếu nó có giá trị và không phải là 'null' hoặc 'undefined'
+    if (hocKy && hocKy !== 'null' && hocKy !== 'undefined') {
+      url.searchParams.append('hocKy', hocKy);
     }
 
     // Lấy danh sách phân công coi thi
@@ -44,7 +45,7 @@ export const GET = async (req) => {
     const result = {
       totalAssignments,
       completedCount,
-      completionPercentage: completionPercentage.toFixed(2) // Giới hạn đến 2 chữ số thập phân
+      completionPercentage: completionPercentage.toFixed(1) // Giới hạn đến 2 chữ số thập phân
     };
 
     return new Response(JSON.stringify(result), { status: 200 });

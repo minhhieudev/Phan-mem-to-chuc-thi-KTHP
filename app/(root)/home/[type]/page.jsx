@@ -210,15 +210,15 @@ const Pages = () => {
               <label htmlFor="ky" className="block text-sm text-gray-700 mb-1">
                 Kỳ
               </label>
-              <Select
+              <Select allowClear
                 id="ky"
                 value={selectKy}
                 onChange={(value) => setSelectKy(value)}
                 className="w-full md:w-32"
                 placeholder="Chọn kỳ"
               >
-                <Option value="1">Kỳ 1</Option>
-                <Option value="2">Kỳ 2</Option>
+                <Option value="1">1</Option>
+                <Option value="2">2</Option>
               </Select>
             </div>
           </div>
@@ -379,15 +379,15 @@ const Pages = () => {
               <label htmlFor="ky" className="block text-sm text-gray-700 mb-1">
                 Kỳ
               </label>
-              <Select
+              <Select allowClear
                 id="ky"
                 value={selectKy}
                 onChange={(value) => setSelectKy(value)}
                 className="w-full md:w-32"
                 placeholder="Chọn kỳ"
               >
-                <Option value="1">Kỳ 1</Option>
-                <Option value="2">Kỳ 2</Option>
+                <Option value="1">1</Option>
+                <Option value="2">2</Option>
               </Select>
             </div>
           </div>
@@ -396,7 +396,7 @@ const Pages = () => {
             {sortedGroupedData2.today.length > 0 && (
               <div>
                 <h3 className="text-lg font-bold mb-1">HÔM NAY</h3>
-                <div className="flex justify-center space-x-4">
+                <div className="flex flex-col md:flex-row justify-center gap-4">
                   {sortedGroupedData2.today.map((exam, index) => (
                     <Card
                       key={index}
@@ -435,7 +435,7 @@ const Pages = () => {
             {sortedGroupedData2.upcoming.length > 0 && (
               <div>
                 <h3 className="text-lg font-bold mb-1">SẮP DIỄN RA</h3>
-                <div className="flex justify-center space-x-4">
+                <div className="flex flex-col md:flex-row justify-center gap-4">
                   {sortedGroupedData2.upcoming.map((exam, index) => (
                     <Card
                       key={index}
@@ -475,7 +475,7 @@ const Pages = () => {
             {sortedGroupedData2.past.length > 0 && (
               <div>
                 <h3 className="text-lg font-bold mb-1">ĐÃ QUA</h3>
-                <div className="flex justify-center space-x-4">
+                <div className="flex flex-col md:flex-row justify-center gap-4">
                   {sortedGroupedData2.past.map((exam, index) => (
                     <Card
                       key={index}

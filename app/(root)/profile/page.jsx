@@ -57,7 +57,7 @@ const Profile = () => {
       reset({
         username: user?.username,
         profileImage: user?.profileImage,
-        khoa: user?.khoa, 
+        khoa: user?.khoa,
       });
     }
     setLoading(false);
@@ -93,7 +93,7 @@ const Profile = () => {
   }
 
   return (
-    <div className="profile-page bg-white w-[40%] rounded-md shadow-md mx-auto p-4">
+    <div className="profile-page bg-white w-[40%] max-sm:w-[80%] max-sm:text-[13px] rounded-md shadow-md mx-auto p-4">
       <h1 className="text-heading3-bold">CHỈNH SỬA THÔNG TIN</h1>
 
       <form className="edit-profile" onSubmit={handleSubmit(updateUser)}>
@@ -126,7 +126,7 @@ const Profile = () => {
             <Select className="w-full" placeholder="Chọn khoa" {...field}>
               {khoaList.length > 0 ? (
                 khoaList.map(khoa => (
-                  <Option key={khoa._id} value={khoa.maKhoa}>
+                  <Option key={khoa._id} value={khoa.tenKhoa}>
                     {khoa.tenKhoa}
                   </Option>
                 ))
@@ -153,10 +153,18 @@ const Profile = () => {
           <CldUploadButton
             options={{ maxFiles: 1 }}
             onUpload={uploadPhoto}
+            onError={(error) => {
+              console.error('Upload error:', error);
+              toast.error("Có lỗi xảy ra khi upload ảnh");
+            }}
             uploadPreset="e0rggou2"
+            onClick={() => {
+              console.log("Upload button clicked");
+            }}  // Thêm sự kiện onClick để kiểm tra nút được nhấn
           >
             <p className="text-body-bold ml-3">Upload new photo</p>
           </CldUploadButton>
+
         </div>
 
         <button className="btn" type="submit">

@@ -6,7 +6,7 @@ export const exportToExcelTongHop = (dataList, type, title) => {
     return;
   }
 
-  const isChinhQuy = type === "chinh-quy" ? true : false
+  const isChinhQuy = type === "Chính quy" ? true : false
 
   const ws = isChinhQuy ?
     XLSX.utils.aoa_to_sheet([

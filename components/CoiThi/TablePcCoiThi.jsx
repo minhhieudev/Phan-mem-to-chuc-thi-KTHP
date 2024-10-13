@@ -31,7 +31,7 @@ const TablePcCoiThi = ({ list, namHoc, loaiKyThi, loaiDaoTao, hocky }) => {
     const updatedData = data.map((item) => (item._id === editingKey ? editingRow : item));
     setData(updatedData);
     setEditingKey("");
-    toast.success("Đã lưu thành công!");
+    toast.success("Thay đổi thành công!");
   };
 
   // Hủy chỉnh sửa
@@ -130,6 +130,7 @@ const TablePcCoiThi = ({ list, namHoc, loaiKyThi, loaiDaoTao, hocky }) => {
         ) : (
           <span style={{ fontWeight: "bold", color: "orange" }}>{text}</span>
         ),
+      width: 65,
     },
     {
       title: "Phòng thi",
@@ -145,7 +146,7 @@ const TablePcCoiThi = ({ list, namHoc, loaiKyThi, loaiDaoTao, hocky }) => {
         ),
     },
     {
-      title: "Cán bộ coi thi 1",
+      title: "Cán bộ  1",
       dataIndex: "cbo1",
       render: (text, record) =>
         isEditing(record) ? (
@@ -158,7 +159,7 @@ const TablePcCoiThi = ({ list, namHoc, loaiKyThi, loaiDaoTao, hocky }) => {
         ),
     },
     {
-      title: "Cán bộ coi thi 2",
+      title: "Cán bộ 2",
       dataIndex: "cbo2",
       render: (text, record) =>
         isEditing(record) ? (
@@ -183,10 +184,10 @@ const TablePcCoiThi = ({ list, namHoc, loaiKyThi, loaiDaoTao, hocky }) => {
         ) : (
           <span style={{ fontWeight: 'bold' }}>{text}</span>
         ),
-      width: 20,
+        width: 70,
     },
     {
-      title: 'Thời gian (phút)',
+      title: 'Thời gian',
       dataIndex: 'thoiGian',
       key: 'thoiGian',
       render: (text, record) =>
@@ -198,7 +199,7 @@ const TablePcCoiThi = ({ list, namHoc, loaiKyThi, loaiDaoTao, hocky }) => {
         ) : (
           <span style={{ fontWeight: 'bold' }}>{text}</span>
         ),
-      width: 20,
+        width: 75,
     },
 
     {
@@ -207,7 +208,7 @@ const TablePcCoiThi = ({ list, namHoc, loaiKyThi, loaiDaoTao, hocky }) => {
       render: (_, record) => {
         const editable = isEditing(record);
         return editable ? (
-          <Space size="middle">
+          <Space size="small">
             <Button size="small" type="primary" onClick={save}>
               Lưu
             </Button>
@@ -233,6 +234,7 @@ const TablePcCoiThi = ({ list, namHoc, loaiKyThi, loaiDaoTao, hocky }) => {
           </Space>
         );
       },
+      width: 20,
     },
   ];
 
@@ -242,8 +244,6 @@ const TablePcCoiThi = ({ list, namHoc, loaiKyThi, loaiDaoTao, hocky }) => {
     current * pageSize
   );
   const handleSubmit = async () => {
-    console.log('Data:', list)
-
     //setLoading(true)
     try {
       const res = await fetch("/api/admin/lich-thi", {
@@ -272,12 +272,12 @@ const TablePcCoiThi = ({ list, namHoc, loaiKyThi, loaiDaoTao, hocky }) => {
         </div>
       ) : (
         <div className="flex-grow overflow-auto" style={{ maxHeight: 'calc(85vh - 120px)' }}>
-          <div className="text-heading4-bold text-orange-600 text-center mb-2" style={{ textTransform: "uppercase" }}>
+          <div className="text-heading4-bold text-orange-600 text-center mb-1" style={{ textTransform: "uppercase" }}>
             KẾT QUẢ PHÂN CÔNG COI THI KỲ THI KẾT THÚC HỌC PHẦN - HỆ {loaiDaoTao} - THUỘC HỌC KỲ {hocky}, NĂM HỌC {namHoc}
           </div>
-          <div className="mb-4   flex justify-end">
+          <div className="mb-2   flex justify-end">
             <Input.Search
-            className="w-[30%]"
+              className="w-[30%]"
               placeholder="Tìm kiếm học phần"
               onSearch={onSearch}
               enterButton

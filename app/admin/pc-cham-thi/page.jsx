@@ -13,11 +13,12 @@ const PcChamThiTable = () => {
   const [dataList, setDataList] = useState([]);
   const [filteredData, setFilteredData] = useState([]);
   const [namHoc, setNamHoc] = useState("2023-2024");
+  const [hocKy, setHocKy] = useState("");
   const [loaiKyThi, setLoaiKyThi] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const [loai, setLoai] = useState("chinh-quy");
+  const [loai, setLoai] = useState("Chính quy");
 
   const [current, setCurrent] = useState(1);
   const [pageSize, setPageSize] = useState(10);
@@ -30,7 +31,7 @@ const PcChamThiTable = () => {
     const fetchData = async () => {
       try {
         setLoading(true);
-        const res = await fetch(`/api/admin/pc-cham-thi?namHoc=${namHoc}&loaiKyThi=${loaiKyThi}&loai=${loai}`, {
+        const res = await fetch(`/api/admin/pc-cham-thi?namHoc=${namHoc}&hocKy=${hocKy}&loaiKyThi=${loaiKyThi}&loai=${loai}`, {
           method: "GET",
           headers: { "Content-Type": "application/json" },
         });
@@ -49,7 +50,7 @@ const PcChamThiTable = () => {
     };
 
     fetchData();
-  }, [namHoc, loaiKyThi, loai]);
+  }, [namHoc, loaiKyThi, loai, hocKy]);
 
   useEffect(() => {
     const filtered = dataList.filter((item) => {
@@ -196,8 +197,8 @@ const PcChamThiTable = () => {
         <div className="flex gap-2">
           <div className="text-small-bold">LOẠI:</div>
           <Select value={loai} size="small" placeholder="Chọn loại hình đào tạo..." onChange={(value) => setLoai(value)}>
-            <Option value="chinh-quy">Chính quy</Option>
-            <Option value="lien-thong-vlvh">Liên thông vừa làm vừa học</Option>
+            <Option value="Chính quy">Chính quy</Option>
+            <Option value="Liên thông vừa làm vừa học">Liên thông vừa làm vừa học</Option>
           </Select>
         </div>
         <h2 className="font-bold text-heading4-bold text-center text-green-500">DANH SÁCH PHÂN CÔNG CHẤM THI</h2>
@@ -221,6 +222,19 @@ const PcChamThiTable = () => {
             <Option value="2022-2023">2022-2023</Option>
             <Option value="2023-2024">2023-2024</Option>
             <Option value="2024-2025">2024-2025</Option>
+          </Select>
+        </div>
+
+        <div className="w-[25%] flex items-center gap-2">
+          <label className="block text-sm font-semibold mb-1">Học kỳ:</label>
+          <Select size="small" allowClear
+            placeholder="Chọn học kỳ"
+            onChange={(value) => setHocKy(value)}
+            className="w-[50%]"
+            value={hocKy}
+          >
+            <Option value="1">1</Option>
+            <Option value="2">2</Option>
           </Select>
         </div>
 

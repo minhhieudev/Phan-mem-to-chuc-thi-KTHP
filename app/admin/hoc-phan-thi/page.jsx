@@ -285,7 +285,7 @@ const HocPhanThiForm = () => {
                                     name="soTinChi"
                                     control={control}
                                     rules={{ required: "Số tín chỉ là bắt buộc" }}
-                                    render={({ field }) => <Input className="input-text" placeholder="Nhập số tín chỉ ..." {...field} />}
+                                    render={({ field }) => <InputNumber className="input-text" placeholder="Nhập số tín chỉ ..." {...field} />}
                                 />
                             </Form.Item>
 

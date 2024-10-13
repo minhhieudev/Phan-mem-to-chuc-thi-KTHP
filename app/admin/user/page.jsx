@@ -37,7 +37,7 @@ const UserForm = () => {
 
     const fileInputRef = useRef(null);
     const [isUploading, setIsUploading] = useState(false); // Trạng thái upload
-    const [pageSize, setPageSize] = useState(5);
+    const [pageSize, setPageSize] = useState(10);
 
     // Phân trang dữ liệu
     const paginatedData = filteredList.slice(
@@ -463,7 +463,7 @@ const UserForm = () => {
                         setCurrent(page);
                         setPageSize(size);
                     }}
-                    pageSizeOptions={['5', '10', '25', '50', '100']}
+                    pageSizeOptions={['10', '25', '50', '100', '200']}
                     showSizeChanger
                     className="flex justify-end"
                 />

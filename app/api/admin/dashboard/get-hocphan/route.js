@@ -22,8 +22,9 @@ export const GET = async (req) => {
     if (namHoc) {
       filter.namHoc = namHoc;
     }
-    if (hocKy) {
-      filter.ky = hocKy;
+    // Chỉ thêm 'hocKy' nếu nó có giá trị và không phải là 'null' hoặc 'undefined'
+    if (hocKy && hocKy !== 'null' && hocKy !== 'undefined') {
+      url.searchParams.append('hocKy', hocKy);
     }
 
     // Lấy danh sách phân công coi thi
@@ -53,16 +54,9 @@ export const GET = async (req) => {
       if (isCompleted) {
         completedCount++;
       }
-
-      console.log(`Assignment ID: ${assignment._id}`);
-      console.log(`Ngay Thi: ${ngayThi.format('YYYY-MM-DD')}`);
-      console.log(`Is Completed: ${isCompleted}`);
     });
 
     console.log('Filter:', filter);
-    console.log('Today:', today.format('YYYY-MM-DD'));
-    console.log('Total Assignments:', soPhanCongCoiThi.length);
-    console.log('Completed Count:', completedCount);
 
     // Tính phần trăm hoàn thành
     const totalAssignments = soPhanCongCoiThi.length;

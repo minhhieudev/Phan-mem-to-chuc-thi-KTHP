@@ -17,7 +17,7 @@ const PcChamThiTable = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const [loai, setLoai] = useState("chinh-quy");
+  const [loai, setLoai] = useState("Chính quy");
 
   const [current, setCurrent] = useState(1);
   const [pageSize, setPageSize] = useState(5);
@@ -186,8 +186,8 @@ const PcChamThiTable = () => {
         <div className="w-[25%] flex items-center gap-2">
           <label className="block text-sm font-semibold mb-1">Loại đào tạo:</label>
           <Select placeholder="Chọn loại hình đào tạo..." onChange={(value) => setLoai(value)}>
-            <Option value="chinh-quy">Chính quy</Option>
-            <Option value="lien-thong-vlvh">Liên thông vừa làm vừa học</Option>
+            <Option value="Chính quy">Chính quy</Option>
+            <Option value="Liên thông vừa làm vừa học">Liên thông vừa làm vừa học</Option>
           </Select>
         </div>
 

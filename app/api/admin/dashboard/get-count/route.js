@@ -1,8 +1,8 @@
-import { connectToDB } from '@mongodb'; 
+import { connectToDB } from '@mongodb';
 import PcChamThi from "@models/PcChamThi";
 import PcCoiThi from "@models/PcCoiThi";
 import User from "@models/User";
-import dayjs from "dayjs"; 
+import dayjs from "dayjs";
 
 export const GET = async (req) => {
   try {
@@ -14,20 +14,21 @@ export const GET = async (req) => {
     const hocKy = searchParams.get('hocKy');
     const khoa = searchParams.get('khoa');
 
-    console.log('Khoa:',khoa)
+    console.log('Khoa:', khoa)
 
     let filter = {};
 
     if (namHoc) {
       filter.namHoc = namHoc;
     }
-    if (hocKy) {
-      filter.ky = hocKy;
+    // Chỉ thêm 'hocKy' nếu nó có giá trị và không phải là 'null' hoặc 'undefined'
+    if (hocKy && hocKy !== 'null' && hocKy !== 'undefined') {
+      url.searchParams.append('hocKy', hocKy);
     }
 
     let giangViens = [];
 
-    if (khoa){
+    if (khoa) {
       giangViens = await User.find({ khoa });
     } else {
       giangViens = await User.find(); // Nếu không có khoa, lấy tất cả giảng viên
@@ -35,7 +36,7 @@ export const GET = async (req) => {
 
     // Tạo một đối tượng để lưu trữ kết quả
     const result = giangViens.map(giangVien => ({
-      username: giangVien.username, 
+      username: giangVien.username,
       khoa: giangVien.khoa,
       soBuoiChamThi: 0,
       soBuoiCoiThi: 0,
@@ -47,10 +48,8 @@ export const GET = async (req) => {
     // Lấy danh sách phân công cói thi phù hợp với filter
     const phanCongCoiThi = await PcCoiThi.find(filter).select('cbo1 cbo2');
 
-    console.log('11111111:',filter)
+    console.log('11111111:', filter)
 
-    console.log('2222:',phanCongChamThi)
-    console.log('3333333:',phanCongCoiThi)
     //Đếm số buổi chấm thi cho mỗi giảng viên
     phanCongChamThi.forEach(pc => {
       [pc.cb1, pc.cb2].forEach(cb => {

@@ -40,7 +40,7 @@ const Dashboard = () => {
     const [current, setCurrent] = useState(1);
     const [pageSize, setPageSize] = useState(10);
     const [namHoc, setNamHoc] = useState('2024-2025');
-    const [hocKy, setHocKy] = useState('1');
+    const [hocKy, setHocKy] = useState(null);
 
     const [listCount, setListCount] = useState([]);
     const [searchTerm, setSearchTerm] = useState('');
@@ -181,7 +181,7 @@ const Dashboard = () => {
                         <div className="flex gap-3">
                             <p>Học kỳ: </p>
                             <h2 className="text-xl font-bold mb-0">
-                                <Select onChange={(value) => setHocKy(value)} className="font-bold" defaultValue={"1"} style={{ width: 120 }} allowClear>
+                                <Select onChange={(value) => setHocKy(value)} className="font-bold" value={hocKy} style={{ width: 120 }} allowClear>
                                     {["1", "2"].map((nam, index) => (
                                         <Option key={index} value={nam}>
                                             {nam}

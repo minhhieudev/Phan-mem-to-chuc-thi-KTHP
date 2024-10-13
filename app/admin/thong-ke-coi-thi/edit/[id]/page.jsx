@@ -62,6 +62,7 @@ const PcCoiThiForm = () => {
               const dataFormat = {
                 ...data, 
                 ngayThi: formattedNgayThi.format('DD/MM/YYYY'),
+                hocKy: data.ky
               };
   
               setEditRecord(dataFormat);
@@ -136,8 +137,8 @@ const PcCoiThiForm = () => {
         <div className="flex gap-2">
           <div className="text-heading4-bold">LOẠI:</div>
           <Select placeholder="Chọn loại hình đào tạo..." value={loai} onChange={(value) => setLoai(value)}>
-            <Option value="chinh-quy">Chính quy</Option>
-            <Option value="lien-thong-vlvh">Liên thông vừa làm vừa học</Option>
+            <Option value="Chính quy">Chính quy</Option>
+            <Option value="Liên thông vừa làm vừa học">Liên thông vừa làm vừa học</Option>
           </Select>
         </div>
       </div>

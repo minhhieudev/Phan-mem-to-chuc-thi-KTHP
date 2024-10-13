@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useForm, Controller } from "react-hook-form";
-import { Button, Input, Form, Select, InputNumber, Row, Col ,DatePicker} from "antd";
+import { Button, Input, Form, Select, InputNumber, Row, Col, DatePicker } from "antd";
 import toast from "react-hot-toast";
 import { useSession } from "next-auth/react";
 import { ArrowLeftOutlined } from "@ant-design/icons";
@@ -20,7 +20,8 @@ const formSchema = {
   soBai: 0,
   hinhThucThoiGianThi: "",
   namHoc: "",
-  loaiKyThi: ""
+  loaiKyThi: "",
+  ky: ''
 };
 
 const PcCoiThiForm = () => {
@@ -61,7 +62,7 @@ const PcCoiThiForm = () => {
   }, [id, reset]);
 
   const onSubmit = async (data) => {
-   
+
     try {
       const url = `/api/admin/pc-cham-thi`;
 
@@ -100,8 +101,8 @@ const PcCoiThiForm = () => {
         <div className="flex gap-2">
           <div className="text-heading4-bold">LOẠI:</div>
           <Select placeholder="Chọn loại hình đào tạo..." value={loai} onChange={(value) => setLoai(value)}>
-            <Option value="chinh-quy">Chính quy</Option>
-            <Option value="lien-thong-vlvh">Liên thông vừa làm vừa học</Option>
+            <Option value="Chính quy">Chính quy</Option>
+            <Option value="Liên thông vừa làm vừa học">Liên thông vừa làm vừa học</Option>
           </Select>
         </div>
       </div>
@@ -153,7 +154,7 @@ const PcCoiThiForm = () => {
           </Col>
 
           <Col span={12}>
-            <Form.Item label="Số bài" validateStatus={errors.soBai? 'error' : ''} help={errors.soBai?.message}>
+            <Form.Item label="Số bài" validateStatus={errors.soBai ? 'error' : ''} help={errors.soBai?.message}>
               <Controller
                 name="soBai"
                 control={control}
@@ -198,7 +199,7 @@ const PcCoiThiForm = () => {
           </Col>
         </Row>
         <Row gutter={16}>
-          <Col span={12}>
+          <Col span={8}>
             <Form.Item label="Năm học" validateStatus={errors.namHoc ? 'error' : ''} help={errors.namHoc?.message}>
               <Controller
                 name="namHoc"
@@ -208,7 +209,22 @@ const PcCoiThiForm = () => {
               />
             </Form.Item>
           </Col>
-          <Col span={12}>
+          <Col span={8}>
+            <Form.Item label="Học kỳ" validateStatus={errors.ky ? 'error' : ''} help={errors.ky?.message}>
+              <Controller
+                name="ky"
+                control={control}
+                rules={{ required: "Vui lòng chọn học kỳ" }}
+                render={({ field }) => (
+                  <Select placeholder="Chọn học kỳ ..." {...field}>
+                    <Option value="1">1</Option>
+                    <Option value="2">2</Option>
+                  </Select>
+                )}
+              />
+            </Form.Item>
+          </Col>
+          <Col span={8}>
             <Form.Item label="Loại kỳ thi" validateStatus={errors.loaiKyThi ? 'error' : ''} help={errors.loaiKyThi?.message}>
               <Controller
                 name="loaiKyThi"
@@ -216,9 +232,16 @@ const PcCoiThiForm = () => {
                 rules={{ required: "Vui lòng chọn loại kỳ thi" }}
                 render={({ field }) => (
                   <Select placeholder="Chọn loại kỳ thi..." {...field}>
-                    <Option value="Chính thức">Chính thức</Option>
-                    <Option value="Phụ">Phụ</Option>
-                    <Option value="Hè">Hè</Option>
+                    <Option value="Học kỳ 1">Học kỳ 1</Option>
+                    <Option value="Học kỳ 1 (đợt 2)">Học kỳ 1 (đợt 2)</Option>
+                    <Option value="Học kỳ 1 (đợt 3)">Học kỳ 1 (đợt 3)</Option>
+                    <Option value="Học kỳ 2">Học kỳ 2</Option>
+                    <Option value="Học kỳ 2 (đợt 2)">Học kỳ 2 (đợt 2)</Option>
+                    <Option value="Học kỳ 2 (đợt 3)">Học kỳ 2 (đợt 3)</Option>
+                    <Option value="Kỳ thi phụ (đợt 1)">Kỳ thi phụ (đợt 1)</Option>
+                    <Option value="Kỳ thi phụ (đợt 2)">Kỳ thi phụ (đợt 2)</Option>
+                    <Option value="Kỳ thi phụ (đợt 3)">Kỳ thi phụ (đợt 3)</Option>
+                    <Option value="Học kỳ hè">Học kỳ hè</Option>
                   </Select>
                 )}
               />

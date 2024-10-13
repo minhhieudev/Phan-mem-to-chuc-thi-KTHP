@@ -19,15 +19,15 @@ export const GET = async (req) => {
       filter.namHoc = namHoc;
     }
 
-    // if (ky) {
-    //   filter.ky = ky;
-    // }
+    if (ky && ky !== 'null'&& ky !== 'undefined') {
+      filter.ky = ky;
+    }
 
     // Kiểm tra điều kiện username cho cán bộ coi thi 1 hoặc 2
     if (username) {
       filter.$or = [
-        { cb1: username },
-        { cb2: username }
+        { cb1: { $regex: username, $options: 'i' } },
+        { cb2: { $regex: username, $options: 'i' } }
       ];
     }
 

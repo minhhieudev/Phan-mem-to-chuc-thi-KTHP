@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef } from "react";
+import React, { useState, useRef } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { Button, Input, Form, Select, DatePicker, Spin } from "antd";
 import toast from "react-hot-toast";
@@ -12,6 +12,7 @@ import dayjs from 'dayjs';
 
 const { Option } = Select;
 
+// Định nghĩa schema mặc định cho form
 const formSchema = {
   hocPhan: '',
   nhomLop: '',
@@ -22,7 +23,8 @@ const formSchema = {
   namHoc: "",
   loaiKyThi: "",
   loai: "",
-  hinhThucThoiGianThi: ''
+  hinhThucThoiGianThi: '',
+  ky: ''
 };
 
 const TeachingAssignmentForm = () => {
@@ -40,13 +42,13 @@ const TeachingAssignmentForm = () => {
   const fileInputRef = useRef(null);
   const [isUploading, setIsUploading] = useState(false);
 
+  // Hàm xử lý submit form
   const onSubmit = async (data) => {
     if (loai === "") {
       toast.error("Vui lòng chọn Loại hình đào tạo trước!");
       return;
     }
 
-    // Không cần chuyển đổi các trường dạng chuỗi thành mảng nữa
     try {
       console.log('Data:', data);
       const method = editRecord ? "PUT" : "POST";
@@ -68,11 +70,13 @@ const TeachingAssignmentForm = () => {
     }
   };
 
+  // Hàm reset form
   const resetForm = () => {
     reset(formSchema);
     setEditRecord(null);
   };
 
+  // Hàm tạo nhiều bản ghi từ dữ liệu upload
   const createMany = async (ListData) => {
     setIsUploading(true);
     try {
@@ -97,6 +101,7 @@ const TeachingAssignmentForm = () => {
     }
   };
 
+  // Hàm xử lý upload file Excel
   const handleFileUpload = (e) => {
     if (loai === "") {
       toast.error("Vui lòng chọn Loại hình đào tạo trước!");
@@ -151,7 +156,7 @@ const TeachingAssignmentForm = () => {
               cb1: row[4],
               cb2: row[5],
               hinhThucThoiGianThi: row[7],
-              soBai: parseInt(row[6], 6) || 0, // Số bài là số nguyên, thêm kiểm tra nếu trường này có giá trị null
+              soBai: parseInt(row[6], 10) || 0, // Số bài là số nguyên, thêm kiểm tra nếu trường này có giá trị null
               loai
             };
           }
@@ -174,15 +179,16 @@ const TeachingAssignmentForm = () => {
   };
 
   return (
-    <div className="p-4 bg-white shadow-lg rounded-lg mt-3 w-[70%] mx-auto font-bold">
-      <div className="flex items-center justify-center mb-3">
+    <div className="p-4 bg-white shadow-lg rounded-lg mt-3 w-full max-w-4xl mx-auto font-bold">
+      <div className="flex items-center justify-between mb-3 flex-wrap">
         <Button
           className="button-kiem-nhiem text-white font-bold shadow-md mb-2"
           onClick={() => router.push(`/admin/pc-cham-thi`)}
+          size="small"
         >
           <ArrowLeftOutlined style={{ color: 'white', fontSize: '18px' }} /> QUAY LẠI
         </Button>
-        <h2 className="font-bold text-heading3-bold flex-grow text-center text-green-500">PHÂN CÔNG CHẤM THI</h2>
+        <h2 className="font-bold text-heading3-bold flex-grow text-center text-green-500 mb-2 md:mb-0">PHÂN CÔNG CHẤM THI</h2>
         <div className="flex gap-2">
           <div className="text-heading4-bold">LOẠI:</div>
           <Select value={loai} placeholder="Chọn loại hình đào tạo..." onChange={(value) => setLoai(value)}>
@@ -203,15 +209,43 @@ const TeachingAssignmentForm = () => {
             <Controller
               name="namHoc"
               control={control}
+              rules={{ required: 'Năm học là bắt buộc' }}
               render={({ field }) => (
                 <Select
                   placeholder="Chọn năm học"
                   {...field}
+                  onChange={(value) => {
+                    field.onChange(value);
+                  }}
                 >
                   <Option value="2021-2022">2021-2022</Option>
                   <Option value="2022-2023">2022-2023</Option>
                   <Option value="2023-2024">2023-2024</Option>
                   <Option value="2024-2025">2024-2025</Option>
+                </Select>
+              )}
+            />
+          </Form.Item>
+
+          <Form.Item
+            label="Học kỳ"
+            validateStatus={errors.ky ? 'error' : ''}
+            help={errors.ky?.message}
+          >
+            <Controller
+              name="ky"
+              control={control}
+              rules={{ required: 'Học kỳ là bắt buộc' }}
+              render={({ field }) => (
+                <Select
+                  placeholder="Chọn học kỳ"
+                  {...field}
+                  onChange={(value) => {
+                    field.onChange(value);
+                  }}
+                >
+                  <Option value="1">1</Option>
+                  <Option value="2">2</Option>
                 </Select>
               )}
             />
@@ -226,10 +260,15 @@ const TeachingAssignmentForm = () => {
             <Controller
               name="loaiKyThi"
               control={control}
+              rules={{ required: 'Loại kỳ thi là bắt buộc' }}
+              setValueAs={(value) => value ? dayjs(value).format('DD/MM/YYYY') : ''}
               render={({ field }) => (
                 <Select
                   placeholder="Chọn loại kỳ thi"
                   {...field}
+                  onChange={(value) => {
+                    field.onChange(value);
+                  }}
                 >
                   <Option value="Học kỳ 1">Học kỳ 1</Option>
                   <Option value="Học kỳ 1 (đợt 2)">Học kỳ 1 (đợt 2)</Option>
@@ -255,6 +294,7 @@ const TeachingAssignmentForm = () => {
             <Controller
               name="hocPhan"
               control={control}
+              rules={{ required: 'Học phần là bắt buộc' }}
               render={({ field }) => <Input placeholder="Nhập học phần" {...field} />}
             />
           </Form.Item>
@@ -268,6 +308,7 @@ const TeachingAssignmentForm = () => {
             <Controller
               name="nhomLop"
               control={control}
+              rules={{ required: 'Nhóm lớp là bắt buộc' }}
               render={({ field }) => <Input placeholder="Nhập nhóm lớp" {...field} />}
             />
           </Form.Item>
@@ -281,12 +322,14 @@ const TeachingAssignmentForm = () => {
             <Controller
               name="ngayThi"
               control={control}
+              rules={{ required: 'Ngày thi là bắt buộc' }}
               render={({ field }) => (
                 <DatePicker
                   placeholder="Chọn ngày thi"
                   style={{ width: '100%' }}
                   format="DD/MM/YYYY"
-                  {...field}
+                  onChange={(date, dateString) => field.onChange(dateString)}
+                  value={field.value ? dayjs(field.value, 'DD/MM/YYYY') : null}
                 />
               )}
             />
@@ -301,6 +344,7 @@ const TeachingAssignmentForm = () => {
             <Controller
               name="cb1"
               control={control}
+              rules={{ required: 'Cán bộ coi thi 1 là bắt buộc' }}
               render={({ field }) => <Input placeholder="Nhập cán bộ coi thi 1" {...field} />}
             />
           </Form.Item>
@@ -314,6 +358,7 @@ const TeachingAssignmentForm = () => {
             <Controller
               name="cb2"
               control={control}
+              rules={{ required: 'Cán bộ coi thi 2 là bắt buộc' }}
               render={({ field }) => <Input placeholder="Nhập cán bộ coi thi 2" {...field} />}
             />
           </Form.Item>
@@ -327,6 +372,7 @@ const TeachingAssignmentForm = () => {
             <Controller
               name="soBai"
               control={control}
+              rules={{ required: 'Số bài thi là bắt buộc', min: { value: 1, message: 'Số bài thi phải lớn hơn 0' } }}
               render={({ field }) => <Input type="number" placeholder="Nhập số bài thi" {...field} />}
             />
           </Form.Item>
@@ -340,14 +386,13 @@ const TeachingAssignmentForm = () => {
             <Controller
               name="hinhThucThoiGianThi"
               control={control}
+              rules={{ required: 'Hình thức thời gian thi là bắt buộc' }}
               render={({ field }) => <Input placeholder="Nhập hình thức thời gian" {...field} />}
             />
           </Form.Item>
-
         </div>
 
-        <div className="flex justify-end gap-4">
-
+        <div className="flex justify-end gap-4 mt-4 flex-wrap">
           <Button
             type="primary"
             htmlType="submit"
@@ -362,7 +407,6 @@ const TeachingAssignmentForm = () => {
               ref={fileInputRef}
               onChange={handleFileUpload}
               accept=".xlsx"
-
             />
           </div>
           <Button

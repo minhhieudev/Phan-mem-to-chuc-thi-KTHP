@@ -31,9 +31,9 @@ const PcCoiThi = () => {
   const [list, setList] = useState([]);
 
   const [namHoc, setNamHoc] = useState("2024-2025");
-  const [loaiKyThi, setLoaiKyThi] = useState("1");
+  const [loaiKyThi, setLoaiKyThi] = useState("");
   const [loaiDaoTao, setLoaiDaoTao] = useState("Chính quy");
-  const [hocKy, setHocKy] = useState("1");
+  const [hocKy, setHocKy] = useState("");
   const [examDateRange, setExamDateRange] = useState({});
   const [loading, setLoading] = useState(true);
 
@@ -70,8 +70,20 @@ const PcCoiThi = () => {
   const onCheckAllChangePhong = (e) => {
     setListPhongSelect(e.target.checked ? listPhong : []);
   };
+
   const onCheckAllChangeGV = (e) => {
     setListGVSelect(e.target.checked ? listGV : []);
+  };
+
+  const onCheckAllChangeGV2 = (e) => {
+    if (e.target.checked) {
+      setListGVSelect(filteredListGV);
+    }
+    else {
+      setListGVSelect(filteredListGV);
+      const updatedList = listGVSelect.filter(item => !filteredListGV.includes(item));
+      setListGVSelect(updatedList);
+    }
   };
 
   const handleCancel = () => {
@@ -846,10 +858,21 @@ const PcCoiThi = () => {
                     </Select>
                   </div>
                 </div>
-                <Checkbox onChange={onCheckAllChangeGV} >
+
+                <Checkbox
+                  onChange={onCheckAllChangeGV}
+                  style={{ display: selectKhoa ? 'none' : '' }}
+                >
                   Chọn tất cả
                 </Checkbox>
-                <div className="flex  flex-wrap gap-3 h-[20%]">
+                <Checkbox
+                  onChange={onCheckAllChangeGV2}
+                  style={{ display: selectKhoa ? '' : 'none' }}
+                >
+                  Chọn tất cả *
+                </Checkbox>
+
+                <div className="flex mt-1 flex-wrap gap-3 h-[20%]">
                   {filteredListGV.map((gv) => (
                     <div
                       key={gv._id}

@@ -28,10 +28,9 @@ export const GET = async (req) => {
     if (loai) {
       filter.loaiDaoTao = loai;
     }
-    if (hocKy) {
+    if (hocKy && hocKy !== 'null'&& hocKy !== 'undefined') {
       filter.ky = hocKy;
     }
-
 
     // Tìm kiếm các bản ghi phân công giảng dạy theo điều kiện filter
     const assignments = await PcCoiThi.find(filter);
