@@ -1,11 +1,11 @@
 "use client";
 import { useState, useEffect } from "react";
 import { useForm, Controller } from "react-hook-form";
-import { Button, Input, Form, Space, Typography, Table, Popconfirm, InputNumber, Select, Checkbox, Row, Col, Pagination } from "antd";
+import { Button, Input, Form, Space, Typography, Table, Popconfirm, Spin, InputNumber, Select, Checkbox, Row, Col, Pagination } from "antd";
 import toast from "react-hot-toast";
 import Loader from "../../../components/Loader";
 import { SearchOutlined } from '@ant-design/icons';
-import { FileExcelOutlined } from '@ant-design/icons';
+import { FileExcelOutlined, UploadOutlined } from '@ant-design/icons';
 
 const { Title } = Typography;
 
@@ -35,6 +35,7 @@ const HocPhanThiForm = () => {
     const [loading, setLoading] = useState(true);
     const [formVisible, setFormVisible] = useState(false); // Trạng thái ẩn hiện form
     const [filteredData, setFilteredData] = useState([]);
+    const [isUploading, setIsUploading] = useState(false); // Trạng thái upload
 
 
     const paginatedData = filteredData.slice(
@@ -232,6 +233,58 @@ const HocPhanThiForm = () => {
         },
     ];
 
+    const createManyHocPhan = async (ListDataUser) => {
+        setIsUploading(true);
+        try {
+            const method = "POST";
+            const res = await fetch("/api/admin/hoc-phan-thi/create", {
+                method,
+                body: JSON.stringify({ users: ListDataUser }),
+                headers: { "Content-Type": "application/json" },
+            });
+
+            if (res.ok) {
+                const newData = await res.json();
+                fetchData();
+                toast.success("Thêm mới thành công");
+                onReset();
+                fileInputRef.current.value = "";
+            } else {
+                toast.error("Failed to save record");
+            }
+        } catch (err) {
+            toast.error("An error occurred while saving data");
+        } finally {
+            setIsUploading(false); 
+        }
+    };
+
+
+    const handleFileUpload = (e) => {
+        const file = e.target.files[0];
+        const reader = new FileReader();
+
+        reader.onload = (event) => {
+            const data = event.target.result;
+            const workbook = XLSX.read(data, { type: "binary" });
+            const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+            const ListData = XLSX.utils.sheet_to_json(firstSheet, { header: 1 });
+            ListData.shift(); // Loại bỏ dòng tiêu đề nếu cần
+
+            if (ListData.length > 0) {
+                createManyHocPhan(ListData);
+            } else {
+                toast.error("No hocphan data found in file.");
+            }
+        };
+
+        reader.onerror = () => {
+            toast.error("Đã xảy ra lỗi khi đọc file Excel");
+        };
+
+        reader.readAsBinaryString(file);
+    };
+
     return (
         <div className="flex gap-2 max-sm:flex-col mt-2 h-full">
 
@@ -357,9 +410,35 @@ const HocPhanThiForm = () => {
 
                         <Form.Item className="text-center">
                             <Button type="primary" htmlType="submit" loading={isSubmitting} className="bg-blue-500">
-                                {editRecord ? "Chỉnh sửa" : "Thêm mới"}
+                                {editRecord ? "Lưu thay đổi" : "Thêm mới"}
                             </Button>
-                            <Button htmlType="button" onClick={onReset} className="ml-4"  type="primary" danger>
+                            <div className="text-center">
+                                <Spin spinning={isUploading}>
+                                    <label htmlFor="excelUpload">
+                                        <Button
+                                            className="mt-3 button-lien-thong-vlvh"
+                                            type="primary"
+                                            icon={<UploadOutlined />}
+                                            onClick={() => fileInputRef.current.click()}
+                                            disabled={isUploading}
+                                        >
+                                            {isUploading ? 'Đang tải lên...' : 'Import từ file Excel'}
+                                        </Button>
+                                    </label>
+                                </Spin>
+
+                                <div className="hidden">
+                                    <input
+                                        type="file"
+                                        accept=".xlsx, .xls"
+                                        onChange={handleFileUpload}
+                                        className="hidden"
+                                        id="excelUpload"
+                                        ref={fileInputRef}
+                                    />
+                                </div>
+                            </div>
+                            <Button htmlType="button" onClick={onReset} className="ml-4" type="primary" danger>
                                 Reset
                             </Button>
                         </Form.Item>
@@ -375,7 +454,7 @@ const HocPhanThiForm = () => {
                         value={searchName}
                         onChange={(e) => setSearchName(e.target.value)}
                         prefix={<SearchOutlined />}
-                        className="w-[10%]"
+                        className="w-[15%]"
                     />
                     <div className="font-bold text-[20px] text-green-500">
                         DANH SÁCH HỌC PHẦN

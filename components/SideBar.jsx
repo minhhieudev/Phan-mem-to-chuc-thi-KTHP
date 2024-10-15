@@ -24,7 +24,7 @@ const SideBar = () => {
     dashboard: { color: pathname === "/admin/dashboard" ? "red" : "orange" },
     coiThi: { color: pathname === "/admin/pc-coi-thi" ? "red" : "purple" },
     chamThi: { color: pathname === "/admin/pc-cham-thi" ? "red" : "teal" },
-    thongKeCoiThi: { color: pathname === "/admin/thong-ke-coi-thi" ? "red" : "lightblue" },
+    thongKeCoiThi: { color: pathname === "/admin/thong-ke-coi-thi" ? "red" : "aqua" },
     thongKeChamThi: { color: pathname === "/admin/thong-ke-cham-thi" ? "red" : "lightgreen" },
     hocPhanThi: { color: pathname === "/admin/hoc-phan-thi" ? "red" : "darkgreen" },
     phongThi: { color: pathname === "/admin/phong-thi" ? "red" : "blue" },

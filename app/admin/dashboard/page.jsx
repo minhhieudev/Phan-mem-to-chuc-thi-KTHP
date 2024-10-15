@@ -1,12 +1,11 @@
 'use client';
 import React, { useState, useEffect, useMemo } from "react";
-import { Table, Select, Progress, Input, Pagination, Spin } from "antd";
+import { Table, Select, Progress, Input, Pagination, Spin, Radio } from "antd";
 import {
     CheckCircleOutlined,
     CalendarOutlined,
     FileOutlined,
 } from "@ant-design/icons";
-import { BarChart, Bar, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer, CartesianGrid } from 'recharts';
 import toast from "react-hot-toast";
 
 const { Option } = Select;
@@ -25,12 +24,40 @@ const Dashboard = () => {
             title: "Số buổi coi thi",
             dataIndex: "soBuoiCoiThi",
             key: "soBuoiCoiThi",
-            render: (text) => <span style={{ fontWeight: 'bold', color: 'green' }}>{text}</span>
+            render: (text) => <span style={{ fontWeight: 'bold', color: 'green' }}>{text}</span>,
+            width:110
         },
         {
             title: "Số buổi chấm thi",
             dataIndex: "soBuoiChamThi",
             key: "soBuoiChamThi",
+            render: (text) => <span style={{ fontWeight: 'bold', color: 'red' }}>{text}</span>,
+            width:110
+        }
+    ];
+    const columns2 = [
+        {
+            title: "Học phần",
+            dataIndex: "hocPhan",
+            key: "hocPhan",
+            render: (text) => <span style={{ fontWeight: 'bold', color: 'blue' }}>{text}</span>
+        },
+        {
+            title: "Ngày thi",
+            dataIndex: "ngayThi",
+            key: "ngayThi",
+            render: (text) => <span style={{ fontWeight: 'bold', color: 'green' }}>{text}</span>
+        },
+        {
+            title: "Cán bộ 1",
+            dataIndex: "cbo1",
+            key: "cbo1",
+            render: (text) => <span style={{ fontWeight: 'bold', color: 'red' }}>{text}</span>
+        },
+        {
+            title: "Cán bộ 2",
+            dataIndex: "cbo2",
+            key: "cbo2",
             render: (text) => <span style={{ fontWeight: 'bold', color: 'red' }}>{text}</span>
         }
     ];
@@ -39,15 +66,22 @@ const Dashboard = () => {
     const [khoaList, setKhoaList] = useState([]);
     const [current, setCurrent] = useState(1);
     const [pageSize, setPageSize] = useState(10);
+    const [current2, setCurrent2] = useState(1);
+    const [pageSize2, setPageSize2] = useState(5);
     const [namHoc, setNamHoc] = useState('2024-2025');
     const [hocKy, setHocKy] = useState(null);
 
     const [listCount, setListCount] = useState([]);
     const [searchTerm, setSearchTerm] = useState('');
+    const [searchTerm2, setSearchTerm2] = useState('');
 
     const [thongKeCoiThi, setThongKeCoiThi] = useState({});
     const [thongKeChamThi, setThongKeChamThi] = useState({});
     const [loading, setLoading] = useState(false);
+    const [loading2, setLoading2] = useState(false);
+
+    const [listLichMoi, setListLichMoi] = useState([]);
+    const [timeType, setTimeType] = useState('month');
 
 
     const fetchKhoaData = async () => {
@@ -66,6 +100,31 @@ const Dashboard = () => {
             toast.error("An error occurred while fetching khoa data");
         }
     };
+    const fetchLichSapDienRa = async () => {
+        try {
+            setLoading2(true);
+
+            const res = await fetch(`/api/admin/pc-coi-thi/get-sap-dien-ra?time=${timeType}&namHoc=${namHoc}&hocKy=${hocKy}`, {
+                method: "GET",
+                headers: { "Content-Type": "application/json" },
+            });
+            if (res.ok) {
+                const data = await res.json();
+                const sortedData = data.sort((a, b) => {
+                    const dateA = new Date(a.ngayThi.split('/').reverse().join('-'));
+                    const dateB = new Date(b.ngayThi.split('/').reverse().join('-'));
+                    return dateA - dateB;
+                });
+                setListLichMoi(sortedData.reverse());
+                setLoading2(false);
+
+            } else {
+                toast.error("Failed to fetch lich sap dien ra");
+            }
+        } catch (err) {
+            toast.error("An error occurred while ffetch lich sap dien ra");
+        }
+    };
 
     const fetchDataThongKe = async () => {
         try {
@@ -76,8 +135,6 @@ const Dashboard = () => {
             if (res.ok) {
                 const data = await res.json();
                 setThongKeChamThi(data)
-                console.log('Res chamthi:', data)
-                // Xử lý dữ liệu nếu cần
             } else {
                 toast.error("Failed to fetch thống kê chấm thi");
             }
@@ -128,7 +185,12 @@ const Dashboard = () => {
 
     useEffect(() => {
         fetchDataThongKe();
+
     }, [namHoc, hocKy]);
+    useEffect(() => {
+        fetchLichSapDienRa();
+
+    }, [timeType]);
 
     useEffect(() => {
         if (!selectedKhoa) return
@@ -141,7 +203,11 @@ const Dashboard = () => {
 
     const handleSearch = (value) => {
         setSearchTerm(value.toLowerCase());
-        setCurrent(1); // Đặt lại trang hiện tại về 1 khi tìm kiếm
+        setCurrent(1);
+    };
+    const handleSearch2 = (value) => {
+        setSearchTerm2(value.toLowerCase());
+        //setCurrent(1);
     };
 
     // Tạo danh sách đã lọc dựa trên searchTerm
@@ -151,6 +217,15 @@ const Dashboard = () => {
             item.username.toLowerCase().includes(searchTerm)
         );
     }, [listCount, searchTerm]);
+    // Tạo danh sách đã lọc dựa trên searchTerm
+    const filteredList2 = useMemo(() => {
+        if (!searchTerm2) return listLichMoi;
+        return listLichMoi.filter(item =>
+            item.hocPhan.toLowerCase().includes(searchTerm2) ||
+            item.cbo1.toLowerCase().includes(searchTerm2) ||
+            item.cbo2.toLowerCase().includes(searchTerm2)
+        );
+    }, [listLichMoi, searchTerm2]);
 
     // Phân trang dữ liệu đã lọc
     const paginatedData = useMemo(() => {
@@ -159,6 +234,14 @@ const Dashboard = () => {
             current * pageSize
         );
     }, [filteredList, current, pageSize]);
+    // Phân trang dữ liệu đã lọc
+    const paginatedData2 = useMemo(() => {
+        return filteredList2.slice(
+            (current2 - 1) * pageSize2,
+            current2 * pageSize2
+        );
+    }, [filteredList2, current2, pageSize2]);
+
 
     return (
         <div className="py-2 px-0 h-[90vh]">
@@ -228,13 +311,64 @@ const Dashboard = () => {
                 </div>
             </div>
 
-            <div className="grid grid-cols-5 gap-3 h-[67vh]">
-                <div className="col-span-3 bg-white p-6 rounded-lg shadow-md">
-                    <h2 className="text-xl font-bold mb-4">Content</h2>
-                   
+            <div className="grid grid-cols-5 gap-2 h-[67vh]">
+                <div className="col-span-3 bg-white px-2 py-3 rounded-lg shadow-md">
+                    <div className="flex justify-between font-bold">
+                        <h2 className="text-xl font-bold mb-2">Lịch thi sắp diễn ra</h2>
+                        <Radio.Group onChange={(e) => setTimeType(e.target.value)} defaultValue="month">
+                            <Radio value="month">Tháng</Radio>
+                            <Radio value="week">Tuần</Radio>
+                        </Radio.Group>
+                        <Search
+                            placeholder="Tìm kiếm học phần, giảng viên..."
+                            //enterButton
+
+                            allowClear
+                            enterButton="Search"
+                            size="small"
+                            style={{ width: 200 }}
+                            //onSearch={handleSearch}
+                            onChange={(e) => handleSearch2(e.target.value)}
+                        />
+
+                    </div>
+                    {listLichMoi == [] ? (
+                        <h2 className="font-bold text-center text-red-500">Chưa có lịch thi</h2>
+                    ) : (
+                        <div>
+                            {loading2 ? (
+                                <div className="mx-auto text-center w-full">
+                                    <Spin />
+                                </div>
+                            ) : (
+                                <div style={{ height: '380px' }}>
+                                    <Table
+                                        columns={columns2}
+                                        dataSource={paginatedData2}
+                                        pagination={false}
+                                        rowKey="key"
+                                        scroll={{ y: 370 }}
+                                    />
+                                    <Pagination
+                                        current={current2}
+                                        pageSize={pageSize2}
+                                        total={listLichMoi.length}
+                                        onChange={(page, size) => {
+                                            setCurrent2(page);
+                                            setPageSize2(size);
+                                        }}
+                                        pageSizeOptions={['10', '25', '50', '100', '200']}
+                                        showSizeChanger
+                                        className="flex justify-end"
+                                    />
+                                </div>
+                            )}
+                        </div>
+
+                    )}
                 </div>
 
-                <div className="col-span-2 bg-white p-6 rounded-lg shadow-md ">
+                <div className="col-span-2 bg-white p-4 rounded-lg shadow-md ">
                     <div className="flex justify-between mb-4">
                         <h2 className="text-xl font-bold">Danh sách</h2>
                         <div className="flex space-x-4 w-[70%]">
@@ -268,8 +402,8 @@ const Dashboard = () => {
                                 <Spin />
                             </div>
                         ) : (
-                            <div style={{ maxHeight: '375px', height: '375px', overflowY: 'auto' }}>
-                                <Table columns={columns} dataSource={paginatedData} pagination={false} rowKey="key" />
+                            <div style={{ height: '375px' }}>
+                                <Table scroll={{ y: 340 }} columns={columns} dataSource={paginatedData} pagination={false} rowKey="key" />
                             </div>
                         )}
 

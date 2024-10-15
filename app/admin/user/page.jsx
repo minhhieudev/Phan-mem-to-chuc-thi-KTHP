@@ -225,34 +225,40 @@ const UserForm = () => {
         {
             title: 'Email',
             dataIndex: 'email',
-            key: 'email'
+            key: 'email',
+            className: 'text-green-500 font-bold'
         },
         {
             title: 'Khoa',
             dataIndex: 'khoa',
-            key: 'khoa'
+            key: 'khoa',
+            className: 'text-orange-500 font-bold'
+
         },
         {
             title: 'Quyền',
             dataIndex: 'role',
-            key: 'role'
+            key: 'role',
+            className: 'font-bold'
+
         },
         {
             title: 'Hành động',
             key: 'action',
             render: (_, record) => (
-                <Space size="middle">
-                    <Button onClick={() => handleEdit(record)} type="primary">Sửa</Button>
+                <Space size="small">
+                    <Button size="small"  onClick={() => handleEdit(record)} type="primary">Sửa</Button>
                     <Popconfirm
                         title="Bạn có chắc chắn muốn xoá?"
                         onConfirm={() => handleDelete(record._id)}
                         okText="Có"
                         cancelText="Không"
                     >
-                        <Button type="primary" danger>Xoá</Button>
+                        <Button size="small" type="primary" danger>Xoá</Button>
                     </Popconfirm>
                 </Space>
             ),
+            width:20
         },
     ];
 
@@ -267,7 +273,7 @@ const UserForm = () => {
                     <Space direction="vertical" className="w-full">
                         <div className="flex justify-between">
                             <Form.Item
-                                label={<span className="font-bold text-xl">Họ tên giảng viên <span className="text-red-600">*</span></span>}
+                                label={<span className="font-bold text-xl">Họ tên GV <span className="text-red-600">*</span></span>}
                                 className="w-[40%] p-0"
                                 validateStatus={errors.username ? 'error' : ''}
                                 help={errors.username?.message}

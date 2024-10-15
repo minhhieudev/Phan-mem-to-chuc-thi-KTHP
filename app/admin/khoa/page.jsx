@@ -129,29 +129,33 @@ const KhoaForm = () => {
             title: 'Mã khoa',
             dataIndex: 'maKhoa',
             key: 'maKhoa',
+            className: 'text-green-500 font-bold'
+
         },
         {
             title: 'Tên khoa',
             dataIndex: 'tenKhoa',
             key: 'tenKhoa',
+            className: 'text-orange-500 font-bold'
+            
         },
         {
             title: 'Hành động',
             key: 'action',
             render: (_, record) => (
-                <Space size="middle">
-                    <Button onClick={() => handleEdit(record)} type="primary">Sửa</Button>
+                <Space size="small">
+                    <Button size="small" onClick={() => handleEdit(record)} type="primary">Sửa</Button>
                     <Popconfirm
                         title="Bạn có chắc chắn muốn xoá?"
                         onConfirm={() => handleDelete(record._id)}
                         okText="Có"
                         cancelText="Không"
                     >
-                        <Button type="primary" danger>Xoá</Button>
+                        <Button size="small" type="primary" danger>Xoá</Button>
                     </Popconfirm>
                 </Space>
             ),
-            width: 140
+            width: 20
         },
     ];
 

@@ -23,13 +23,13 @@ export const GET = async (req) => {
     }
     // Chỉ thêm 'hocKy' nếu nó có giá trị và không phải là 'null' hoặc 'undefined'
     if (hocKy && hocKy !== 'null' && hocKy !== 'undefined') {
-      url.searchParams.append('hocKy', hocKy);
+      filter.ky = hocKy;
     }
 
     let giangViens = [];
 
-    if (khoa) {
-      giangViens = await User.find({ khoa });
+    if (khoa){
+      giangViens = await User.find({ khoa, role:'user' });
     } else {
       giangViens = await User.find(); // Nếu không có khoa, lấy tất cả giảng viên
     }
@@ -47,8 +47,6 @@ export const GET = async (req) => {
 
     // Lấy danh sách phân công cói thi phù hợp với filter
     const phanCongCoiThi = await PcCoiThi.find(filter).select('cbo1 cbo2');
-
-    console.log('11111111:', filter)
 
     //Đếm số buổi chấm thi cho mỗi giảng viên
     phanCongChamThi.forEach(pc => {

@@ -26,7 +26,6 @@ export const GET = async (req) => {
     if (loai) {
       filter.loai = loai;
     }
-
     const assignments = await PcChamThi.find(filter);
 
     return new Response(JSON.stringify(assignments), { status: 200 });

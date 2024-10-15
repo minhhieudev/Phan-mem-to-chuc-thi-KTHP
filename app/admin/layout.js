@@ -8,7 +8,7 @@ import { Toaster } from "react-hot-toast"; // Import Toaster từ react-hot-toas
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata = {
-  title: "Hệ thống quản lý giờ lao động",
+  title: "Phần mềm tổ chức thi KTHP",
   description: "TRƯỜNG ĐẠI HỌC PHÚ YÊN ",
 };
 

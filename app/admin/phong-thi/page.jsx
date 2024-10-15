@@ -144,39 +144,42 @@ const PhongThiForm = () => {
             title: 'Tên phòng',
             dataIndex: 'tenPhong',
             key: 'tenPhong',
+            className: 'text-blue-500 font-bold'
         },
         {
             title: 'Số chỗ',
             dataIndex: 'soCho',
             key: 'soCho',
+            className: 'text-green-500 font-bold'
         },
         {
             title: 'Loại',
             dataIndex: 'loai',
             key: 'loai',
+            className: 'text-orange-500 font-bold'
         },
         {
             title: 'Hành động',
             key: 'action',
             render: (_, record) => (
-                <Space size="middle">
-                    <Button onClick={() => handleEdit(record)} type="primary">Sửa</Button>
+                <Space size="small">
+                    <Button size="small" onClick={() => handleEdit(record)} type="primary">Sửa</Button>
                     <Popconfirm
                         title="Bạn có chắc chắn muốn xoá?"
                         onConfirm={() => handleDelete(record._id)}
                         okText="Có"
                         cancelText="Không"
                     >
-                        <Button type="primary" danger>Xoá</Button>
+                        <Button size="small" type="primary" danger>Xoá</Button>
                     </Popconfirm>
                 </Space>
             ),
-            width: 140
+            width: 20
         },
     ];
 
     return (
-        <div className="flex gap-5 max-sm:flex-col mt-3 h-full">
+        <div className="flex gap-2 max-sm:flex-col mt-3 h-full">
             <div className="p-4 shadow-xl bg-white rounded-xl flex-[25%]">
                 <Title className="text-center" level={3}>QUẢN LÝ PHÒNG THI</Title>
 

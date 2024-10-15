@@ -543,13 +543,13 @@ const PcCoiThi = () => {
                   <Option value="2024-2025">2024-2025</Option>
                 </Select>
               </div>
-              <div className=" flex items-center gap-2">
+              <div className=" flex items-center gap-2 w-[20%]">
                 <label className="block text-sm font-semibold mb-1 ">Học kỳ:</label>
                 <Select size="small"
                   value={hocKy}
                   placeholder="Chọn học kỳ"
                   onChange={(value) => setHocKy(value)}
-                  className=""
+                  className="w-[20%]"
                 >
                   <Option value="1">1</Option>
                   <Option value="2">2</Option>
@@ -557,23 +557,25 @@ const PcCoiThi = () => {
 
               </div>
 
-              <div className=" flex items-center gap-2 w-[13%]">
+              <div className=" flex items-center gap-2 w-[20%]">
                 <label className="block text-sm font-semibold mb-1 ">Loại kỳ thi:</label>
                 <Select size="small"
                   value={loaiKyThi}
                   placeholder="Chọn loại kỳ thi"
                   onChange={(value) => setLoaiKyThi(value)}
-                  className="w-[60%]"
+                  className="w-[65%]"
                 >
-                  <Option value="Học kỳ 1">Học kỳ 1</Option>
+                  <Option value="Chính thức">Chính thức</Option>
                   <Option value="Học kỳ 1 (đợt 2)">Học kỳ 1 (đợt 2)</Option>
                   <Option value="Học kỳ 1 (đợt 3)">Học kỳ 1 (đợt 3)</Option>
-                  <Option value="Học kỳ 2">Học kỳ 2</Option>
+
                   <Option value="Học kỳ 2 (đợt 2)">Học kỳ 2 (đợt 2)</Option>
                   <Option value="Học kỳ 2 (đợt 3)">Học kỳ 2 (đợt 3)</Option>
+
                   <Option value="Kỳ thi phụ (đợt 1)">Kỳ thi phụ (đợt 1)</Option>
                   <Option value="Kỳ thi phụ (đợt 2)">Kỳ thi phụ (đợt 2)</Option>
                   <Option value="Kỳ thi phụ (đợt 3)">Kỳ thi phụ (đợt 3)</Option>
+
                   <Option value="Học kỳ hè">Học kỳ hè</Option>
                 </Select>
               </div>
@@ -877,13 +879,12 @@ const PcCoiThi = () => {
                     <div
                       key={gv._id}
                       className="flex items-center p-1 border border-gray-300 rounded-lg h-10"
-                    // style={{ backgroundColor: getRandomColor() }}
                     >
                       <Checkbox
                         onChange={(e) => handleSelectGV(e.target.checked, gv)}
                         checked={listGVSelect.includes(gv)}
                       >
-                        <UserOutlined className="text-gray-500 mr-2" style={{ fontSize: '24px' }} />
+                        <UserOutlined className="text-gray-500 mr-2" style={{ fontSize: '24px', color: getRandomColor() }} />
                         <span className="text-base-bold">{gv.username}</span>
                       </Checkbox>
                     </div>

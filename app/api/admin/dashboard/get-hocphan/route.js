@@ -24,7 +24,7 @@ export const GET = async (req) => {
     }
     // Chỉ thêm 'hocKy' nếu nó có giá trị và không phải là 'null' hoặc 'undefined'
     if (hocKy && hocKy !== 'null' && hocKy !== 'undefined') {
-      url.searchParams.append('hocKy', hocKy);
+      filter.ky = hocKy;
     }
 
     // Lấy danh sách phân công coi thi

@@ -246,10 +246,10 @@ const Pages = () => {
                           <CalendarOutlined /> Ngày thi: {exam.ngayThi}
                         </p>
                         <p className="text-black mb-1 text-lg font-bold">
-                          <TeamOutlined /> Cán bộ coi thi 1: {exam.cbo1}
+                          <TeamOutlined /> Cán bộ 1: {exam.cbo1}
                         </p>
                         <p className="text-black mb-1 text-lg font-bold">
-                          <TeamOutlined /> Cán bộ coi thi 2: {exam.cbo2}
+                          <TeamOutlined /> Cán bộ 2: {exam.cbo2}
                         </p>
                         <p className="text-black mb-1 text-lg font-bold">
                           <ClockCircleOutlined /> Ca thi: {exam.ca}
@@ -286,10 +286,10 @@ const Pages = () => {
                           <CalendarOutlined /> Ngày thi: {exam.ngayThi}
                         </p>
                         <p className="text-black mb-1 text-lg font-bold">
-                          <TeamOutlined /> Cán bộ coi thi 1: {exam.cbo1}
+                          <TeamOutlined /> Cán bộ 1: {exam.cbo1}
                         </p>
                         <p className="text-black mb-1 text-lg font-bold">
-                          <TeamOutlined /> Cán bộ coi thi 2: {exam.cbo2}
+                          <TeamOutlined /> Cán bộ 2: {exam.cbo2}
                         </p>
                         <p className="text-black mb-1 text-lg font-bold">
                           <ClockCircleOutlined /> Ca thi: {exam.ca}
