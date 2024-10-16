@@ -28,6 +28,9 @@ const HocPhanThiSchema = new mongoose.Schema({
   },
   thiT7CN: {
     type: Boolean
+  },
+  thiChung: {
+    type: Boolean
   }
 
 });

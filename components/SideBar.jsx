@@ -85,7 +85,7 @@ const SideBar = () => {
         <span>Khoa</span>
       </Link>
 
-      <Link href="/admin/email" className={`flex items-center gap-3 p-3 rounded-lg transition border-b-2 ${textColor("/admin/email")}`}>
+      <Link href="/admin/send-email" className={`flex items-center gap-3 p-3 rounded-lg transition border-b-2 ${textColor("/admin/send-email")}`}>
         <MailFilled style={{ fontSize: "20px", ...iconStyles.email }} />
         <span>Gửi Email</span>
       </Link>

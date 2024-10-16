@@ -62,7 +62,7 @@ const Dashboard = () => {
         }
     ];
 
-    const [selectedKhoa, setSelectedKhoa] = useState(null);
+    const [selectedKhoa, setSelectedKhoa] = useState('Kỹ thuật - Công nghệ');
     const [khoaList, setKhoaList] = useState([]);
     const [current, setCurrent] = useState(1);
     const [pageSize, setPageSize] = useState(10);

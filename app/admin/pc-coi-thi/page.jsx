@@ -361,7 +361,6 @@ const PcCoiThi = () => {
         // Lấy danh sách giảng viên theo khoa
         let gvKhoa = []
         if (randomHocPhan) {
-          console.log('GV:', randomHocPhan.giangVien)
           setGVToGetKhoa(randomHocPhan.giangVien)
           setFetchs(!fetchs)
           try {
@@ -415,7 +414,7 @@ const PcCoiThi = () => {
         } else {
           let gvList = [...listGVSelect]; /// KHÔNG HIỂU CHỖ NÀY 
 
-          console.log(JSON.stringify(gvList, null, 2));
+          //console.log(JSON.stringify(gvList, null, 2));
 
           // Nếu hinhThuc khác 'TH', cbo1 và cbo2 không được là giảng viên giảng dạy môn đó hoặc giảng viên trong khoa
           const filterGVList = gvList.filter(gv => gv.username != randomHocPhan.giangVien && !gvKhoa.some(gvKhoa => gvKhoa.username == gv.username));
@@ -491,7 +490,7 @@ const PcCoiThi = () => {
 
   };
 
-
+  
   const handleExamSessionChange = (e) => {
     setExamSessions(e.target.value);
   };
@@ -907,9 +906,10 @@ const PcCoiThi = () => {
                 return dateA - dateB;
               })}
               namHoc={namHoc}
-              hocKy={hocKy}
               loaiKyThi={loaiKyThi}
               loaiDaoTao={loaiDaoTao}
+              hocKy={hocKy}
+
             />
           </TabPane>
 

@@ -4,8 +4,9 @@ import React, { useEffect, useState } from "react";
 import { Table, Popconfirm, Button, Input, Space, Pagination, Spin } from "antd";
 import toast from "react-hot-toast";
 import { useSession } from "next-auth/react";
+import { exportLichThi } from '../fileExport'
 
-const TablePcCoiThi = ({ list, namHoc, loaiKyThi, loaiDaoTao, hocky }) => {
+const TablePcCoiThi = ({ list, namHoc, loaiKyThi, loaiDaoTao, hocKy }) => {
   const [data, setData] = useState(list); // Dữ liệu danh sách
   const [editingKey, setEditingKey] = useState(""); // Khóa của hàng đang chỉnh sửa
   const [editingRow, setEditingRow] = useState({}); // Dữ liệu của hàng đang chỉnh sửa
@@ -45,10 +46,6 @@ const TablePcCoiThi = ({ list, namHoc, loaiKyThi, loaiDaoTao, hocky }) => {
     setData(newData);
     toast.success("Đã xoá thành công!");
   };
-
-  useEffect(() => {
-    console.log('List:', list)
-  }, [list])
 
   /// Xử lý tìm kiếm
   const onSearch = (value) => {
@@ -146,7 +143,7 @@ const TablePcCoiThi = ({ list, namHoc, loaiKyThi, loaiDaoTao, hocky }) => {
         ),
     },
     {
-      title: "Cán bộ  1",
+      title: "Cán bộ 1",
       dataIndex: "cbo1",
       render: (text, record) =>
         isEditing(record) ? (
@@ -272,8 +269,8 @@ const TablePcCoiThi = ({ list, namHoc, loaiKyThi, loaiDaoTao, hocky }) => {
         </div>
       ) : (
         <div className="flex-grow overflow-auto" style={{ maxHeight: 'calc(85vh - 120px)' }}>
-          <div className="text-heading4-bold text-orange-600 text-center mb-1" style={{ textTransform: "uppercase" }}>
-            KẾT QUẢ PHÂN CÔNG COI THI KỲ THI KẾT THÚC HỌC PHẦN - HỆ {loaiDaoTao} - THUỘC HỌC KỲ {hocky}, NĂM HỌC {namHoc}
+          <div className="text-base-bold text-orange-600 text-center mb-1" style={{ textTransform: "uppercase" }}>
+            KẾT QUẢ PHÂN CÔNG COI THI KỲ THI KẾT THÚC HỌC PHẦN - HỆ {loaiDaoTao} <br /> THUỘC HỌC KỲ {hocKy}, NĂM HỌC {namHoc}
           </div>
           <div className="mb-2   flex justify-end">
             <Input.Search
@@ -296,7 +293,8 @@ const TablePcCoiThi = ({ list, namHoc, loaiKyThi, loaiDaoTao, hocky }) => {
       <div className="mt-2 flex justify-around">
         <div className="b text-center rounded-md  flex justify-center gap-10">
           <Button type="primary" className="button-chinh-quy" onClick={handleSubmit}>Lưu</Button>
-          <Button type="primary" className="button-lien-thong-vlvh" >Xuất Excel</Button>
+          <Button  onClick={() => exportLichThi(data, `LỊCH COI THI KẾT THÚC HỌC PHẦN - HỆ`, hocKy, namHoc, loaiDaoTao)} type="primary" className="button-lien-thong-vlvh" >Xuất Excel</Button>
+          
         </div>
         <Pagination
           current={current}

@@ -13,22 +13,19 @@ const transporter = nodemailer.createTransport({
 export const POST = async (req) => {
   try {
     await connectToDB();
-    const { idUser, subject, text, attachments } = await req.json();
+    const { subject, text, attachments } = await req.json();
 
-    // Fetch the list of users excluding the current user
-    const users = await User.find().select('email');
-    const emails = users
-      .filter(user => user._id.toString() !== idUser)
-      .map(user => user.email);
+    const email = ['minhhieudev31@gmail.com', '211ctt004_hieu@pyu.edu.vn']
 
     const mailOptions = {
       from: "TRƯỜNG ĐẠI HỌC PHÚ YÊN",
-      to: emails.join(', '),
+      to: email.join(', '),
       subject: subject || 'Default Subject',
       text: text || 'Default Email Body',
       attachments: attachments,
     };
-    console.log(emails)
+
+    console.log('File:', email)
 
     try {
       await transporter.sendMail(mailOptions);
