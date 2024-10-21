@@ -1,12 +1,13 @@
 'use client'
-import { useState, useEffect } from "react";
-import { Select, DatePicker, Button, message, Tabs, Card, Col, Row, Checkbox, Radio, Input, Table, Modal } from "antd";
+import { useState, useEffect, useRef } from "react";
+import { Select, DatePicker, Button, message, Tabs, Card, Col, Row, Checkbox, Radio, Input, Table, Modal, Spin } from "antd";
 
-import { UserOutlined, BookOutlined, HomeOutlined, CalendarOutlined, DeleteOutlined } from '@ant-design/icons';
+import { UserOutlined, BookOutlined, HomeOutlined, CalendarOutlined, DeleteOutlined, UploadOutlined } from '@ant-design/icons';
 import Loader from "../../../components/Loader";
 import TablePcCoiThi from "@components/CoiThi/TablePcCoiThi";
 import { useSession } from "next-auth/react";
 import { v4 as uuidv4 } from "uuid";
+import * as XLSX from 'xlsx';
 
 const CheckboxGroup = Checkbox.Group;
 
@@ -63,6 +64,14 @@ const PcCoiThi = () => {
   const user = session?.user;
 
   const [isDisplay, setIsDisplay] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
+  const fileInputRef = useRef(null);
+
+  const [dataMonThi, setDataMonThi] = useState([]);
+  const [dataSinhVien, setDataSinhVien] = useState([]);
+  const [dataPhong, setDataPhong] = useState([]);
+  const [dataGV, setDataGV] = useState([]);
+
 
   const onCheckAllChange = (e) => {
     setListHocPhanSelect(e.target.checked ? listHocPhan : []);
@@ -76,8 +85,9 @@ const PcCoiThi = () => {
   };
 
   const onCheckAllChangeGV2 = (e) => {
+    setChecked(!checked);
     if (e.target.checked) {
-      setListGVSelect(filteredListGV);
+      setListGVSelect(prevList => [...prevList, ...filteredListGV]);
     }
     else {
       setListGVSelect(filteredListGV);
@@ -126,6 +136,11 @@ const PcCoiThi = () => {
     updatedList.splice(index, 1);
     setListGVSelect(updatedList);
   };
+
+  const [checked, setChecked] = useState(false);
+  useEffect(() => {
+    setChecked(false);
+  }, [selectKhoa]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -490,11 +505,6 @@ const PcCoiThi = () => {
 
   };
 
-  
-  const handleExamSessionChange = (e) => {
-    setExamSessions(e.target.value);
-  };
-
 
   const getRandomColor = () => {
     const randomValue = () => Math.floor(Math.random() * 128) + 64;
@@ -506,11 +516,121 @@ const PcCoiThi = () => {
     return `#${r}${g}${b}`;
   };
 
+
+  // Xử lý đọc Excel
+
+  const importMonThi = (e) => {
+    const file = e.target.files[0];
+    const reader = new FileReader();
+
+    reader.onload = (event) => {
+      const data = event.target.result;
+      const workbook = XLSX.read(data, { type: "binary" });
+      const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+      const ListData = XLSX.utils.sheet_to_json(firstSheet, { header: 1 });
+      ListData.shift(); // Loại bỏ dòng tiêu đề nếu cần
+
+      if (ListData.length > 0) {
+        setDataMonThi(ListData)
+      } else {
+        toast.error("Lỗi khi đọc file.");
+      }
+      console.log("Dữ liệu từ file Excel đã lọc:", ListData);
+    };
+
+    reader.onerror = () => {
+      toast.error("Đã xảy ra lỗi khi đọc file Excel");
+    };
+
+    reader.readAsBinaryString(file);
+  };
+  const importPhong = (e) => {
+    const file = e.target.files[0];
+    const reader = new FileReader();
+
+    reader.onload = (event) => {
+      const data = event.target.result;
+      const workbook = XLSX.read(data, { type: "binary" });
+      const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+      const ListData = XLSX.utils.sheet_to_json(firstSheet, { header: 1 });
+      ListData.shift(); // Loại bỏ dòng tiêu đề nếu cần
+
+      if (ListData.length > 0) {
+        setDataPhong(ListData)
+      } else {
+        toast.error("Lỗi khi đọc file.");
+      }
+      console.log("Dữ liệu từ file Excel đã lọc:", ListData);
+    };
+
+    reader.onerror = () => {
+      toast.error("Đã xảy ra lỗi khi đọc file Excel");
+    };
+
+    reader.readAsBinaryString(file);
+  };
+  const importGV = (e) => {
+
+    const file = e.target.files[0];
+    const reader = new FileReader();
+
+    reader.onload = (event) => {
+      const data = event.target.result;
+      const workbook = XLSX.read(data, { type: "binary" });
+      const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+      const ListData = XLSX.utils.sheet_to_json(firstSheet, { header: 1 });
+      ListData.shift();
+
+      if (ListData.length > 0) {
+        setDataGV(ListData)
+      } else {
+        toast.error("Lỗi khi đọc file.");
+      }
+      console.log("Dữ liệu từ file Excel đã lọc:", ListData);
+    };
+
+    reader.onerror = () => {
+      toast.error("Đã xảy ra lỗi khi đọc file Excel");
+    };
+
+    reader.readAsBinaryString(file);
+  };
+  const importSinhVien = (e) => {
+
+    const file = e.target.files[0];
+    const reader = new FileReader();
+
+    reader.onload = (event) => {
+      const data = event.target.result;
+      const workbook = XLSX.read(data, { type: "binary" });
+      const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+      const ListData = XLSX.utils.sheet_to_json(firstSheet, { header: 1 });
+      ListData.shift();
+
+      if (ListData.length > 0) {
+        setDataSinhVien(ListData)
+      } else {
+        toast.error("Lỗi khi đọc file.");
+      }
+      console.log("Dữ liệu từ file Excel đã lọc:", ListData);
+    };
+
+    reader.onerror = () => {
+      toast.error("Đã xảy ra lỗi khi đọc file Excel");
+    };
+
+    reader.readAsBinaryString(file);
+  };
+
+  const create2 = () => {
+
+  }
+
   return loading ? (
     <Loader />
   ) : (
     <div>
-      <div className="py-1 px-6 bg-white rounded-lg shadow-lg mt-3 h-[90vh]">
+      <div className="py-1 px-6 bg-white rounded-lg shadow-lg mt-2 h-[90vh]">
         <Tabs activeKey={activeTab} onChange={(key) => setActiveTab(key)}>
           <TabPane tab="Tạo lịch thi" key="1">
             <div className="text-heading3-bold text-blue-600 text-center ">THÔNG TIN KỲ THI</div>
@@ -542,13 +662,13 @@ const PcCoiThi = () => {
                   <Option value="2024-2025">2024-2025</Option>
                 </Select>
               </div>
-              <div className=" flex items-center gap-2 w-[20%]">
+              <div className=" flex items-center gap-2 ">
                 <label className="block text-sm font-semibold mb-1 ">Học kỳ:</label>
                 <Select size="small"
                   value={hocKy}
                   placeholder="Chọn học kỳ"
                   onChange={(value) => setHocKy(value)}
-                  className="w-[20%]"
+                  className="w-[60px]"
                 >
                   <Option value="1">1</Option>
                   <Option value="2">2</Option>
@@ -556,13 +676,13 @@ const PcCoiThi = () => {
 
               </div>
 
-              <div className=" flex items-center gap-2 w-[20%]">
+              <div className=" flex items-center gap-2 ">
                 <label className="block text-sm font-semibold mb-1 ">Loại kỳ thi:</label>
                 <Select size="small"
                   value={loaiKyThi}
                   placeholder="Chọn loại kỳ thi"
                   onChange={(value) => setLoaiKyThi(value)}
-                  className="w-[65%]"
+                  className="w-[152px]"
                 >
                   <Option value="Chính thức">Chính thức</Option>
                   <Option value="Học kỳ 1 (đợt 2)">Học kỳ 1 (đợt 2)</Option>
@@ -577,6 +697,34 @@ const PcCoiThi = () => {
 
                   <Option value="Học kỳ hè">Học kỳ hè</Option>
                 </Select>
+              </div>
+
+              <div className=" flex items-center gap-2">
+                <label className="block text-sm font-semibold mb-1 ">Ngày thi:</label>
+                <RangePicker
+                  placeholder={['Từ ngày', 'Đến ngày']}
+                  onChange={(dates) => {
+                    if (dates && dates.length === 2) {
+                      const startDate = dates[0]?.toDate();
+                      const endDate = dates[1]?.toDate();
+                      setExamDateRange({ startDate, endDate });
+                    }
+                  }}
+                />
+              </div>
+
+              <div className="flex flex-col gap-3">
+                <div className=" flex items-center gap-2">
+                  <label className="block text-sm font-semibold mb-1">Ca:</label>
+                  <Checkbox.Group
+                    options={[
+                      { label: "1", value: 1 },
+                      { label: "3", value: 3 },
+                    ]}
+                    value={examSessions}
+                    onChange={(checkedValues) => setExamSessions(checkedValues)}
+                  />
+                </div>
               </div>
 
             </div>
@@ -601,9 +749,35 @@ const PcCoiThi = () => {
                           </li>
                         ))}
                       </ul>
-                      <div className="flex justify-around mt-3">
+                      <div className="flex justify-around mt-3 items-center">
                         <Button className="button-lien-thong-chinh-quy text-white" onClick={() => { setOpen(true); setTitle('Chọn học phần') }}>Chọn học phần</Button>
-                        <Button className="button-lien-thong-vlvh text-white">Import</Button>
+
+                        <div className="">
+                          <Spin spinning={isUploading}>
+                            <label htmlFor="excelUpload">
+                              <Button
+                                className="button-chinh-quy-khac"
+                                type="primary"
+                                icon={<UploadOutlined />}
+                                onClick={() => fileInputRef.current.click()}
+                                disabled={isUploading}
+                              >
+                                {isUploading ? 'Đang tải lên...' : 'Import'}
+                              </Button>
+                            </label>
+                          </Spin>
+
+                          <div className="hidden">
+                            <input
+                              type="file"
+                              accept=".xlsx, .xls"
+                              onChange={importMonThi}
+                              className="hidden"
+                              id="excelUpload"
+                              ref={fileInputRef}
+                            />
+                          </div>
+                        </div>
                       </div>
                     </Card>
 
@@ -614,39 +788,51 @@ const PcCoiThi = () => {
                 <Col span={5} className="h-[55%] overflow-y-auto">
                   <div className="shadow-lg  text-center ">
                     <Card
-                      title={<span><CalendarOutlined /> THÔNG TIN</span>}
+                      title={<span><UserOutlined /> Danh sách SV</span>}
                       bordered={false}
                       className="h-full text-center"
                       style={{ backgroundColor: '#fafafa' }}
                     >
-                      <div className="flex flex-col gap-3">
-                        <div className=" flex items-center gap-2">
-                          <label className="block text-sm font-semibold mb-1">Ca:</label>
-                          <Checkbox.Group
-                            options={[
-                              { label: "1", value: 1 },
-                              { label: "3", value: 3 },
-                              { label: "5", value: 5 },
-                            ]}
-                            value={examSessions}
-                            onChange={(checkedValues) => setExamSessions(checkedValues)}
+                      {dataSinhVien?.map((phong, index) => (
+                        <div key={phong[1]} className="flex justify-between items-center">
+                          <p className="text-base-bold">- {phong[2]}</p>
+                          <DeleteOutlined
+                            className="text-red-500 cursor-pointer"
+                          //onClick={() => handleDeletePhong(index)}
                           />
                         </div>
+                      ))}
 
-                        <div className=" flex items-center gap-2">
-                          <label className="block text-sm font-semibold mb-1 ">Ngày thi:</label>
-                          <RangePicker
-                            placeholder={['Từ ngày', 'Đến ngày']}
-                            onChange={(dates) => {
-                              if (dates && dates.length === 2) {
-                                const startDate = dates[0]?.toDate();
-                                const endDate = dates[1]?.toDate();
-                                setExamDateRange({ startDate, endDate });
-                              }
-                            }}
-                          />
+                      <div className="flex gap-4 mt-3 flex-col items-center">
+                        <Button className="button-lien-thong-vlvh text-white w-[50%] flex justify-center" onClick={() => { setOpen(true); setTitle('Chọn phòng') }}>Chọn Sinh viên</Button>
+                        <div className="">
+                          <Spin spinning={isUploading}>
+                            <label htmlFor="excelUpload">
+                              <Button
+                                className="button-chinh-quy-khac"
+                                type="primary"
+                                icon={<UploadOutlined />}
+                                onClick={() => fileInputRef.current.click()}
+                                disabled={isUploading}
+                              >
+                                {isUploading ? 'Đang tải lên...' : 'Import'}
+                              </Button>
+                            </label>
+                          </Spin>
+
+                          <div className="hidden">
+                            <input
+                              type="file"
+                              accept=".xlsx, .xls"
+                              onChange={importSinhVien}
+                              className="hidden"
+                              id="excelUpload"
+                              ref={fileInputRef}
+                            />
+                          </div>
                         </div>
                       </div>
+
                     </Card>
                   </div>
                 </Col>
@@ -671,7 +857,32 @@ const PcCoiThi = () => {
 
                       <div className="flex gap-4 mt-3 flex-col">
                         <Button className="button-lien-thong-vlvh-nd71 text-white" onClick={() => { setOpen(true); setTitle('Chọn phòng') }}>Chọn phòng thi</Button>
-                        <Button className="button-lien-thong-vlvh text-white">Import</Button>
+                        <div className="">
+                          <Spin spinning={isUploading}>
+                            <label htmlFor="excelUpload">
+                              <Button
+                                className="button-chinh-quy-khac"
+                                type="primary"
+                                icon={<UploadOutlined />}
+                                onClick={() => fileInputRef.current.click()}
+                                disabled={isUploading}
+                              >
+                                {isUploading ? 'Đang tải lên...' : 'Import'}
+                              </Button>
+                            </label>
+                          </Spin>
+
+                          <div className="hidden">
+                            <input
+                              type="file"
+                              accept=".xlsx, .xls"
+                              onChange={importPhong}
+                              className="hidden"
+                              id="excelUpload"
+                              ref={fileInputRef}
+                            />
+                          </div>
+                        </div>
                       </div>
 
                     </Card>
@@ -688,7 +899,7 @@ const PcCoiThi = () => {
                       <div className="flex flex-wrap gap-3 h-[20%]">
                         {listGVSelect.map((gv, index) => (
                           <div
-                            key={gv._id}
+                            key={`${gv.id}-${index}`}
                             className="flex justify-between items-center p-2 border border-gray-300 rounded-lg"
                             style={{ backgroundColor: getRandomColor() }} // Áp dụng màu ngẫu nhiên
                           >
@@ -708,7 +919,32 @@ const PcCoiThi = () => {
                   </div>
                   <div className="flex gap-4 mt-3 justify-center">
                     <Button className="button-boi-duong text-white" onClick={() => { setOpen(true); setTitle('Chọn cán bộ') }}>Chọn cán bộ</Button>
-                    <Button className="button-lien-thong-vlvh text-white">Import</Button>
+                    <div className="">
+                      <Spin spinning={isUploading}>
+                        <label htmlFor="excelUpload">
+                          <Button
+                            className="button-chinh-quy-khac"
+                            type="primary"
+                            icon={<UploadOutlined />}
+                            onClick={() => fileInputRef.current.click()}
+                            disabled={isUploading}
+                          >
+                            {isUploading ? 'Đang tải lên...' : 'Import'}
+                          </Button>
+                        </label>
+                      </Spin>
+
+                      <div className="hidden">
+                        <input
+                          type="file"
+                          accept=".xlsx, .xls"
+                          onChange={importGV}
+                          className="hidden"
+                          id="excelUpload"
+                          ref={fileInputRef}
+                        />
+                      </div>
+                    </div>
                   </div>
                 </Col>
               </Row>
@@ -726,7 +962,7 @@ const PcCoiThi = () => {
                 onOk={() => setOpen(false)}
                 width={1500}
                 centered
-                bodyStyle={{ height: '600px', overflowY: 'auto' }}
+                styles ={{ height: '600px', overflowY: 'auto' }}
               >
                 <div className="text-center">
                   <Input.Search
@@ -768,7 +1004,7 @@ const PcCoiThi = () => {
                 onOk={() => setOpen(false)}
                 width={1000}
                 centered
-                bodyStyle={{ height: '600px', overflowY: 'auto' }}
+                styles ={{ height: '600px', overflowY: 'auto' }}
               >
                 <div className="flex justify-between mt-2">
                   {/* Thêm Select ở đây */}
@@ -817,8 +1053,6 @@ const PcCoiThi = () => {
               </Modal>
             )}
 
-
-
             {title === 'Chọn cán bộ' && (
               <Modal
                 title={title}
@@ -828,7 +1062,6 @@ const PcCoiThi = () => {
                 onOk={() => setOpen(false)}
                 width={1500}
                 centered
-                bodyStyle={{ height: '600px', overflowY: 'auto' }}
               >
                 <div className="flex justify-between">
                   <Input.Search
@@ -851,11 +1084,13 @@ const PcCoiThi = () => {
                       onChange={setSelectKhoa}
                       style={{ marginBottom: '16px' }} // Thêm style để tạo khoảng cách với các thành phần khác
                     >
+                      
                       {khoaOptions.map(khoa => (
                         <Select.Option key={khoa} value={khoa}>
                           {khoa}
                         </Select.Option>
                       ))}
+                      
                     </Select>
                   </div>
                 </div>
@@ -867,13 +1102,14 @@ const PcCoiThi = () => {
                   Chọn tất cả
                 </Checkbox>
                 <Checkbox
+                  checked={checked}
                   onChange={onCheckAllChangeGV2}
                   style={{ display: selectKhoa ? '' : 'none' }}
                 >
                   Chọn tất cả *
                 </Checkbox>
 
-                <div className="flex mt-1 flex-wrap gap-3 h-[20%]">
+                <div className="flex mt-1 flex-wrap gap-3 max-h-[450px] overflow-auto">
                   {filteredListGV.map((gv) => (
                     <div
                       key={gv._id}

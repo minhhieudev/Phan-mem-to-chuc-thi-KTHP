@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { Button, Input, Form, Space, Typography, Table, Popconfirm, Spin, InputNumber, Select, Checkbox, Row, Col, Pagination } from "antd";
 import toast from "react-hot-toast";
@@ -36,6 +36,7 @@ const HocPhanThiForm = () => {
     const [formVisible, setFormVisible] = useState(false); // Trạng thái ẩn hiện form
     const [filteredData, setFilteredData] = useState([]);
     const [isUploading, setIsUploading] = useState(false); // Trạng thái upload
+    const fileInputRef = useRef(null);
 
 
     const paginatedData = filteredData.slice(
@@ -438,7 +439,7 @@ const HocPhanThiForm = () => {
                                     />
                                 </div>
                             </div>
-                            <Button htmlType="button" onClick={onReset} className="ml-4" type="primary" danger>
+                            <Button htmlType="button" onClick={onReset} className="ml-4 mt-2" type="primary" danger>
                                 Reset
                             </Button>
                         </Form.Item>
