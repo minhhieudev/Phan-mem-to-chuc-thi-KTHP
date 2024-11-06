@@ -52,7 +52,7 @@ const SideBar = () => {
       
       <Link href="/admin/pc-cham-thi" className={`flex items-center gap-3 p-3 rounded-lg transition border-b-2 ${textColor("/admin/pc-cham-thi")}`}>
         <FileTextOutlined style={{ fontSize: "20px", ...iconStyles.chamThi }} />
-        <span>Phân công chấm thi</span>
+        <span>Quản lý chấm thi</span>
       </Link>
 
       <Link href="/admin/thong-ke-coi-thi" className={`flex items-center gap-3 p-3 rounded-lg transition border-b-2 ${textColor("/admin/thong-ke-coi-thi")}`}>
@@ -77,7 +77,7 @@ const SideBar = () => {
       
       <Link href="/admin/user" className={`flex items-center gap-3 p-3 rounded-lg transition border-b-2 ${textColor("/admin/user")}`}>
         <TeamOutlined style={{ fontSize: "20px", ...iconStyles.user }} />
-        <span>User</span>
+        <span>Quản lý người dùng</span>
       </Link>
       
       <Link href="/admin/khoa" className={`flex items-center gap-3 p-3 rounded-lg transition border-b-2 ${textColor("/admin/khoa")}`}>

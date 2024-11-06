@@ -624,85 +624,7 @@ const PcCoiThi = () => {
 
   const create2 = () => {
 
-    // ========= SINH VIÊN =============
-
-    // Tạo object lưu danh sách môn thi, sinh viên và lớp
-    const result = {};
-  
-    // Duyệt qua từng sinh viên trong dataSinhVien
-    dataSinhVien.forEach(([maSinhVien, maMonThi, lop]) => {
-      // Nếu môn thi chưa tồn tại trong result, thêm môn thi đó với cấu trúc mới
-      if (!result[maMonThi]) {
-        result[maMonThi] = { sinhVien: [], lop: [], tongSoThiSinh: 0 };
-      }
-  
-      // Thêm sinh viên vào danh sách sinh viên của môn thi
-      result[maMonThi].sinhVien.push(maSinhVien);
-  
-      // Tăng tổng số thí sinh
-      result[maMonThi].tongSoThiSinh++;
-  
-      // Thêm lớp vào danh sách lớp nếu chưa có lớp đó
-      if (!result[maMonThi].lop.includes(lop)) {
-        result[maMonThi].lop.push(lop);
-      }
-    });
-  
-    console.log(result);
-    return result;
-    // ==========================================================
-
-    // MÔN HỌC
-
-    const dataMonThi = [
-      ['KC21345', 'Tên học phần 1', 3,'TL', 90],
-      ['KC21389', 'Tên học phần 2', 2,'TN', 120],
-    ];
-
-    if (dataMonThi.length >0){
-
-    }
-  };
-  
-  
-
-  const columns = [
-    {
-      title: 'STT',
-      dataIndex: 'index',
-      width: 18,
-      render: (text, record, index) => <span style={{ fontWeight: 'bold' }}>{index + 1}</span>,
-    },
-    {
-      title: 'Tên giảng viên',
-      dataIndex: 'username',
-      key: 'username',
-      width: 60,
-      render: (text) => <span style={{ fontWeight: 'bold', color: 'orange' }}>{text}</span>,
-    },
-    {
-      title: 'Khoa',
-      dataIndex: 'khoa',
-      key: 'khoa',
-      width: 60,
-      render: (text) => <span style={{ fontWeight: 'bold', color: 'blue' }}>{text}</span>,
-    },
-    {
-      title: 'Xóa',
-      key: 'action',
-      width: 10,
-      render: (_, record) => (
-
-        //<Button onConfirm={() => handleDelete(record._id)} size="small" type="primary" danger>Xoá</Button>
-        <DeleteOutlined
-          className="text-red-500 cursor-pointer ml-2"
-          onClick={() => handleDeleteGV(record.index)}
-        />
-
-      ),
-      width: 20,
-    },
-  ];
+  }
 
   return loading ? (
     <Loader />
@@ -863,7 +785,7 @@ const PcCoiThi = () => {
 
                 </Col>
 
-                <Col span={5} className="h-[60%] overflow-y-auto">
+                <Col span={5} className="h-[55%] overflow-y-auto">
                   <div className="shadow-lg  text-center ">
                     <Card
                       title={<span><UserOutlined /> Danh sách SV</span>}
@@ -923,17 +845,15 @@ const PcCoiThi = () => {
                       style={{ backgroundColor: '#f5f5f5' }} // Màu nền
                     >
 
-                      <ul className="list-decimal text-left max-h-[300px] overflow-auto bg-[#f5f5f5]">
-                        {listPhongSelect.map((phong, index) => (
-                          <div key={phong.tenPhong} className="flex justify-between items-center">
-                            <p className="text-base-bold">- {phong.tenPhong}</p>
-                            <DeleteOutlined
-                              className="text-red-500 cursor-pointer"
-                              onClick={() => handleDeletePhong(index)}
-                            />
-                          </div>
-                        ))}
-                      </ul>
+                      {listPhongSelect.map((phong, index) => (
+                        <div key={phong.tenPhong} className="flex justify-between items-center">
+                          <p className="text-base-bold">- {phong.tenPhong}</p>
+                          <DeleteOutlined
+                            className="text-red-500 cursor-pointer"
+                            onClick={() => handleDeletePhong(index)}
+                          />
+                        </div>
+                      ))}
 
                       <div className="flex gap-4 mt-3 flex-col">
                         <Button className="button-lien-thong-vlvh-nd71 text-white" onClick={() => { setOpen(true); setTitle('Chọn phòng') }}>Chọn phòng thi</Button>
@@ -969,22 +889,15 @@ const PcCoiThi = () => {
                   </div>
                 </Col>
                 <Col span={9} className=" ">
-                  <div className="shadow-lg text-center text-base-bold h-[49vh] ">
+                  <div className="shadow-lg text-center text-base-bold h-[49vh] overflow-y-auto">
                     <Card
                       title={<span><UserOutlined /> CÁN BỘ COI THI</span>}
                       bordered={false}
                       className="h-full text-center"
                       style={{ backgroundColor: '#f0fff0' }} // Màu nền
                     >
-                      <div className="h-full w-full ">
-                        <Table
-                          scroll={{ y: '360px' }}
-                          columns={columns}
-                          dataSource={listGVSelect}
-                          rowKey="_id"
-                          pagination={false} // Tắt phân trang trên Table
-                        />
-                        {/* {listGVSelect.map((gv, index) => (
+                      <div className="flex flex-wrap gap-3 h-[20%]">
+                        {listGVSelect.map((gv, index) => (
                           <div
                             key={`${gv.id}-${index}`}
                             className="flex justify-between items-center p-2 border border-gray-300 rounded-lg"
@@ -999,7 +912,7 @@ const PcCoiThi = () => {
                               onClick={() => handleDeleteGV(index)}
                             />
                           </div>
-                        ))} */}
+                        ))}
                       </div>
                     </Card>
 
@@ -1049,7 +962,7 @@ const PcCoiThi = () => {
                 onOk={() => setOpen(false)}
                 width={1500}
                 centered
-                styles={{ height: '600px', overflowY: 'auto' }}
+                styles ={{ height: '600px', overflowY: 'auto' }}
               >
                 <div className="text-center">
                   <Input.Search
@@ -1091,7 +1004,7 @@ const PcCoiThi = () => {
                 onOk={() => setOpen(false)}
                 width={1000}
                 centered
-                styles={{ height: '600px', overflowY: 'auto' }}
+                styles ={{ height: '600px', overflowY: 'auto' }}
               >
                 <div className="flex justify-between mt-2">
                   {/* Thêm Select ở đây */}
@@ -1171,13 +1084,13 @@ const PcCoiThi = () => {
                       onChange={setSelectKhoa}
                       style={{ marginBottom: '16px' }} // Thêm style để tạo khoảng cách với các thành phần khác
                     >
-
+                      
                       {khoaOptions.map(khoa => (
                         <Select.Option key={khoa} value={khoa}>
                           {khoa}
                         </Select.Option>
                       ))}
-
+                      
                     </Select>
                   </div>
                 </div>
