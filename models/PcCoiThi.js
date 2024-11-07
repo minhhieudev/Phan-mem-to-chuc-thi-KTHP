@@ -1,18 +1,18 @@
 import mongoose from "mongoose";
 
 const PcCoiThiSchema = new mongoose.Schema({
-  hocPhan: {
-    type: String,  
-  },
-  lop: {
-    type: String,  
-  },
   // hocPhan: {
-  //   type: [String],  
+  //   type: String,  
   // },
   // lop: {
-  //   type: [String],  
+  //   type: String,  
   // },
+  hocPhan: {
+    type: [String],  
+  },
+  lop: {
+    type: [String],  
+  },
   ngayThi: {
     type: String,  
   },
@@ -51,6 +51,17 @@ const PcCoiThiSchema = new mongoose.Schema({
   },
   ky: {
     type: String,
+  },
+
+
+  danhSachThiSinh: {
+    type: [
+      {
+        maSV: String,
+        hoTen: String,
+        lop: String
+      }
+    ],
   },
 }, {
   timestamps: true,

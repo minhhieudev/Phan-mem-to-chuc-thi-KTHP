@@ -6,6 +6,7 @@ import toast from "react-hot-toast";
 import Loader from "../../../components/Loader";
 import { SearchOutlined } from '@ant-design/icons';
 import { FileExcelOutlined, UploadOutlined } from '@ant-design/icons';
+import * as XLSX from 'xlsx';
 
 const { Title } = Typography;
 
@@ -13,12 +14,14 @@ const formSchema = {
     maHocPhan: "",
     tenHocPhan: "",
     soTinChi: "",
-    lop: "",
     hinhThuc: "",
     thoiGian: "",
     giangVien: "",
-    soSVDK: 0,
     thiT7CN: false,
+
+    namHoc: '',
+    loai: '',
+    ky: ''
 };
 
 const HocPhanThiForm = () => {
@@ -37,6 +40,15 @@ const HocPhanThiForm = () => {
     const [filteredData, setFilteredData] = useState([]);
     const [isUploading, setIsUploading] = useState(false); // Trạng thái upload
     const fileInputRef = useRef(null);
+
+
+    const [namHoc, setNamHoc] = useState("2023-2024");
+    const [hocKy, setHocKy] = useState("1");
+    const [loai, setLoai] = useState("Chính quy");
+
+    const [namHocF, setNamHocF] = useState("2023-2024");
+    const [hocKyF, setHocKyFF] = useState("1");
+    const [loaiF, setLoaiF] = useState("Chính quy");
 
 
     const paginatedData = filteredData.slice(
@@ -84,7 +96,6 @@ const HocPhanThiForm = () => {
         try {
             const updatedData = {
                 ...data,
-                lop: data.lop.split(',').map(item => item.trim()),
                 id: editRecord ? editRecord._id : undefined
             };
             const method = editRecord ? "PUT" : "POST";
@@ -102,6 +113,7 @@ const HocPhanThiForm = () => {
                 toast.error("Failed to save record");
             }
         } catch (err) {
+            console.log('E:',err)
             toast.error("An error occurred while saving data");
         }
     };
@@ -117,11 +129,9 @@ const HocPhanThiForm = () => {
         setValue("maHocPhan", record.maHocPhan);
         setValue("tenHocPhan", record.tenHocPhan);
         setValue("soTinChi", record.soTinChi);
-        setValue("lop", record.lop.join(', '));
         setValue("hinhThuc", record.hinhThuc);
         setValue("thoiGian", record.thoiGian);
         setValue("giangVien", record.giangVien);
-        setValue("soSVDK", record.soSVDK);
         setValue("thiT7CN", record.thiT7CN);
     };
 
@@ -143,6 +153,19 @@ const HocPhanThiForm = () => {
             toast.error("An error occurred while deleting data");
         }
     };
+
+    const handleFilterByMaMon = (maMon) => {
+        if (maMon) {
+            setFilteredData(
+                dataList.filter((hocPhan) =>
+                    hocPhan.maHocPhan.toLowerCase().startsWith(maMon.toLowerCase())
+                )
+            );
+        } else {
+            setFilteredData(dataList);
+        }
+    };
+
 
     const columns = [
         {
@@ -173,19 +196,19 @@ const HocPhanThiForm = () => {
             key: 'soTinChi',
             width: 70
         },
-        {
-            title: 'Số SVĐK',
-            dataIndex: 'soSVDK',
-            key: 'soSVDK',
-            width: 70
+        // {
+        //     title: 'Số SVĐK',
+        //     dataIndex: 'soSVDK',
+        //     key: 'soSVDK',
+        //     width: 70
 
-        },
-        {
-            title: 'Lớp',
-            dataIndex: 'lop',
-            key: 'lop',
-            render: (text) => text.join(', '),
-        },
+        // },
+        // {
+        //     title: 'Lớp',
+        //     dataIndex: 'lop',
+        //     key: 'lop',
+        //     render: (text) => text.join(', '),
+        // },
         {
             title: 'Hình thức',
             dataIndex: 'hinhThuc',
@@ -240,7 +263,7 @@ const HocPhanThiForm = () => {
             const method = "POST";
             const res = await fetch("/api/admin/hoc-phan-thi/create", {
                 method,
-                body: JSON.stringify({ users: ListDataUser }),
+                body: JSON.stringify({ hocPhans: ListDataUser }),
                 headers: { "Content-Type": "application/json" },
             });
 
@@ -256,7 +279,7 @@ const HocPhanThiForm = () => {
         } catch (err) {
             toast.error("An error occurred while saving data");
         } finally {
-            setIsUploading(false); 
+            setIsUploading(false);
         }
     };
 
@@ -296,6 +319,46 @@ const HocPhanThiForm = () => {
                     <Title className="text-center" level={3}>QUẢN LÝ HỌC PHẦN THI</Title>
                     {/* Form toggle button */}
 
+                    {/* <div className="flex gap-1">
+                        <div className="text-small-bold">LOẠI:</div>
+                        <Select value={loaiF} size="small" placeholder="Chọn loại hình đào tạo..." onChange={(value) => setLoaiF(value)}>
+                            <Option value="Chính quy">Chính quy</Option>
+                            <Option value="Liên thông vừa làm vừa học">Liên thông vừa làm vừa học</Option>
+                        </Select>
+                    </div>
+                    <div className="grid grid-cols-2 gap-1 mt-2">
+
+
+                        <div className=" flex items-center gap-1">
+                            <label className="block text-sm font-semibold mb-1">Năm học:</label>
+                            <Select size="small"
+                                placeholder="Chọn năm học"
+                                onChange={(value) => setNamHocF(value)}
+                                className="w-[50%]"
+                                value={namHocF}
+                            >
+                                <Option value="2021-2022">2021-2022</Option>
+                                <Option value="2022-2023">2022-2023</Option>
+                                <Option value="2023-2024">2023-2024</Option>
+                                <Option value="2024-2025">2024-2025</Option>
+                            </Select>
+                        </div>
+
+                        <div className=" flex items-center gap-1">
+                            <label className="block text-sm font-semibold mb-1">Học kỳ:</label>
+                            <Select size="small" allowClear
+                                placeholder="Chọn học kỳ"
+                                onChange={(value) => setHocKyF(value)}
+                                className="w-[50%]"
+                                value={hocKyF}
+                            >
+                                <Option value="1">1</Option>
+                                <Option value="2">2</Option>
+                                <Option value="he">Hè</Option>
+                            </Select>
+                        </div>
+
+                    </div> */}
 
                     <Form onFinish={handleSubmit(onSubmit)} layout="vertical" className="space-y-5 mt-6">
                         <Row gutter={16}>
@@ -329,7 +392,18 @@ const HocPhanThiForm = () => {
                             </Col>
                         </Row>
 
+
+
                         <div className="grid grid-cols-2 gap-4">
+                            {/* <Form.Item
+                                label={<span className="font-bold text-xl">Thời gian</span>}
+                            >
+                                <Controller
+                                    name="thoiGian"
+                                    control={control}
+                                    render={({ field }) => <InputNumber className="input-text" placeholder="Thời gian thi ..." {...field} />}
+                                />
+                            </Form.Item> */}
                             <Form.Item
                                 label={<span className="font-bold text-xl">Số tín chỉ <span className="text-red-600">*</span></span>}
                                 validateStatus={errors.soTinChi ? 'error' : ''}
@@ -344,40 +418,26 @@ const HocPhanThiForm = () => {
                             </Form.Item>
 
                             <Form.Item
-                                label={<span className="font-bold text-xl">Số SV ĐK</span>}
+                                label={<span className="font-bold text-xl">Thi T7, CN?</span>}
                             >
                                 <Controller
-                                    name="soSVDK"
+                                    name="thiT7CN"
                                     control={control}
-                                    render={({ field }) => <InputNumber className="input-text w-full" placeholder="Nhập số sinh viên đăng ký ..." {...field} />}
-                                />
-                            </Form.Item>
-                        </div>
-
-                        <div className="grid grid-cols-2 gap-4">
-                            <Form.Item
-                                label={<span className="font-bold text-xl">Lớp</span>}
-                            >
-                                <Controller
-                                    name="lop"
-                                    control={control}
-                                    render={({ field }) => <Input className="input-text" placeholder="Nhập lớp (cách nhau bằng dấu phẩy) ..." {...field} />}
+                                    render={({ field }) => (
+                                        <Checkbox
+                                            checked={field.value === 1}
+                                            onChange={(e) => field.onChange(e.target.checked ? 1 : 0)}
+                                        >
+                                            Có
+                                        </Checkbox>
+                                    )}
                                 />
                             </Form.Item>
 
-                            <Form.Item
-                                label={<span className="font-bold text-xl">Hình thức</span>}
-                            >
-                                <Controller
-                                    name="hinhThuc"
-                                    control={control}
-                                    render={({ field }) => <Input className="input-text" placeholder="Nhập hình thức thi ..." {...field} />}
-                                />
-                            </Form.Item>
 
                         </div>
                         <div className="grid grid-cols-2 gap-4">
-                            <Form.Item
+                            {/* <Form.Item
                                 label={<span className="font-bold text-xl">Thời gian</span>}
                             >
                                 <Controller
@@ -385,16 +445,66 @@ const HocPhanThiForm = () => {
                                     control={control}
                                     render={({ field }) => <InputNumber className="input-text" placeholder="Thời gian thi ..." {...field} />}
                                 />
-                            </Form.Item>
+                            </Form.Item> */}
                             <Form.Item
-                                label={<span className="font-bold text-xl">Thi T7, CN?</span>}
+                                label={<span className="font-bold text-xl">Hình thức thi</span>}
+                                validateStatus={errors.hinhThuc ? 'error' : ''}
+                                help={errors.hinhThuc?.message}
                             >
                                 <Controller
-                                    name="thiT7CN"
+                                    name="hinhThuc"
                                     control={control}
-                                    render={({ field }) => <Checkbox checked={field.value} onChange={e => field.onChange(e.target.checked)}>Có</Checkbox>}
+                                    render={({ field }) =>
+                                        <Select
+                                            size="small"
+                                            placeholder="Chọn hình thức thi..."
+                                            allowClear
+                                            className="w-[50%]"
+                                            {...field}
+                                            onChange={(value) => {
+                                                field.onChange(value);
+                                            }}
+                                        >
+                                            <Option value="TH">TH</Option>
+                                            <Option value="TL+TN">TL+TN</Option>
+                                            <Option value="TN">TN</Option>
+                                            <Option value="VĐ">VĐ</Option>
+                                            <Option value="BCTL">BCTL</Option>
+                                            <Option value="BCTN">BCTN</Option>
+                                            <Option value="TL">TL</Option>
+                                        </Select>
+                                    }
                                 />
                             </Form.Item>
+                            <Form.Item
+                                label={<span className="font-bold text-xl">Thời gian thi</span>}
+                                validateStatus={errors.thoiGian ? 'error' : ''}
+                                help={errors.thoiGian?.message}
+                            >
+                                <Controller
+                                    name="thoiGian"
+                                    control={control}
+                                    render={({ field }) =>
+                                        <Select
+                                            size="small"
+                                            placeholder="Chọn thời gian thi..."
+                                            allowClear
+                                            className="w-[50%]"
+                                            {...field}
+                                            onChange={(value) => {
+                                                field.onChange(value); // Cập nhật giá trị trong form
+                                            }}
+                                        >
+                                            <Option value="45">45</Option>
+                                            <Option value="60">60</Option>
+                                            <Option value="90">90</Option>
+                                            <Option value="120">120</Option>
+                                            <Option value="180">180</Option>
+                                        </Select>
+                                    }
+                                />
+                            </Form.Item>
+
                         </div>
 
                         <Form.Item
@@ -409,47 +519,112 @@ const HocPhanThiForm = () => {
 
 
 
-                        <Form.Item className="text-center">
-                            <Button type="primary" htmlType="submit" loading={isSubmitting} className="bg-blue-500">
-                                {editRecord ? "Lưu thay đổi" : "Thêm mới"}
-                            </Button>
-                            <div className="text-center">
-                                <Spin spinning={isUploading}>
-                                    <label htmlFor="excelUpload">
-                                        <Button
-                                            className="mt-3 button-lien-thong-vlvh"
-                                            type="primary"
-                                            icon={<UploadOutlined />}
-                                            onClick={() => fileInputRef.current.click()}
-                                            disabled={isUploading}
-                                        >
-                                            {isUploading ? 'Đang tải lên...' : 'Import từ file Excel'}
-                                        </Button>
-                                    </label>
-                                </Spin>
+                        <Form.Item className=" ">
+                            <div className="flex justify-between">
+                                <Button type="primary" htmlType="submit" loading={isSubmitting} className="bg-blue-500">
+                                    {editRecord ? "Lưu thay đổi" : "Thêm mới"}
+                                </Button>
+                                <div className="text-center">
+                                    <Spin spinning={isUploading}>
+                                        <label htmlFor="excelUpload">
+                                            <Button
+                                                className=" button-lien-thong-vlvh"
+                                                type="primary"
+                                                icon={<UploadOutlined />}
+                                                onClick={() => fileInputRef.current.click()}
+                                                disabled={isUploading}
+                                            >
+                                                {isUploading ? 'Đang tải lên...' : 'Import từ file Excel'}
+                                            </Button>
+                                        </label>
+                                    </Spin>
 
-                                <div className="hidden">
-                                    <input
-                                        type="file"
-                                        accept=".xlsx, .xls"
-                                        onChange={handleFileUpload}
-                                        className="hidden"
-                                        id="excelUpload"
-                                        ref={fileInputRef}
-                                    />
+                                    <div className="hidden">
+                                        <input
+                                            type="file"
+                                            accept=".xlsx, .xls"
+                                            onChange={handleFileUpload}
+                                            className="hidden"
+                                            id="excelUpload"
+                                            ref={fileInputRef}
+                                        />
+                                    </div>
                                 </div>
+                                <Button htmlType="button" onClick={onReset} className="ml-4 " type="primary" danger>
+                                    Reset
+                                </Button>
                             </div>
-                            <Button htmlType="button" onClick={onReset} className="ml-4 mt-2" type="primary" danger>
-                                Reset
-                            </Button>
                         </Form.Item>
                     </Form>
                 </div>
             )}
 
             {/* Table Section */}
-            <div className="bg-white px-2 py-3 shadow-xl rounded-xl overflow-auto flex-[75%]">
-                <div className="mb-1 flex justify-between">
+            <div className="bg-white px-2 py-1 shadow-xl rounded-xl overflow-auto flex-[75%]">
+
+                <div className="font-bold text-[20px] text-green-500 text-center">
+                    DANH SÁCH HỌC PHẦN
+                </div>
+
+                <div className="flex justify-between gap-5 items-center mb-2 text-small-bold">
+                    {/* <div className="flex gap-2">
+                        <div className="text-small-bold">LOẠI:</div>
+                        <Select value={loai} size="small" placeholder="Chọn loại hình đào tạo..." onChange={(value) => setLoai(value)}>
+                            <Option value="Chính quy">Chính quy</Option>
+                            <Option value="Liên thông vừa làm vừa học">Liên thông vừa làm vừa học</Option>
+                        </Select>
+                    </div>
+                    <div className="w-[25%] flex items-center gap-2">
+                        <label className="block text-sm font-semibold mb-1">Năm học:</label>
+                        <Select size="small"
+                            placeholder="Chọn năm học"
+                            onChange={(value) => setNamHoc(value)}
+                            className="w-[50%]"
+                            value={namHoc}
+                        >
+                            <Option value="2021-2022">2021-2022</Option>
+                            <Option value="2022-2023">2022-2023</Option>
+                            <Option value="2023-2024">2023-2024</Option>
+                            <Option value="2024-2025">2024-2025</Option>
+                        </Select>
+                    </div>
+
+                    <div className="w-[25%] flex items-center gap-2">
+                        <label className="block text-sm font-semibold mb-1">Học kỳ:</label>
+                        <Select size="small" allowClear
+                            placeholder="Chọn học kỳ"
+                            onChange={(value) => setHocKy(value)}
+                            className="w-[50%]"
+                            value={hocKy}
+                        >
+                            <Option value="1">1</Option>
+                            <Option value="2">2</Option>
+                            <Option value="he">Hè</Option>
+                        </Select>
+                    </div> */}
+
+                    <div className="w-[25%] flex items-center gap-2">
+                        <label className="block text-sm font-semibold mb-1">Lọc theo mã môn:</label>
+                        <Select size="small" allowClear
+                            placeholder="Chọn mã môn"
+                            onChange={(value) => handleFilterByMaMon(value)}
+                            className="w-[50%]"
+                        //value={}
+                        >
+                            <Option value="KC">KC</Option>
+                            <Option value="KT">KT</Option>
+                            <Option value="LC">LC</Option>
+                            <Option value="MN">MN</Option>
+                            <Option value="NG">NG</Option>
+                            <Option value="NN">NN</Option>
+                            <Option value="NT">NT</Option>
+                            <Option value="SP">SP</Option>
+                            <Option value="TC">TC</Option>
+                            <Option value="TN">TN</Option>
+                            <Option value="XH">XH</Option>
+                        </Select>
+                    </div>
+
                     <Input
                         placeholder="Tìm kiếm học phần"
                         value={searchName}
@@ -457,9 +632,7 @@ const HocPhanThiForm = () => {
                         prefix={<SearchOutlined />}
                         className="w-[15%]"
                     />
-                    <div className="font-bold text-[20px] text-green-500">
-                        DANH SÁCH HỌC PHẦN
-                    </div>
+
                     <Button type="primary" onClick={() => setFormVisible(!formVisible)}>
                         {formVisible ? "Ẩn Form" : "Hiện Form"}
                     </Button>

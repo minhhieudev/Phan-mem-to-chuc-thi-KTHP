@@ -17,12 +17,15 @@ export const POST = async (req) => {
       hocPhans.map(async (hp) => {
         const maHocPhan = hp[0];
 
-        // Tìm và cập nhật nếu người dùng tồn tại, nếu không thì tạo mới
         const updatedUser = await HocPhanThi.findOneAndUpdate(
           { maHocPhan },
           {
             tenHocPhan: hp[1], 
             soTinChi: hp[2],
+            hinhThuc: hp[3],
+            thoiGian: hp[4],
+            giangVien: hp[5],
+            thiT7CN: hp[6] || 0
            
           },
           { new: true, upsert: true } 

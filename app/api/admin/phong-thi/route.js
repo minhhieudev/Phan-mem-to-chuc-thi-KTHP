@@ -21,7 +21,7 @@ export const GET = async (req, res) => {
 export const POST = async (req, res) => {
   try {
     await connectToDB();
-    const { tenPhong, soCho, loai } = await req.json();
+    const { tenPhong, soCho, loai, tinhTrang } = await req.json();
 
     // Kiểm tra phòng thi có tồn tại không, nếu có thì cập nhật, nếu không thì tạo mới
     let existingPhongThi = await PhongThiModel.findOne({ tenPhong });
@@ -29,6 +29,7 @@ export const POST = async (req, res) => {
     if (existingPhongThi) {
       existingPhongThi.loai = loai;
       existingPhongThi.soCho = soCho;
+      existingPhongThi.tinhTrang = tinhTrang;
       await existingPhongThi.save();
 
       return new Response(JSON.stringify(existingPhongThi), { status: 200 });
@@ -36,7 +37,8 @@ export const POST = async (req, res) => {
       const newPhongThi = new PhongThiModel({
         tenPhong,
         soCho,
-        loai
+        loai,
+        tinhTrang
       });
 
       await newPhongThi.save();
@@ -51,7 +53,7 @@ export const POST = async (req, res) => {
 export const PUT = async (req, res) => {
   try {
     await connectToDB();
-    const { id, tenPhong, soCho,loai } = await req.json();
+    const { id, tenPhong, soCho,loai, tinhTrang } = await req.json();
 
     const phongThiToUpdate = await PhongThiModel.findById(id);
 
@@ -62,6 +64,7 @@ export const PUT = async (req, res) => {
     phongThiToUpdate.tenPhong = tenPhong;
     phongThiToUpdate.soCho = soCho;
     phongThiToUpdate.loai = loai;
+    phongThiToUpdate.tinhTrang = tinhTrang;
 
     await phongThiToUpdate.save();
 

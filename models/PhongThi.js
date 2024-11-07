@@ -11,6 +11,10 @@ const PhongThiSchema = new mongoose.Schema({
   loai: {
     type: String,
   },
+  tinhTrang: {
+    type: Number,
+    default: 1
+  },
 });
 
 const PhongThi = mongoose.models.PhongThi || mongoose.model("PhongThi", PhongThiSchema);

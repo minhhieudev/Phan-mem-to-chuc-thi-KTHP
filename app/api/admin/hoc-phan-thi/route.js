@@ -21,18 +21,17 @@ export const GET = async (req, res) => {
 export const POST = async (req, res) => {
   try {
     await connectToDB();
-    const { tenHocPhan, soTinChi, maHocPhan, lop, hinhThuc, thoiGian, soSVDK, giangVien, thiT7CN } = await req.json();
+    const { tenHocPhan, soTinChi, maHocPhan, hinhThuc, thoiGian, giangVien, thiT7CN } = await req.json();
 
-    // Kiểm tra học phần thi có tồn tại không, nếu có thì cập nhật, nếu không thì tạo mới
-    let existingHocPhanThi = await HocPhanThiModel.findOne({ tenHocPhan, lop, giangVien });
+    // Kiểm tra nếu học phần với maHocPhan đã tồn tại, nếu có thì cập nhật, nếu không thì tạo mới
+    let existingHocPhanThi = await HocPhanThiModel.findOne({ maHocPhan });
 
     if (existingHocPhanThi) {
+      existingHocPhanThi.tenHocPhan = tenHocPhan;
       existingHocPhanThi.soTinChi = soTinChi;
-      existingHocPhanThi.maHocPhan = maHocPhan;
-
       existingHocPhanThi.hinhThuc = hinhThuc;
       existingHocPhanThi.thoiGian = thoiGian;
-      existingHocPhanThi.soSVDK = soSVDK;
+      existingHocPhanThi.giangVien = giangVien;
       existingHocPhanThi.thiT7CN = thiT7CN;
 
       await existingHocPhanThi.save();
@@ -43,10 +42,8 @@ export const POST = async (req, res) => {
         tenHocPhan,
         soTinChi,
         maHocPhan,
-        lop,
         hinhThuc,
         thoiGian,
-        soSVDK,
         giangVien,
         thiT7CN,
       });
@@ -60,10 +57,11 @@ export const POST = async (req, res) => {
   }
 };
 
+
 export const PUT = async (req, res) => {
   try {
     await connectToDB();
-    const { tenHocPhan, soTinChi, maHocPhan, id, lop, hinhThuc, thoiGian, soSVDK, giangVien, thiT7CN } = await req.json();
+    const { tenHocPhan, soTinChi, maHocPhan, id, hinhThuc, thoiGian, giangVien, thiT7CN } = await req.json();
 
     const hocPhanThiToUpdate = await HocPhanThiModel.findById(id);
 
@@ -74,11 +72,9 @@ export const PUT = async (req, res) => {
     hocPhanThiToUpdate.tenHocPhan = tenHocPhan;
     hocPhanThiToUpdate.soTinChi = soTinChi;
     hocPhanThiToUpdate.maHocPhan = maHocPhan;
-    hocPhanThiToUpdate.lop = lop;
 
     hocPhanThiToUpdate.hinhThuc = hinhThuc;
     hocPhanThiToUpdate.thoiGian = thoiGian;
-    hocPhanThiToUpdate.soSVDK = soSVDK;
     hocPhanThiToUpdate.giangVien = giangVien;
     hocPhanThiToUpdate.thiT7CN = thiT7CN;
 

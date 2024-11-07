@@ -12,7 +12,8 @@ const { Title } = Typography;
 const formSchema = {
     tenPhong: "",
     soCho: "",
-    loai: ""
+    loai: "",
+    tinhTrang: 1
 };
 
 const PhongThiForm = () => {
@@ -112,6 +113,7 @@ const PhongThiForm = () => {
         setValue("tenPhong", record.tenPhong);
         setValue("soCho", record.soCho);
         setValue("loai", record.loai);
+        setValue("tinhTrang", record.tinhTrang);
     };
 
     const handleDelete = async (id) => {
@@ -157,6 +159,12 @@ const PhongThiForm = () => {
             dataIndex: 'loai',
             key: 'loai',
             className: 'text-orange-500 font-bold'
+        },
+        {
+            title: 'Tinh trạng',
+            dataIndex: 'tinhTrang',
+            key: 'tinhTrang',
+            className: 'text-orange-500 font-bold',
         },
         {
             title: 'Hành động',
@@ -220,9 +228,26 @@ const PhongThiForm = () => {
                             control={control}
                             render={({ field }) => (
                                 <Select {...field} placeholder="Chọn loại" className="w-full">
-                                    <Select.Option value="Phòng thường">Phòng thường</Select.Option>
+                                    <Select.Option value="Phòng học">Phòng học</Select.Option>
                                     <Select.Option value="Phòng máy">Phòng máy</Select.Option>
                                     <Select.Option value="Phòng GDTC">Phòng GDTC</Select.Option>
+                                </Select>
+                            )}
+                        />
+                    </Form.Item>
+
+                    <Form.Item
+                        label={<span className="font-bold text-xl">Tình trạng</span>}
+                        validateStatus={errors.tinhTrang ? 'error' : ''}
+                        help={errors.tinhTrang?.message}
+                    >
+                        <Controller
+                            name="tinhTrang"
+                            control={control}
+                            render={({ field }) => (
+                                <Select {...field} placeholder="Chọn loại" className="w-full">
+                                    <Select.Option value="1">1</Select.Option>
+                                    <Select.Option value="0">0</Select.Option>
                                 </Select>
                             )}
                         />

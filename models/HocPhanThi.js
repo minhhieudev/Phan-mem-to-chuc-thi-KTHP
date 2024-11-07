@@ -11,12 +11,6 @@ const HocPhanThiSchema = new mongoose.Schema({
   soTinChi: {
     type: Number,
   },
-  soSVDK: {
-    type: Number,
-  },
-  lop: {
-    type: [String],
-  },
   hinhThuc: {
     type: String,
   },
@@ -27,11 +21,19 @@ const HocPhanThiSchema = new mongoose.Schema({
     type: String,
   },
   thiT7CN: {
-    type: Boolean
+    type: Number,
+    default: 0
   },
-  thiChung: {
-    type: Boolean
-  }
+
+  // namHoc: {
+  //   type: String,  
+  // },
+  // loai: {
+  //   type: String,  
+  // },
+  // ky: {
+  //   type: String,
+  // },
 
 });
 
