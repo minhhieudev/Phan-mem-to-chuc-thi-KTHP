@@ -1,24 +1,25 @@
 'use client'
 import { useState, useEffect, useRef } from "react";
-import { Select, DatePicker, Button, message, Tabs, Card, Col, Row, Checkbox, Radio, Input, Table, Modal, Spin } from "antd";
+import { Select, DatePicker, Button, message, Tabs, Card, Col, Row, Checkbox, Space, Radio, Input, Table, Modal, Spin, Upload } from "antd";
 
-import { UserOutlined, BookOutlined, HomeOutlined, CalendarOutlined, DeleteOutlined, UploadOutlined } from '@ant-design/icons';
+import { UserOutlined, BookOutlined, HomeOutlined, CalendarOutlined, FileAddOutlined, DeleteOutlined, UploadOutlined, InboxOutlined } from '@ant-design/icons';
 import Loader from "../../../components/Loader";
 import TablePcCoiThi from "@components/CoiThi/TablePcCoiThi";
 import { useSession } from "next-auth/react";
 import { v4 as uuidv4 } from "uuid";
 import * as XLSX from 'xlsx';
+import { CldUploadButton } from "next-cloudinary";
+
 
 const CheckboxGroup = Checkbox.Group;
-
-
+const { Dragger } = Upload;
 
 const { Option } = Select;
 const { TabPane } = Tabs;
 const { RangePicker } = DatePicker;
 
 const PcCoiThi = () => {
-  const [activeTab, setActiveTab] = useState("1");
+  const [activeTab, setActiveTab] = useState("3");
 
   const [listHocPhan, setListHocPhan] = useState([]);
   const [listGV, setListGV] = useState([]);
@@ -356,8 +357,8 @@ const PcCoiThi = () => {
 
 
 
-    let hocPhanListNonT7CN = listHocPhanSelect.filter(hp => !hp.thiT7CN);
-    let hocPhanListT7CN = listHocPhanSelect.filter(hp => hp.thiT7CN);
+    let hocPhanListNonT7CN = listHocPhanSelect?.filter(hp => !hp.thiT7CN);
+    let hocPhanListT7CN = listHocPhanSelect?.filter(hp => hp.thiT7CN);
 
     let phongList = [...listPhongSelect];
     let phongMayList = phongList.filter(phong => phong.loai === "Phòng máy");
@@ -596,7 +597,6 @@ const PcCoiThi = () => {
     reader.readAsBinaryString(file);
   };
   const importSinhVien = (e) => {
-
     const file = e.target.files[0];
     const reader = new FileReader();
 
@@ -607,12 +607,34 @@ const PcCoiThi = () => {
       const ListData = XLSX.utils.sheet_to_json(firstSheet, { header: 1 });
       ListData.shift();
 
-      if (ListData.length > 0) {
-        setDataSinhVien(ListData)
+      // Map dữ liệu thành cấu trúc { maSV, hoTen, lop, maMon }
+      const formattedData = ListData.map((row, index) => ({
+        key: index.toString(),
+        maSV: row[0],
+        hoTen: row[1],
+        lop: row[2],
+        maMon: row[3]
+      }));
+
+      // Kiểm tra nếu có dữ liệu sau khi import
+      if (formattedData.length > 0) {
+        setDataSinhVien(formattedData);
+
+        // Tính toán số liệu thống kê
+        const uniqueLops = new Set(formattedData.map(item => item.lop)).size;
+        const uniqueSVs = new Set(formattedData.map(item => item.maSV)).size;
+        const uniqueMonThi = new Set(formattedData.map(item => item.maMon));
+
+        setSoSV(uniqueSVs);       // Tổng số sinh viên
+        setSoLop(uniqueLops);                // Tổng số lớp
+        setSoMonThi(uniqueMonThi.size);     
+        
+        console.log('hh:',[...uniqueMonThi])// Tổng số môn thi
+
+        setListHocPhanSelect([...uniqueMonThi])
       } else {
         toast.error("Lỗi khi đọc file.");
       }
-      console.log("Dữ liệu từ file Excel đã lọc:", ListData);
     };
 
     reader.onerror = () => {
@@ -622,46 +644,47 @@ const PcCoiThi = () => {
     reader.readAsBinaryString(file);
   };
 
+
   const create2 = () => {
 
     const dataSinhVien = [
-      ['211CTT004','Võ Minh Hiếu', 'KC21345', 'DC21CTT01'], 
-      ['211CTT005', 'Lê Văn Nam', 'KC21345', 'DC21CTT01'], 
-      ['211CTT006','Hồ Hà', 'KC21345', 'DC21CTT02'], 
-      ['211CTT007','Lê My', 'KC21346', 'DC21NNA01'] 
-    ]; 
-    
+      ['211CTT004', 'Võ Minh Hiếu', 'KC21345', 'DC21CTT01'],
+      ['211CTT005', 'Lê Văn Nam', 'KC21345', 'DC21CTT01'],
+      ['211CTT006', 'Hồ Hà', 'KC21345', 'DC21CTT02'],
+      ['211CTT007', 'Lê My', 'KC21346', 'DC21NNA01']
+    ];
+
     // Tạo object lưu danh sách môn thi, sinh viên và lớp
     const result = {};
-  
+
     // Duyệt qua từng sinh viên trong dataSinhVien
     dataSinhVien.forEach(([maSinhVien, hoTen, maMonThi, lop]) => {
       // Nếu môn thi chưa tồn tại trong result, thêm môn thi đó với cấu trúc mới
       if (!result[maMonThi]) {
         result[maMonThi] = { sinhVien: [], lop: [], tongSoThiSinh: 0 };
       }
-  
+
       // Thêm thông tin sinh viên vào danh sách sinh viên của môn thi
       result[maMonThi].sinhVien.push({
         maSV: maSinhVien,
         hoTen: hoTen,
         lop: lop
       });
-  
+
       // Tăng tổng số thí sinh
       result[maMonThi].tongSoThiSinh++;
-  
+
       // Thêm lớp vào danh sách lớp nếu chưa có lớp đó
       if (!result[maMonThi].lop.includes(lop)) {
         result[maMonThi].lop.push(lop);
       }
     });
-  
+
     console.log(result);
     return result;
   };
-  
-  
+
+
 
   const columns = [
     {
@@ -701,12 +724,220 @@ const PcCoiThi = () => {
     },
   ];
 
+  // ===========================================================================
+  const [editingKey, setEditingKey] = useState('');
+  const [editingRecord, setEditingRecord] = useState({});
+
+  const [soSV, setSoSV] = useState('');
+  const [soLop, setSoLop] = useState('');
+  const [soMonThi, setSoMonThi] = useState('');
+
+
+  // Hàm xóa sinh viên
+  const deleteStudent = (key) => {
+    setDataSinhVien(dataSinhVien.filter((item) => item.key !== key));
+  };
+
+  // Hàm bật chế độ chỉnh sửa
+  const editStudent = (record) => {
+    setEditingKey(record.key);
+    setEditingRecord({ ...record });
+  };
+
+  // Hàm xử lý khi lưu thay đổi
+  const saveEdit = () => {
+    setDataSinhVien((prevData) =>
+      prevData.map((item) => (item.key === editingKey ? editingRecord : item))
+    );
+    setEditingKey('');
+  };
+
+  // Hàm hủy chế độ chỉnh sửa
+  const cancelEdit = () => {
+    setEditingKey('');
+  };
+
+  // Hàm cập nhật dữ liệu chỉnh sửa
+  const handleEditChange = (field, value) => {
+    setEditingRecord((prev) => ({ ...prev, [field]: value }));
+  };
+
+  // Cấu hình cột bảng
+  const columnSV = [
+    {
+      title: 'STT',
+      dataIndex: 'index',
+      render: (text, record, index) => <span style={{ fontWeight: 'bold' }}>{index + 1}</span>,
+    },
+    {
+      title: 'Mã SV',
+      dataIndex: 'maSV',
+      key: 'maSV',
+      render: (_, record) =>
+        editingKey === record.key ? (
+          <Input
+            value={editingRecord.maSV}
+            onChange={(e) => handleEditChange('maSV', e.target.value)}
+          />
+        ) : (
+          record.maSV
+        ),
+      className: 'font-bold text-green-500'
+    },
+    {
+      title: 'Họ tên',
+      dataIndex: 'hoTen',
+      key: 'hoTen',
+      render: (_, record) =>
+        editingKey === record.key ? (
+          <Input
+            value={editingRecord.hoTen}
+            onChange={(e) => handleEditChange('hoTen', e.target.value)}
+          />
+        ) : (
+          record.hoTen
+        ),
+      className: 'font-bold '
+
+    },
+    {
+      title: 'Lớp',
+      dataIndex: 'lop',
+      key: 'lop',
+      render: (_, record) =>
+        editingKey === record.key ? (
+          <Input
+            value={editingRecord.lop}
+            onChange={(e) => handleEditChange('lop', e.target.value)}
+          />
+        ) : (
+          record.lop
+        ),
+      className: 'font-bold text-red-500'
+
+    },
+    {
+      title: 'Mã môn',
+      dataIndex: 'maMon',
+      key: 'maMon',
+      render: (_, record) =>
+        editingKey === record.key ? (
+          <Input
+            value={editingRecord.maMon}
+            onChange={(e) => handleEditChange('maMon', e.target.value)}
+          />
+        ) : (
+          record.maMon
+        ),
+      className: 'font-bold text-blue-500'
+    },
+    {
+      title: 'Hành động',
+      key: 'action',
+      render: (_, record) => {
+        const isEditing = editingKey === record.key;
+        return isEditing ? (
+          <Space size="middle">
+            <Button onClick={saveEdit} type="primary" size="small">
+              Lưu
+            </Button>
+            <Button onClick={cancelEdit} size="small">
+              Hủy
+            </Button>
+          </Space>
+        ) : (
+          <Space size="middle">
+            <Button onClick={() => editStudent(record)} type="primary" size="small">
+              Sửa
+            </Button>
+            <Button onClick={() => deleteStudent(record.key)} type="primary" danger size="small">
+              Xoá
+            </Button>
+          </Space>
+        );
+      },
+    },
+  ];
+
+
+
   return loading ? (
     <Loader />
   ) : (
     <div>
-      <div className="py-1 px-6 bg-white rounded-lg shadow-lg mt-2 h-[90vh]">
+      <div className="py-1 px-3 bg-gray-100 rounded-lg shadow-lg mt-2 h-[90vh]">
         <Tabs activeKey={activeTab} onChange={(key) => setActiveTab(key)}>
+
+          <TabPane tab="Dữ liệu sinh viên" key="3">
+            <div className="flex gap-3 h-[82vh] ">
+              {/* Left Container */}
+              <div className="flex-[60%] p-1 bg-white rounded-md flex flex-col gap-2">
+                <div className=" h-[75%] p-1">
+                  <Table
+                    dataSource={dataSinhVien}
+                    columns={columnSV}
+                    scroll={{ y: 400 }} // Chỉ cuộn dọc
+                    pagination={false}  // Tắt phân trang nếu cần
+                  />
+
+
+                </div>
+                <div className="border-dashed border-2 border-blue-500 rounded-lg p-2 text-center bg-blue-50 hover:bg-blue-100 transition-all duration-300">
+                  <InboxOutlined style={{ fontSize: '48px', color: '#1890ff' }} />
+                  <p className="text-blue-600 mt-2"> Chọn file</p>
+                  <div className="">
+                    <Spin spinning={isUploading}>
+                      <label htmlFor="excelUpload">
+                        <Button
+                          className="button-chinh-quy-khac mt-1"
+                          type="primary"
+                          icon={<UploadOutlined />}
+                          onClick={() => fileInputRef.current.click()}
+                          disabled={isUploading}
+                        >
+                          {isUploading ? 'Đang tải lên...' : 'Import'}
+                        </Button>
+                      </label>
+                    </Spin>
+
+                    <div className="hidden">
+                      <input
+                        type="file"
+                        accept=".xlsx, .xls"
+                        onChange={importSinhVien}
+                        className="hidden"
+                        id="excelUpload"
+                        ref={fileInputRef}
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+
+
+              {/* Right Side with 3 Boxes */}
+              <div className="space-y-3 flex-grow h-full">
+                <div className="p-4 bg-white shadow-md rounded-lg h-[32%] flex flex-col">
+                  <h3 className="text-lg text-heading3-bold ">SỐ MÔN THI</h3>
+                  <p className="text-heading1-bold text-center text-blue-600 mt-auto mb-auto">{soMonThi}</p>
+                </div>
+
+                <div className="p-4 bg-white shadow-md rounded-lg h-[32%] flex flex-col">
+                  <h3 className="text-lg text-heading3-bold ">SỐ SINH VIÊN</h3>
+                  <p className=" text-heading1-bold text-center text-green-600 mt-auto mb-auto">{soSV}</p>
+                </div>
+
+                <div className="p-4 bg-white shadow-md rounded-lg h-[32%] flex flex-col">
+                  <h3 className="text-lg text-heading3-bold ">SỐ LỚP</h3>
+                  <p className=" text-heading1-bold text-center text-red-600 mt-auto mb-auto">{soLop}</p>
+                </div>
+              </div>
+
+            </div>
+
+          </TabPane>
+
           <TabPane tab="Tạo lịch thi" key="1">
             <div className="text-heading3-bold text-blue-600 text-center ">THÔNG TIN KỲ THI</div>
             <div className="flex justify-between gap-3 mt-2">
@@ -811,7 +1042,7 @@ const PcCoiThi = () => {
                       style={{ backgroundColor: '#f0f8ff' }} // Màu nền nhẹ
                     >
                       <ul className="list-decimal pl-5 text-left max-h-[300px] overflow-auto bg-[#f0f8ff]">
-                        {listHocPhanSelect.map((hocPhan, index) => (
+                        {listHocPhanSelect?.map((hocPhan, index) => (
                           <li key={hocPhan.tenHocPhan} className="flex justify-between items-center">
                             <span>{index + 1}. {hocPhan.tenHocPhan} ({hocPhan.lop?.join(', ')})</span>
                             <DeleteOutlined
@@ -821,7 +1052,7 @@ const PcCoiThi = () => {
                           </li>
                         ))}
                       </ul>
-                    
+
                     </Card>
 
                   </div>
@@ -902,7 +1133,7 @@ const PcCoiThi = () => {
 
                       <div className="flex gap-4 mt-3 flex-col">
                         <Button className="button-lien-thong-vlvh-nd71 text-white" onClick={() => { setOpen(true); setTitle('Chọn phòng') }}>Chọn phòng thi</Button>
-                       
+
                       </div>
 
                     </Card>
@@ -1012,7 +1243,7 @@ const PcCoiThi = () => {
                     <li key={hocPhan.tenHocPhan}>
                       <Checkbox
                         onChange={(e) => handleSelectHocPhan(e.target.checked, hocPhan)}
-                        checked={listHocPhanSelect.includes(hocPhan)}
+                        checked={listHocPhanSelect?.includes(hocPhan)}
                       >
                         {hocPhan.tenHocPhan} ({hocPhan.lop?.join(', ')})
                       </Checkbox>
@@ -1174,7 +1405,8 @@ const PcCoiThi = () => {
               hocKy={hocKy}
 
             />
-          </TabPane>
+          </TabPane>'
+
 
 
         </Tabs>

@@ -146,17 +146,18 @@ const SendEmail = () => {
   `
 
     return (
-        <div className="py-4 px-6 h-[90vh] bg-gradient-to-r from-blue-100 via-white to-blue-100 mt-2">
-            <h2 className="text-2xl font-bold mb-6 text-blue-600 flex items-center gap-2">
+        <div className="py-2 px-6 h-[90vh] bg-gradient-to-r from-blue-100 via-white to-blue-100 mt-2 overflow-hidden">
+            <h2 className="text-2xl font-bold mb-0 text-blue-600 flex items-center gap-2 mb-2">
                 <MailOutlined /> Gửi Email
             </h2>
-            <div className="flex gap-3">
+            <div className="flex gap-3 h-[90%]">
                 <div className="flex-[70%]">
-                    <Card bordered={false} className="shadow-lg">
+                    <Card bordered={false} className="shadow-lg h-full">
                         <Form
                             form={form}
                             layout="vertical"
                             onFinish={onFinish}
+                            space='small'
                         >
                             <Form.Item label={<span className="font-semibold text-blue-600">Email người nhận (nếu không chọn)</span>}>
                                 <Input
@@ -192,7 +193,7 @@ const SendEmail = () => {
                             </Form.Item>
 
                             <Form.Item label={<span className="font-semibold text-blue-600">Đính kèm tập tin</span>} name="attachments">
-                                <div className="border-dashed border-2 border-blue-500 rounded-lg p-4 text-center bg-blue-50 hover:bg-blue-100 transition-all duration-300">
+                                <div className="border-dashed border-2 border-blue-500 rounded-lg p-2 text-center bg-blue-50 hover:bg-blue-100 transition-all duration-300">
                                     <InboxOutlined style={{ fontSize: '48px', color: '#1890ff' }} />
                                     <p className="text-blue-600 mt-2"> Chọn file gửi Email</p>
                                     <CldUploadButton
@@ -215,7 +216,7 @@ const SendEmail = () => {
                                     htmlType="submit"
                                     loading={loading}
                                     icon={<SendOutlined />}
-                                    className="bg-blue-600 text-white hover:bg-blue-700 rounded-lg"
+                                    className="bg-blue-600 text-white mt-1 hover:bg-blue-700 rounded-lg"
                                 >
                                     Gửi Email
                                 </Button>
@@ -237,20 +238,9 @@ const SendEmail = () => {
                     />
 
                     <Checkbox onChange={handleCheckAll} checked={allChecked}>Chọn tất cả</Checkbox>
-                    <div className="flex gap-4 mt-4 overflow-y-auto max-h-[470px]">
+                    <div className="flex gap-4 mt-4 overflow-y-auto max-h-[400px]">
                         <div className="w-1/2">
                             {filteredData.slice(0, Math.ceil(filteredData.length / 2)).map(user => (
-                                <Checkbox
-                                    key={user.email}
-                                    onChange={() => handleCheckboxChange(user.email)}
-                                    checked={selectedEmails.includes(user.email)}
-                                >
-                                    {user.email}
-                                </Checkbox>
-                            ))}
-                        </div>
-                        <div className="w-1/2">
-                            {filteredData.slice(Math.ceil(filteredData.length / 2)).map(user => (
                                 <Checkbox
                                     key={user.email}
                                     onChange={() => handleCheckboxChange(user.email)}
