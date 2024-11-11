@@ -3,6 +3,7 @@ import PcChamThi from "@models/PcChamThi";
 import PcCoiThi from "@models/PcCoiThi";
 import User from "@models/User";
 import dayjs from "dayjs";
+export const dynamic = 'force-dynamic';
 
 export const GET = async (req) => {
   try {
