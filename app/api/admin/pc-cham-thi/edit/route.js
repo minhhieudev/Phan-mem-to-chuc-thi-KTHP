@@ -7,7 +7,7 @@ export const GET = async (req) => {
     // Kết nối tới MongoDB
     await connectToDB();
 
-    const url = new URL(req.url);
+    const url = new URL(req.url, 'http://localhost'); 
     const id = url.searchParams.get('id'); // Lấy id từ query param
 
     if (!id) {
