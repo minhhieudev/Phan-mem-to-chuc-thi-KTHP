@@ -1,5 +1,6 @@
 import { connectToDB } from '@mongodb';
 import PcCoiThi from '@models/PcCoiThi';
+export const dynamic = 'force-dynamic';
 
 // Hàm chuyển đổi chuỗi ngày theo định dạng "dd-mm-yyyy" sang đối tượng Date
 const parseDateString = (dateString) => {
