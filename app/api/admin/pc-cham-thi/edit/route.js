@@ -7,8 +7,12 @@ export const GET = async (req) => {
     // Kết nối tới MongoDB
     await connectToDB();
 
-    const { searchParams } = new URL(req.url);
-    const id = searchParams.get('id');
+    const url = new URL(req.url);
+    const id = url.searchParams.get('id'); // Lấy id từ query param
+
+    if (!id) {
+      return new Response("Thiếu id trong query", { status: 400 });
+    }
 
     // Tìm kiếm thông tin PcChamThi theo id
     const PcChamThi = await PcChamThiModel.findById(id);
