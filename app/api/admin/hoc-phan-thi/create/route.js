@@ -1,5 +1,6 @@
 import HocPhanThi from "@models/HocPhanThi";
 import { connectToDB } from "@mongodb";
+export const dynamic = 'force-dynamic';
 
 export const POST = async (req) => {
   try {

@@ -1,5 +1,6 @@
 import { connectToDB } from '@mongodb';
 import PcCoiThi from "@models/PcCoiThi";
+export const dynamic = 'force-dynamic';
 
 
 export const GET = async (req) => {

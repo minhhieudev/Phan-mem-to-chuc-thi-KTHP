@@ -1,6 +1,8 @@
 import User from "@models/User";
 import Khoa from "@models/Khoa";
 import { connectToDB } from "@mongodb";
+export const dynamic = 'force-dynamic';
+
 
 export const GET = async (req, res) => {
   try {

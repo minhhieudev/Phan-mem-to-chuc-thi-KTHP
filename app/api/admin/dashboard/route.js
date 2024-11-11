@@ -1,6 +1,7 @@
 import nodemailer from 'nodemailer';
 import { connectToDB } from '@mongodb';
 import User from "@models/User";
+export const dynamic = 'force-dynamic';
 
 const transporter = nodemailer.createTransport({
   service: 'gmail',
