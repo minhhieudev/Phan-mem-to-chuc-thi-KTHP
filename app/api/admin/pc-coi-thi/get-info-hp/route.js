@@ -1,6 +1,6 @@
+export const dynamic = 'force-dynamic';
 import { connectToDB } from '@mongodb';
 import HocPhanThi from '@models/HocPhanThi';
-export const dynamic = 'force-dynamic';
 
 export const POST = async (req) => {
   try {

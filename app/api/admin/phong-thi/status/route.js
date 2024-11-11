@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 import PhongThi from "@models/PhongThi"; // Import mô hình PhongThi
 import { connectToDB } from "@mongodb";
 

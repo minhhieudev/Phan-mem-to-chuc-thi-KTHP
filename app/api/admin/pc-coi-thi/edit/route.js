@@ -1,6 +1,6 @@
+export const dynamic = 'force-dynamic';
 import { connectToDB } from '@mongodb';
 import PcCoiThiModel from '@models/PcCoiThi';
-export const dynamic = 'force-dynamic';
 
 // Hàm lấy dữ liệu dựa trên id từ param
 export const GET = async (req) => {

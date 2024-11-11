@@ -1,9 +1,9 @@
+export const dynamic = 'force-dynamic';
 import { connectToDB } from '@mongodb';
 import PcCoiThi from "@models/PcCoiThi";
 import dayjs from "dayjs";
 import customParseFormat from "dayjs/plugin/customParseFormat";
 import utc from "dayjs/plugin/utc";
-export const dynamic = 'force-dynamic';
 
 // Kích hoạt các plugin
 dayjs.extend(customParseFormat);

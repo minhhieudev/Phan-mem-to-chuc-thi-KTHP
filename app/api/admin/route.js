@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 import nodemailer from 'nodemailer';
 import { connectToDB } from '@mongodb';
 import User from "@models/User";

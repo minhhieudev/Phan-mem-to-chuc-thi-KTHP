@@ -1,6 +1,6 @@
+export const dynamic = 'force-dynamic';
 import HocPhanThi from "@models/HocPhanThi"; // Import mô hình HocPhanThi
 import { connectToDB } from "@mongodb";
-export const dynamic = 'force-dynamic';
 
 // Lưu mô hình vào biến
 const HocPhanThiModel = HocPhanThi;

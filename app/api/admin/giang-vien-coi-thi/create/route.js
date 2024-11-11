@@ -1,6 +1,6 @@
+export const dynamic = 'force-dynamic';
 import User from "@models/User";
 import { connectToDB } from "@mongodb";
-export const dynamic = 'force-dynamic';
 
 // POST multiple users with update if email exists
 // export const POST = async (req) => {

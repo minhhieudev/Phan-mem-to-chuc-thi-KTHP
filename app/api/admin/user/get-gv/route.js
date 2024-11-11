@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 import User from "@models/User";
 import { connectToDB } from "@mongodb";
 

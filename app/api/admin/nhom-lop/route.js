@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 import { connectToDB } from "@mongodb";
 import NhomLop from "@models/NhomLop";
 
