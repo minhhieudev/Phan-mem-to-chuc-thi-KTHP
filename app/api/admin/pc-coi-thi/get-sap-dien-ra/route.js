@@ -1,9 +1,9 @@
 import { connectToDB } from '@mongodb';
 import PcCoiThi from '@models/PcCoiThi';
 
-// Hàm chuyển đổi chuỗi ngày theo định dạng "dd/mm/yyyy" sang đối tượng Date
+// Hàm chuyển đổi chuỗi ngày theo định dạng "dd-mm-yyyy" sang đối tượng Date
 const parseDateString = (dateString) => {
-  const [day, month, year] = dateString.split('/').map(Number);
+  const [day, month, year] = dateString.split('-').map(Number); // Chuyển đổi phân tách "-" thay vì "/"
   return new Date(year, month - 1, day); // month - 1 vì tháng trong Date bắt đầu từ 0
 };
 
@@ -44,9 +44,9 @@ export const GET = async (req) => {
       endDate.setDate(currentDate.getDate() + (6 - dayOfWeek)); // Ngày cuối tuần
     }
 
-    // Chuyển đổi startDate và endDate thành định dạng ngày theo định dạng "dd/mm/yyyy"
-    const startDateString = `${startDate.getDate().toString().padStart(2, '0')}/${(startDate.getMonth() + 1).toString().padStart(2, '0')}/${startDate.getFullYear()}`;
-    const endDateString = `${endDate.getDate().toString().padStart(2, '0')}/${(endDate.getMonth() + 1).toString().padStart(2, '0')}/${endDate.getFullYear()}`;
+    // Chuyển đổi startDate và endDate thành định dạng ngày theo định dạng "dd-mm-yyyy"
+    const startDateString = `${startDate.getDate().toString().padStart(2, '0')}-${(startDate.getMonth() + 1).toString().padStart(2, '0')}-${startDate.getFullYear()}`;
+    const endDateString = `${endDate.getDate().toString().padStart(2, '0')}-${(endDate.getMonth() + 1).toString().padStart(2, '0')}-${endDate.getFullYear()}`;
 
     // Thêm bước chuyển đổi chuỗi ngày từ cơ sở dữ liệu sang đối tượng Date
     filter.push({
@@ -54,7 +54,7 @@ export const GET = async (req) => {
         ngayThiDate: {
           $dateFromString: {
             dateString: "$ngayThi",
-            format: "%d/%m/%Y"
+            format: "%d-%m-%Y" // Cập nhật định dạng từ "-" thay vì "/"
           }
         }
       }
@@ -73,7 +73,7 @@ export const GET = async (req) => {
     // Tìm các record trong cơ sở dữ liệu với filter đã thiết lập
     const assignments = await PcCoiThi.aggregate(filter);
 
-    // Chuyển đổi lại ngày từ định dạng Date sang chuỗi "dd/mm/yyyy" nếu cần
+    // Chuyển đổi lại ngày từ định dạng Date sang chuỗi "dd-mm-yyyy" nếu cần
     const results = assignments.map(assignment => ({
       ...assignment,
       ngayThi: assignment.ngayThiDate.toLocaleDateString('vi-VN') // Định dạng lại nếu cần

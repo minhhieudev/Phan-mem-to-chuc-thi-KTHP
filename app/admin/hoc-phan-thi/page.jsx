@@ -14,14 +14,14 @@ const formSchema = {
     maHocPhan: "",
     tenHocPhan: "",
     soTinChi: "",
-    hinhThuc: "",
-    thoiGian: "",
-    giangVien: "",
-    thiT7CN: false,
+    hinhThuc: "TL",
+    thoiGian: "90",
+    // giangVien: "",
+    // thiT7CN: false,
 
-    namHoc: '',
-    loai: '',
-    ky: ''
+    // namHoc: '',
+    // loai: '',
+    // ky: ''
 };
 
 const HocPhanThiForm = () => {
@@ -223,20 +223,20 @@ const HocPhanThiForm = () => {
             key: 'thoiGian',
             width: 70
         },
-        {
-            title: 'Thi T7,CN',
-            dataIndex: 'thiT7CN',
-            key: 'thiT7CN',
-            render: (text) => text ? "Có" : "Không",
-            width: 70
+        // {
+        //     title: 'Thi T7,CN',
+        //     dataIndex: 'thiT7CN',
+        //     key: 'thiT7CN',
+        //     render: (text) => text ? "Có" : "Không",
+        //     width: 70
 
-        },
-        {
-            title: 'Giảng viên',
-            dataIndex: 'giangVien',
-            key: 'giangVien',
-            render: (text) => <span style={{ fontWeight: 'bold', color: 'blue' }}>{text}</span>,
-        },
+        // },
+        // {
+        //     title: 'Giảng viên',
+        //     dataIndex: 'giangVien',
+        //     key: 'giangVien',
+        //     render: (text) => <span style={{ fontWeight: 'bold', color: 'blue' }}>{text}</span>,
+        // },
         {
             title: 'Hành động',
             key: 'action',
@@ -417,7 +417,7 @@ const HocPhanThiForm = () => {
                                 />
                             </Form.Item>
 
-                            <Form.Item
+                            {/* <Form.Item
                                 label={<span className="font-bold text-xl">Thi T7, CN?</span>}
                             >
                                 <Controller
@@ -432,7 +432,7 @@ const HocPhanThiForm = () => {
                                         </Checkbox>
                                     )}
                                 />
-                            </Form.Item>
+                            </Form.Item> */}
 
 
                         </div>
@@ -464,6 +464,7 @@ const HocPhanThiForm = () => {
                                             onChange={(value) => {
                                                 field.onChange(value);
                                             }}
+                                            defaultValue="TL"
                                         >
                                             <Option value="TH">TH</Option>
                                             <Option value="TL+TN">TL+TN</Option>
@@ -494,6 +495,7 @@ const HocPhanThiForm = () => {
                                             onChange={(value) => {
                                                 field.onChange(value); // Cập nhật giá trị trong form
                                             }}
+                                            defaultValue="90"
                                         >
                                             <Option value="45">45</Option>
                                             <Option value="60">60</Option>
@@ -507,7 +509,7 @@ const HocPhanThiForm = () => {
 
                         </div>
 
-                        <Form.Item
+                        {/* <Form.Item
                             label={<span className="font-bold text-xl">Giảng viên</span>}
                         >
                             <Controller
@@ -515,7 +517,7 @@ const HocPhanThiForm = () => {
                                 control={control}
                                 render={({ field }) => <Input className="input-text" placeholder="Nhập giảng viên ..." {...field} />}
                             />
-                        </Form.Item>
+                        </Form.Item> */}
 
 
 

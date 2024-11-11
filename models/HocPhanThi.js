@@ -17,13 +17,13 @@ const HocPhanThiSchema = new mongoose.Schema({
   thoiGian: {
     type: String,
   },
-  giangVien: {
-    type: String,
-  },
-  thiT7CN: {
-    type: Number,
-    default: 0
-  },
+  // giangVien: {
+  //   type: String,
+  // },
+  // thiT7CN: {
+  //   type: Number,
+  //   default: 0
+  // },
 
   // namHoc: {
   //   type: String,  

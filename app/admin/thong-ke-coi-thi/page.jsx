@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Select, Input, Table, Popconfirm, Spin, Button, Space, Pagination } from "antd";
+import { Select, Input, Table, Popconfirm, Spin, Button, Space, Pagination, Modal } from "antd";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
 import { FileExcelOutlined } from '@ant-design/icons';
@@ -22,6 +22,9 @@ const PcCoiThiTable = () => {
 
   const [current, setCurrent] = useState(1);
   const [pageSize, setPageSize] = useState(10);
+
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [currentList, setCurrentList] = useState([]);
 
   const router = useRouter();
 
@@ -50,7 +53,7 @@ const PcCoiThiTable = () => {
     };
 
     fetchData();
-  }, [namHoc, loaiKyThi, loai,hocKy]);
+  }, [namHoc, loaiKyThi, loai, hocKy]);
 
   useEffect(() => {
     const filtered = dataList.filter((item) =>
@@ -80,6 +83,27 @@ const PcCoiThiTable = () => {
     }
   };
 
+  const showModal = (danhSachThiSinh) => {
+    const flattenedDanhSach = danhSachThiSinh.flat();
+
+    const sortedDanhSach = flattenedDanhSach
+      .filter(item => item.hoTen)
+      .sort((a, b) => {
+        // Tách tên theo khoảng trắng và lấy phần cuối cùng của tên
+        const lastNameA = typeof a.hoTen === 'string' ? a.hoTen.trim().split(' ').pop().toLowerCase() : '';
+        const lastNameB = typeof b.hoTen === 'string' ? b.hoTen.trim().split(' ').pop().toLowerCase() : '';
+        return lastNameA.localeCompare(lastNameB);
+      });
+
+    // Sau đó gọi Modal để hiển thị danh sách đã sắp xếp
+    setCurrentList(sortedDanhSach);
+    setIsModalVisible(true);
+  };
+
+  const handleCancel = () => {
+    setIsModalVisible(false);
+  };
+
   const columns = [
     {
       title: 'STT',
@@ -103,7 +127,9 @@ const PcCoiThiTable = () => {
       key: 'lop',
       render: (text) => (
         <span style={{ color: 'red', fontWeight: 'bold' }}>
-          {Array.isArray(text) ? text.join(', ') : text}
+          {Array.isArray(text)
+            ? text.map(lop => Array.isArray(lop) ? lop.join(', ') : lop).join(' - ')
+            : text}
         </span>
       ),
     },
@@ -112,20 +138,25 @@ const PcCoiThiTable = () => {
       dataIndex: 'ngayThi',
       key: 'ngayThi',
       render: (text) => <span style={{ fontWeight: 'bold' }}>{text}</span>,
+      width: 110,
     },
     {
       title: 'Ca',
       dataIndex: 'ca',
       key: 'ca',
       width: '1%',
-      render: (text) => <span style={{ fontWeight: 'bold', color: 'orange' }}>{text}</span>,
+      render: (text) => <span style={{ fontWeight: "bold", color: "orange" }}>{text == '1' ? 'Sáng' : 'Chiều'}</span>,
     },
     {
       title: 'Phòng thi',
       dataIndex: 'phong',
       key: 'phong',
       width: 90,
-      render: (text) => <span style={{ fontWeight: 'bold' }}>{text}</span>,
+      render: (text) => (
+        <span style={{ fontWeight: "bold" }}>
+           {Array.isArray(text) ? text.join(', ') : text}
+        </span>
+      ),
     },
     {
       title: 'Cán bộ 1',
@@ -137,28 +168,43 @@ const PcCoiThiTable = () => {
       title: 'Cán bộ 2',
       dataIndex: 'cbo2',
       key: 'cbo2',
-      render: (text) => <span style={{ fontWeight: 'bold',color: 'blue' }}>{text}</span>,
+      render: (text) => <span style={{ fontWeight: 'bold', color: 'blue' }}>{text}</span>,
     },
     {
       title: 'HT',
       dataIndex: 'hinhThuc',
       key: 'hinhThuc',
       width: 20,
-      render: (text) => <span style={{ fontWeight: 'bold' }}>{text}</span>,
+      render: (text) => (
+        <span style={{ fontWeight: 'bold' }}>
+          {Array.isArray(text) ? text.join(' - ') : text}
+        </span>
+      ),
     },
     {
       title: 'TG',
       dataIndex: 'thoiGian',
       key: 'thoiGian',
       width: 20,
-      render: (text) => <span style={{ fontWeight: 'bold' }}>{text}</span>,
+      render: (text) => (
+        <span style={{ fontWeight: 'bold' }}>
+          {Array.isArray(text) ? text.join(' - ') : text}
+        </span>
+      ),
     },
-    // {
-    //   title: 'Ghi chú',
-    //   dataIndex: 'ghiChu',
-    //   key: 'ghiChu',
-    //   render: (text) => <span style={{ fontWeight: 'bold' }}>{text}</span>,
-    // },
+    {
+      title: 'DS SV',
+      dataIndex: 'danhSachThiSinh',
+      key: 'danhSachThiSinh',
+      render: (text, record) => (
+        <Button size="small" type="dashed" danger onClick={() => showModal(text)}>
+          Xem
+        </Button>
+
+      ),
+      width: 15,
+
+    },
     {
       title: 'Hành động',
       key: 'action',
@@ -178,6 +224,7 @@ const PcCoiThiTable = () => {
       width: 20,
     },
   ];
+
 
 
   // Phân trang dữ liệu
@@ -229,7 +276,7 @@ const PcCoiThiTable = () => {
           >
             <Option value="1">1</Option>
             <Option value="2">2</Option>
-           
+
           </Select>
         </div>
 
@@ -240,16 +287,13 @@ const PcCoiThiTable = () => {
             onChange={(value) => setLoaiKyThi(value)}
             className="w-[50%]"
           >
-            <Option value="Học kỳ 1">Học kỳ 1</Option>
-            <Option value="Học kỳ 1 (đợt 2)">Học kỳ 1 (đợt 2)</Option>
-            <Option value="Học kỳ 1 (đợt 3)">Học kỳ 1 (đợt 3)</Option>
-            <Option value="Học kỳ 2">Học kỳ 2</Option>
-            <Option value="Học kỳ 2 (đợt 2)">Học kỳ 2 (đợt 2)</Option>
-            <Option value="Học kỳ 2 (đợt 3)">Học kỳ 2 (đợt 3)</Option>
-            <Option value="Kỳ thi phụ (đợt 1)">Kỳ thi phụ (đợt 1)</Option>
-            <Option value="Kỳ thi phụ (đợt 2)">Kỳ thi phụ (đợt 2)</Option>
-            <Option value="Kỳ thi phụ (đợt 3)">Kỳ thi phụ (đợt 3)</Option>
-            <Option value="Học kỳ hè">Học kỳ hè</Option>
+            <Option value="1">Chính thức</Option>
+            <Option value="2">Đợt 2</Option>
+            <Option value="3">Đợt 3</Option>
+            <Option value="4">Đợt 4</Option>
+            <Option value="5">Đợt 5</Option>
+            <Option value="6">Đợt 6</Option>
+            <Option value="7">Đợt 7</Option>
           </Select>
         </div>
 
@@ -292,11 +336,50 @@ const PcCoiThiTable = () => {
             setCurrent(page);
             setPageSize(size);
           }}
-          pageSizeOptions={[ '10', '25', '50', '100', '200']}
+          pageSizeOptions={['10', '25', '50', '100', '200']}
           showSizeChanger
           className="flex justify-end"
         />
       </div>
+
+      <Modal
+        title="Danh sách sinh viên"
+        visible={isModalVisible}
+        onCancel={handleCancel}
+        footer={null}
+        width={800}
+      >
+        <Table
+          bordered
+          dataSource={currentList}
+          columns={[
+            {
+              title: 'Họ và Tên',
+              dataIndex: 'hoTen',
+              key: 'hoTen',
+              className: 'font-bold text-red-600'
+            },
+            {
+              title: 'Mã Sinh Viên',
+              dataIndex: 'maSV',
+              key: 'maSV',
+              className: 'font-bold text-blue-600'
+
+            },
+            {
+              title: 'Lớp',
+              dataIndex: 'lop',
+              key: 'lop',
+              className: 'font-bold text-green-600'
+
+            },
+          ]}
+          pagination={false}
+          rowKey={(record) => record.index}  // Sử dụng index làm khóa
+          scroll={{ y: 400 }} // Set the vertical scroll height to 400px
+        />
+      </Modal>
+
     </div>
   );
 };

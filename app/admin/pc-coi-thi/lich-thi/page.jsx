@@ -151,16 +151,13 @@ const PcCoiThiTable = () => {
               onChange={(value) => setLoaiKyThi(value)}
               className=""
             >
-              <Option value="Học kỳ 1">Học kỳ 1</Option>
-              <Option value="Học kỳ 1 (đợt 2)">Học kỳ 1 (đợt 2)</Option>
-              <Option value="Học kỳ 1 (đợt 3)">Học kỳ 1 (đợt 3)</Option>
-              <Option value="Học kỳ 2">Học kỳ 2</Option>
-              <Option value="Học kỳ 2 (đợt 2)">Học kỳ 2 (đợt 2)</Option>
-              <Option value="Học kỳ 2 (đợt 3)">Học kỳ 2 (đợt 3)</Option>
-              <Option value="Kỳ thi phụ (đợt 1)">Kỳ thi phụ (đợt 1)</Option>
-              <Option value="Kỳ thi phụ (đợt 2)">Kỳ thi phụ (đợt 2)</Option>
-              <Option value="Kỳ thi phụ (đợt 3)">Kỳ thi phụ (đợt 3)</Option>
-              <Option value="Học kỳ hè">Học kỳ hè</Option>
+              <Option value="1">Chính thức</Option>
+              <Option value="2">Đợt 2</Option>
+              <Option value="3">Đợt 3</Option>
+              <Option value="4">Đợt 4</Option>
+              <Option value="5">Đợt 5</Option>
+              <Option value="6">Đợt 6</Option>
+              <Option value="7">Đợt 7</Option>
             </Select>
           </div>
 

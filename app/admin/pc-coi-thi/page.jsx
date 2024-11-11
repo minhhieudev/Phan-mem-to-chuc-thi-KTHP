@@ -2,17 +2,12 @@
 import { useState, useEffect, useRef } from "react";
 import { Select, DatePicker, Button, message, Tabs, Card, Col, Row, Checkbox, Space, Radio, Input, Table, Modal, Spin, Upload } from "antd";
 
-import { UserOutlined, BookOutlined, HomeOutlined, CalendarOutlined, FileAddOutlined, DeleteOutlined, UploadOutlined, InboxOutlined } from '@ant-design/icons';
+import { UserOutlined, BookOutlined, HomeOutlined, CalendarOutlined, RightOutlined, DeleteOutlined, UploadOutlined, InboxOutlined } from '@ant-design/icons';
 import Loader from "../../../components/Loader";
 import TablePcCoiThi from "@components/CoiThi/TablePcCoiThi";
-import { useSession } from "next-auth/react";
 import { v4 as uuidv4 } from "uuid";
 import * as XLSX from 'xlsx';
-import { CldUploadButton } from "next-cloudinary";
-
-
-const CheckboxGroup = Checkbox.Group;
-const { Dragger } = Upload;
+import toast from "react-hot-toast";
 
 const { Option } = Select;
 const { TabPane } = Tabs;
@@ -21,22 +16,20 @@ const { RangePicker } = DatePicker;
 const PcCoiThi = () => {
   const [activeTab, setActiveTab] = useState("3");
 
-  const [listHocPhan, setListHocPhan] = useState([]);
   const [listGV, setListGV] = useState([]);
   const [listPhong, setListPhong] = useState([]);
 
-  const [listHocPhanSelect, setListHocPhanSelect] = useState([]);
   const [listGVSelect, setListGVSelect] = useState([]);
   const [listPhongSelect, setListPhongSelect] = useState([]);
 
-  const [examSessions, setExamSessions] = useState([]);
+  const [examSessions, setExamSessions] = useState('DHPY'); /// ĐỊA ĐIỂM
   const [list, setList] = useState([]);
 
   const [namHoc, setNamHoc] = useState("2024-2025");
-  const [loaiKyThi, setLoaiKyThi] = useState("");
+  const [loaiKyThi, setLoaiKyThi] = useState("1");
   const [loaiDaoTao, setLoaiDaoTao] = useState("Chính quy");
-  const [hocKy, setHocKy] = useState("");
-  const [examDateRange, setExamDateRange] = useState({});
+  const [hocKy, setHocKy] = useState("1");
+  const [examDateRange, setExamDateRange] = useState({});   // Ngày thi
   const [loading, setLoading] = useState(true);
 
   const [open, setOpen] = useState(false);
@@ -44,39 +37,33 @@ const PcCoiThi = () => {
 
   const [title, setTitle] = useState('');
   const [roomTypeFilter, setRoomTypeFilter] = useState("");
-  const [searchHocPhan, setSearchHocPhan] = useState("");
   const [searchPhong, setSearchPhong] = useState("");
   const [searchGV, setSearchGV] = useState("");
 
   const [filteredListPhong, setFilteredListPhong] = useState([]);
-  const [filteredListHocPhan, setFilteredListHocPhan] = useState([]);
   const [filteredListGV, setFilteredListGV] = useState([]);
 
   const [selectKhoa, setSelectKhoa] = useState("");
   const [khoaOptions, setKhoaOptions] = useState([]);
 
-  const [listGVKhoa, setListGVKhoa] = useState([]);
-
-
-  const [GVToGetKhoa, setGVToGetKhoa] = useState('');
-  const [fetchs, setFetchs] = useState(false);
-
-  const { data: session } = useSession();
-  const user = session?.user;
-
-  const [isDisplay, setIsDisplay] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef(null);
 
-  const [dataMonThi, setDataMonThi] = useState([]);
   const [dataSinhVien, setDataSinhVien] = useState([]);
-  const [dataPhong, setDataPhong] = useState([]);
-  const [dataGV, setDataGV] = useState([]);
+
+  const [listHocPhanThi, setListHocPhanThi] = useState([]);
+  const [result, setResult] = useState([]);
+  const [loading2, setLoading2] = useState(false);
+  const [listSVToClass, setListSVToClass] = useState([]);
+  const [selectedHocPhan, setSelectedHocPhan] = useState(null);
+
+  const [listPhongFilter, setListPhongFilter] = useState([]);
 
 
-  const onCheckAllChange = (e) => {
-    setListHocPhanSelect(e.target.checked ? listHocPhan : []);
-  };
+  const [resultFinals, setResultFinals] = useState([]);
+
+
+
   const onCheckAllChangePhong = (e) => {
     setListPhongSelect(e.target.checked ? listPhong : []);
   };
@@ -101,13 +88,6 @@ const PcCoiThi = () => {
     setOpen(false);
   };
 
-  /// Các hàm cập nhật danh sách
-  const handleSelectHocPhan = (checked, hocPhan) => {
-    setListHocPhanSelect((prev) =>
-      checked ? [...prev, hocPhan] : prev.filter((item) => item !== hocPhan)
-    );
-  };
-
   const handleSelectPhong = (checked, phong) => {
     setListPhongSelect((prev) =>
       checked ? [...prev, phong] : prev.filter((item) => item !== phong)
@@ -121,9 +101,9 @@ const PcCoiThi = () => {
   };
 
   const handleDeleteHocPhan = (index) => {
-    const updatedList = [...listHocPhanSelect];
+    const updatedList = [...result];
     updatedList.splice(index, 1);
-    setListHocPhanSelect(updatedList);
+    setResult(updatedList);
   };
 
   const handleDeletePhong = (index) => {
@@ -157,13 +137,7 @@ const PcCoiThi = () => {
           setKhoaOptions(tenKhoaList);
         }
 
-        const res1 = await fetch('/api/admin/hoc-phan-thi');
-        if (res1.ok) {
-          const data = await res1.json();
-          setListHocPhan(data);
-        }
-
-        const res2 = await fetch('/api/admin/phong-thi');
+        const res2 = await fetch('/api/admin/phong-thi/status');
         if (res2.ok) {
           const data = await res2.json();
           setListPhong(data);
@@ -215,19 +189,6 @@ const PcCoiThi = () => {
     roomTypeFilter, listPhong]);
 
   useEffect(() => {
-    let filteredData = listHocPhan;
-
-
-    if (searchHocPhan) {
-      filteredData = filteredData.filter(phong =>
-        phong.tenHocPhan.toLowerCase().includes(searchHocPhan.toLowerCase())
-      );
-    }
-
-    setFilteredListHocPhan(filteredData);
-  }, [searchHocPhan, listHocPhan]);
-
-  useEffect(() => {
     let filteredData = listGV;
 
     if (searchGV) {
@@ -247,266 +208,6 @@ const PcCoiThi = () => {
     return date.toLocaleDateString();
   };
 
-  // Helper to get a random value from an array
-  const randomFromArray = (array) => {
-    return array[Math.floor(Math.random() * array.length)];
-  };
-
-
-  const handleCreate = () => {
-    // Check data
-    if (!examDateRange.startDate || !examDateRange.endDate || !examSessions.length || !namHoc || !loaiKyThi || !hocKy || !loaiDaoTao) {
-      message.error("Vui lòng nhập đầy đủ thông tin");
-      return;
-    }
-
-    const getRandomDate = (start, end, excludeDates, hocPhan, allowSatSun) => {
-      let date;
-      let attempt = 0;
-
-      const isThiT7CN = allowSatSun;
-      const totalDays = (end.getTime() - start.getTime()) / (1000 * 3600 * 24);
-      let validDays = [];
-
-      // Lặp qua các ngày trong khoảng start đến end
-      for (let i = 0; i <= totalDays; i++) {
-        const checkDate = new Date(start.getTime() + i * (1000 * 3600 * 24));
-        const checkDay = checkDate.getDay();
-        const formattedDate = formatDate(checkDate);
-
-        // Thêm các ngày phù hợp vào validDays, có thể trùng ngày
-        if ((isThiT7CN && (checkDay === 0 || checkDay === 6)) || (!isThiT7CN && (checkDay !== 0 && checkDay !== 6))) {
-          validDays.push(formattedDate);
-        }
-      }
-
-      // Kiểm tra nếu không còn ngày hợp lệ
-      if (validDays.length === 0) {
-        if (allowSatSun) {
-          return "Hết ngày thi t7, cn!!!";
-        } else {
-          return "Hết ngày thi thường !!!";
-        }
-      }
-
-      // Chọn ngày ngẫu nhiên từ danh sách validDays
-      date = validDays[Math.floor(Math.random() * validDays.length)];
-
-      return date;
-    };
-    const handleSplitHocPhan = (hocPhan, phong, cbo1, cbo2, ca, ngayThi) => {
-      const halfSV = Math.ceil(hocPhan.soSVDK / 2);
-      const hocPhan1 = {
-        ...hocPhan,
-        tenHocPhan: `${hocPhan.tenHocPhan} (1)`,
-        soSVDK: halfSV
-      };
-      const hocPhan2 = {
-        ...hocPhan,
-        tenHocPhan: `${hocPhan.tenHocPhan} (2)`,
-        soSVDK: hocPhan.soSVDK - halfSV
-      };
-
-      let randomPhong;
-      let phongListAvailable = hocPhan.hinhThuc === "GDTC" ? phongGDTCList : (hocPhan.hinhThuc === "TH" ? phongMayList : phongThuongList);
-      randomPhong = phongListAvailable.length > 0 ? phongListAvailable.splice(Math.floor(Math.random() * phongListAvailable.length), 1)[0] : { tenPhong: "Hết phòng !!!" };
-
-      let randomCbo1 = gvList.length > 0 ? gvList.splice(Math.floor(Math.random() * gvList.length), 1)[0] : { username: "Hết giảng viên !!!!" };
-      let randomCbo2 = gvList.length > 0 ? gvList.splice(Math.floor(Math.random() * gvList.length), 1)[0] : { username: "Hết giảng viên !!!!" };
-
-      if (randomCbo2.username === randomCbo1.username && gvList.length > 0) {
-        randomCbo2 = gvList.splice(Math.floor(Math.random() * gvList.length), 1)[0];
-      }
-
-      return [
-        {
-          _id: uuidv4(),
-          hocPhan: hocPhan1.tenHocPhan,
-          lop: hocPhan.lop.join(", "),
-          hinhThuc: hocPhan.hinhThuc,
-          thoiGian: hocPhan.thoiGian,
-          phong: phong.tenPhong,
-          cbo1: cbo1.username,
-          cbo2: cbo2.username,
-          ca: 1,
-          ngayThi: ngayThi,
-          namHoc,
-          loaiKyThi,
-          hocKy,
-          loaiDaoTao
-        },
-        {
-          _id: uuidv4(),
-          hocPhan: hocPhan2.tenHocPhan,
-          lop: hocPhan.lop.join(", "),
-          hinhThuc: hocPhan.hinhThuc,
-          thoiGian: hocPhan.thoiGian,
-          phong: phong.tenPhong,
-          cbo1: cbo1.username,
-          cbo2: cbo2.username,
-          ca: 3,
-          ngayThi: ngayThi,
-          namHoc,
-          loaiKyThi,
-          hocKy,
-          loaiDaoTao
-        }
-      ];
-    };
-
-
-
-
-    let hocPhanListNonT7CN = listHocPhanSelect?.filter(hp => !hp.thiT7CN);
-    let hocPhanListT7CN = listHocPhanSelect?.filter(hp => hp.thiT7CN);
-
-    let phongList = [...listPhongSelect];
-    let phongMayList = phongList.filter(phong => phong.loai === "Phòng máy");
-    let phongThuongList = phongList.filter(phong => phong.loai === "Phòng thường");
-    let phongGDTCList = phongList.filter(phong => phong.loai === "Phòng GDTC");
-    let gvList = [...listGVSelect];
-
-    const randomSchedules = [];
-    const usedDates = new Set();
-
-    const scheduleHocPhanList = async (hocPhanList, allowSatSun) => {
-
-      while (hocPhanList.length > 0) {
-        const randomHocPhan = hocPhanList.splice(Math.floor(Math.random() * hocPhanList.length), 1)[0];
-
-        // Lấy danh sách giảng viên theo khoa
-        let gvKhoa = []
-        if (randomHocPhan) {
-          setGVToGetKhoa(randomHocPhan.giangVien)
-          setFetchs(!fetchs)
-          try {
-            const res5 = await fetch(`/api/admin/get-gv-khoa?khoa=${randomHocPhan.giangVien}`);
-            if (res5.ok) {
-              const data = await res5.json();
-              gvKhoa = data;
-            }
-
-          } catch (error) {
-            console.log("Error:", error)
-            message.error("Failed to fetch data");
-          }
-        }
-        ////////////////////////
-
-
-        // Random lấy phòng
-        let randomPhong;
-
-        if (randomHocPhan.hinhThuc === "GDTC") {
-          randomPhong = phongGDTCList.length > 0 ? phongGDTCList.splice(Math.floor(Math.random() * phongGDTCList.length), 1)[0] : { tenPhong: "Hết phòng GDTC!!!" };
-        } else if (randomHocPhan.hinhThuc === "TH") {
-          randomPhong = phongMayList.length > 0 ? phongMayList.splice(Math.floor(Math.random() * phongMayList.length), 1)[0] : { tenPhong: "Thiếu phòng thực hành!!!!" };
-        } else {
-          randomPhong = phongThuongList.length > 0 ? phongThuongList.splice(Math.floor(Math.random() * phongThuongList.length), 1)[0] : { tenPhong: "Hết phòng !!!" };
-        }
-        /////////////////////
-
-
-        // Random lấy cán bộ /////////////
-
-        let randomCbo1, randomCbo2;
-
-        if (randomHocPhan.hinhThuc == "TH") {
-          // Nếu hinhThuc là 'TH', cbo1 là giảng viên của học phần đó
-          randomCbo1 = { username: randomHocPhan.giangVien };
-
-          // cbo2 được lấy từ danh sách listGVKhoa
-          if (gvKhoa.length > 0) {
-            randomCbo2 = gvKhoa.splice(Math.floor(Math.random() * gvKhoa.length), 1)[0];
-          } else {
-            randomCbo2 = { username: "Hết giảng viên khoa!" };
-          }
-
-          if (randomCbo2.username === randomCbo1.username && gvKhoa.length > 0) {
-            randomCbo2 = gvKhoa.splice(Math.floor(Math.random() * gvKhoa.length), 1)[0];
-          }
-          gvKhoa = []
-
-        } else {
-          let gvList = [...listGVSelect]; /// KHÔNG HIỂU CHỖ NÀY 
-
-          //console.log(JSON.stringify(gvList, null, 2));
-
-          // Nếu hinhThuc khác 'TH', cbo1 và cbo2 không được là giảng viên giảng dạy môn đó hoặc giảng viên trong khoa
-          const filterGVList = gvList.filter(gv => gv.username != randomHocPhan.giangVien && !gvKhoa.some(gvKhoa => gvKhoa.username == gv.username));
-
-
-          if (filterGVList.length > 0) {
-            randomCbo1 = filterGVList.splice(Math.floor(Math.random() * filterGVList.length), 1)[0];
-          } else {
-            randomCbo1 = { username: "Hết giảng viên!!!!" };
-          }
-
-          if (filterGVList.length > 0) {
-            randomCbo2 = filterGVList.splice(Math.floor(Math.random() * filterGVList.length), 1)[0];
-          } else {
-            randomCbo2 = { username: "Hết giảng viên!!!!" };
-          }
-
-          if (randomCbo2.username === randomCbo1.username && gvList.length > 0) {
-            randomCbo2 = gvList.splice(Math.floor(Math.random() * gvList.length), 1)[0];
-          }
-          gvKhoa = []
-        }
-
-        // Nếu cbo1 và cbo2 bị trùng, chọn lại cbo2
-
-
-        /////////////////////////////////
-
-        //// CA THI  
-        const availableCaSessions = examSessions;
-        const randomCa = availableCaSessions.length > 0 ? randomFromArray(availableCaSessions) : "Không có dữ liệu";
-        ////////////
-
-        ////// NGÀY THI 
-        const randomDate = getRandomDate(examDateRange.startDate, examDateRange.endDate, usedDates, randomHocPhan, allowSatSun);
-        //////////
-
-        if (randomHocPhan.soSVDK > randomPhong.soCho) {
-          const splitSchedules = handleSplitHocPhan(randomHocPhan, randomPhong, randomCbo1, randomCbo2, randomCa, randomDate);
-          randomSchedules.push(...splitSchedules);
-        }
-        else {
-          const schedule = {
-            _id: uuidv4(),
-            hocPhan: randomHocPhan.tenHocPhan,
-            lop: randomHocPhan.lop.join(", "),
-            hinhThuc: randomHocPhan.hinhThuc,
-            thoiGian: randomHocPhan.thoiGian,
-            phong: randomPhong.tenPhong,
-            cbo1: randomCbo1.username,
-            cbo2: randomCbo2.username,
-            ca: randomCa,
-            ngayThi: randomDate instanceof Date ? randomDate.toLocaleDateString() : randomDate,
-            namHoc,
-            loaiKyThi,
-            hocKy,
-            loaiDaoTao
-          };
-
-          randomSchedules.push(schedule);
-        }
-        setGVToGetKhoa('')
-
-      }
-    };
-
-    scheduleHocPhanList(hocPhanListNonT7CN, false);
-    scheduleHocPhanList(hocPhanListT7CN, true);
-
-    setList(randomSchedules);
-
-    setActiveTab("2");
-
-  };
-
-
   const getRandomColor = () => {
     const randomValue = () => Math.floor(Math.random() * 128) + 64;
 
@@ -517,87 +218,20 @@ const PcCoiThi = () => {
     return `#${r}${g}${b}`;
   };
 
-
   // Xử lý đọc Excel
 
-  const importMonThi = (e) => {
-    const file = e.target.files[0];
-    const reader = new FileReader();
-
-    reader.onload = (event) => {
-      const data = event.target.result;
-      const workbook = XLSX.read(data, { type: "binary" });
-      const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
-      const ListData = XLSX.utils.sheet_to_json(firstSheet, { header: 1 });
-      ListData.shift(); // Loại bỏ dòng tiêu đề nếu cần
-
-      if (ListData.length > 0) {
-        setDataMonThi(ListData)
-      } else {
-        toast.error("Lỗi khi đọc file.");
-      }
-      console.log("Dữ liệu từ file Excel đã lọc:", ListData);
-    };
-
-    reader.onerror = () => {
-      toast.error("Đã xảy ra lỗi khi đọc file Excel");
-    };
-
-    reader.readAsBinaryString(file);
-  };
-  const importPhong = (e) => {
-    const file = e.target.files[0];
-    const reader = new FileReader();
-
-    reader.onload = (event) => {
-      const data = event.target.result;
-      const workbook = XLSX.read(data, { type: "binary" });
-      const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
-      const ListData = XLSX.utils.sheet_to_json(firstSheet, { header: 1 });
-      ListData.shift(); // Loại bỏ dòng tiêu đề nếu cần
-
-      if (ListData.length > 0) {
-        setDataPhong(ListData)
-      } else {
-        toast.error("Lỗi khi đọc file.");
-      }
-      console.log("Dữ liệu từ file Excel đã lọc:", ListData);
-    };
-
-    reader.onerror = () => {
-      toast.error("Đã xảy ra lỗi khi đọc file Excel");
-    };
-
-    reader.readAsBinaryString(file);
-  };
-  const importGV = (e) => {
-
-    const file = e.target.files[0];
-    const reader = new FileReader();
-
-    reader.onload = (event) => {
-      const data = event.target.result;
-      const workbook = XLSX.read(data, { type: "binary" });
-      const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
-      const ListData = XLSX.utils.sheet_to_json(firstSheet, { header: 1 });
-      ListData.shift();
-
-      if (ListData.length > 0) {
-        setDataGV(ListData)
-      } else {
-        toast.error("Lỗi khi đọc file.");
-      }
-      console.log("Dữ liệu từ file Excel đã lọc:", ListData);
-    };
-
-    reader.onerror = () => {
-      toast.error("Đã xảy ra lỗi khi đọc file Excel");
-    };
-
-    reader.readAsBinaryString(file);
-  };
   const importSinhVien = (e) => {
+    setDataSinhVien([]);
+    setIsUploading(true)
     const file = e.target.files[0];
+
+    // Kiểm tra xem có file được chọn hay không
+    if (!file) {
+      console.warn("Không có file nào được chọn.");
+      setIsUploading(false)
+
+      return; // Thoát sớm nếu không có file
+    }
     const reader = new FileReader();
 
     reader.onload = (event) => {
@@ -627,11 +261,12 @@ const PcCoiThi = () => {
 
         setSoSV(uniqueSVs);       // Tổng số sinh viên
         setSoLop(uniqueLops);                // Tổng số lớp
-        setSoMonThi(uniqueMonThi.size);     
-        
-        console.log('hh:',[...uniqueMonThi])// Tổng số môn thi
+        setSoMonThi([...uniqueMonThi]);
 
-        setListHocPhanSelect([...uniqueMonThi])
+        //setListMaHP([...uniqueMonThi]);
+
+        setIsUploading(false)
+
       } else {
         toast.error("Lỗi khi đọc file.");
       }
@@ -644,46 +279,92 @@ const PcCoiThi = () => {
     reader.readAsBinaryString(file);
   };
 
+  useEffect(() => {
+    if (dataSinhVien.length > 0) {
+      const uniqueLops = new Set(dataSinhVien.map(item => item.lop)).size;
+      const uniqueSVs = new Set(dataSinhVien.map(item => item.maSV)).size;
+      const uniqueMonThi = new Set(dataSinhVien.map(item => item.maMon));
 
-  const create2 = () => {
+      setSoSV(uniqueSVs);
+      setSoLop(uniqueLops);
+      setSoMonThi([...uniqueMonThi]);
+    }
+  }, [dataSinhVien])
 
-    const dataSinhVien = [
-      ['211CTT004', 'Võ Minh Hiếu', 'KC21345', 'DC21CTT01'],
-      ['211CTT005', 'Lê Văn Nam', 'KC21345', 'DC21CTT01'],
-      ['211CTT006', 'Hồ Hà', 'KC21345', 'DC21CTT02'],
-      ['211CTT007', 'Lê My', 'KC21346', 'DC21NNA01']
-    ];
+  const fetchDataHP = async () => {
+    setLoading2(true)
+    const method = "POST";
+    const resGetTTHP = await fetch("/api/admin/pc-coi-thi/get-info-hp", {
+      method,
+      body: JSON.stringify({ data: soMonThi }),
+      headers: { "Content-Type": "application/json" },
+    });
+    if (resGetTTHP.ok) {
+      const data = await resGetTTHP.json();
+      setListHocPhanThi(data);
 
-    // Tạo object lưu danh sách môn thi, sinh viên và lớp
-    const result = {};
+    }
+
+  }
+  useEffect(() => {
+    if (listHocPhanThi.length != 0) {
+      dataTranform(dataSinhVien)
+    }
+  }, [listHocPhanThi])
+
+  const dataTranform = (dataSinhVien) => {
+    if (!Array.isArray(listHocPhanThi) || listHocPhanThi.length === 0) {
+      console.error('listHocPhanThi không phải là một mảng hợp lệ:', listHocPhanThi);
+      return;
+    }
+
+    if (!Array.isArray(dataSinhVien)) {
+      console.error('dataSinhVien không phải là một mảng hợp lệ:', dataSinhVien);
+      return;
+    }
+
+    const result = [];
 
     // Duyệt qua từng sinh viên trong dataSinhVien
-    dataSinhVien.forEach(([maSinhVien, hoTen, maMonThi, lop]) => {
-      // Nếu môn thi chưa tồn tại trong result, thêm môn thi đó với cấu trúc mới
-      if (!result[maMonThi]) {
-        result[maMonThi] = { sinhVien: [], lop: [], tongSoThiSinh: 0 };
+    dataSinhVien.forEach(({ maSV, hoTen, lop, maMon }) => {
+      // Tìm đối tượng trong result có maMon phù hợp
+      let existingItem = result.find(item => item.maMon === maMon);
+
+      // Nếu không tìm thấy, tạo một đối tượng mới và thêm vào result
+      if (!existingItem) {
+        existingItem = {
+          maMon: maMon,
+          sinhVien: [],
+          lop: [],
+          tongSoThiSinh: 0,
+          info: null  // info là một đối tượng duy nhất
+        };
+        result.push(existingItem);
       }
 
       // Thêm thông tin sinh viên vào danh sách sinh viên của môn thi
-      result[maMonThi].sinhVien.push({
-        maSV: maSinhVien,
-        hoTen: hoTen,
-        lop: lop
-      });
+      existingItem.sinhVien.push({ maSV, hoTen, lop });
 
       // Tăng tổng số thí sinh
-      result[maMonThi].tongSoThiSinh++;
+      existingItem.tongSoThiSinh++;
 
-      // Thêm lớp vào danh sách lớp nếu chưa có lớp đó
-      if (!result[maMonThi].lop.includes(lop)) {
-        result[maMonThi].lop.push(lop);
+      // Thêm lớp vào danh sách nếu chưa tồn tại
+      if (!existingItem.lop.includes(lop)) {
+        existingItem.lop.push(lop);
       }
+
+      // Kiểm tra và thêm thông tin từ listHocPhanThi vào existingItem.info
+      listHocPhanThi.forEach(hocPhan => {
+        if (hocPhan.maHocPhan === maMon && !existingItem.info) {
+          existingItem.info = hocPhan;  // Lưu thông tin môn thi là một đối tượng duy nhất
+        }
+      });
     });
 
-    console.log(result);
-    return result;
+    setResult(result); // Nếu cần thiết
+    setLoading2(false);
+    setActiveTab('1');
   };
-
 
 
   const columns = [
@@ -728,9 +409,9 @@ const PcCoiThi = () => {
   const [editingKey, setEditingKey] = useState('');
   const [editingRecord, setEditingRecord] = useState({});
 
-  const [soSV, setSoSV] = useState('');
-  const [soLop, setSoLop] = useState('');
-  const [soMonThi, setSoMonThi] = useState('');
+  const [soSV, setSoSV] = useState(0);
+  const [soLop, setSoLop] = useState(0);
+  const [soMonThi, setSoMonThi] = useState([]);
 
 
   // Hàm xóa sinh viên
@@ -859,7 +540,376 @@ const PcCoiThi = () => {
     },
   ];
 
+  // -== HÀM TRẢ VỀ MẢNG NGÀY ĐỂ RANDOM ========
+  const getValidDates = () => {
+    const start = examDateRange.startDate;
+    const end = examDateRange.endDate;
 
+    let validDays = [];
+    const totalDays = (end?.getTime() - start?.getTime()) / (1000 * 3600 * 24);
+
+    for (let i = 0; i <= totalDays; i++) {
+      const currentDate = new Date(start.getTime() + i * (1000 * 3600 * 24));
+      const dayOfWeek = currentDate.getDay(); // 0 là Chủ Nhật, 6 là Thứ 7
+
+      if (dayOfWeek !== 0 && dayOfWeek !== 6) {
+        const day = String(currentDate.getDate()).padStart(2, '0');
+        const month = String(currentDate.getMonth() + 1).padStart(2, '0');
+        const year = currentDate.getFullYear();
+        validDays.push(`${day}-${month}-${year}`);
+      }
+    }
+    return validDays;
+  };
+
+  ///===== HÀM XỬ LÝ CHÍNH ===========
+
+  function phanBoSinhVien() {
+
+    // Check data
+    if (!examDateRange.startDate || !examDateRange.endDate || !examSessions.length || !namHoc || !loaiKyThi || !hocKy || !loaiDaoTao) {
+      message.error("Vui lòng nhập đầy đủ thông tin");
+      return;
+    }
+
+    let danhSachGV = listGVSelect
+
+    let listMon = result;
+    let listMonClone = result;
+    let resultFinal = [];
+    let soPhongConLai = listPhongSelect.slice().sort((a, b) => b.soCho - a.soCho);
+
+    let listSize = listMon.length
+
+    let hocPhanDaDuyet = []
+
+    // Hàm tính toán phân bổ sinh viên vào phòng
+    for (let i = 0; i < listSize; i++) {
+
+      const mon = listMon[i];
+
+      if ((soPhongConLai.length == 1)) {
+        toast.error('Không đủ phòng thi!')
+        return
+      }
+
+      // BỎ QUA CÁI HP ĐÃ GHÉP NÊN KHÔNG DUYỆT TIẾP
+      const isExist = hocPhanDaDuyet.includes(mon.info.tenHocPhan);
+      if (isExist) {
+        continue;
+      }
+
+      listMonClone = listMonClone.filter(monS => monS.info.tenHocPhan != mon.info.tenHocPhan);
+
+      let item = {
+        _id: Math.random().toString(36).substr(2, 9),
+        maHocPhan: [],
+        hocPhan: [],
+        lop: [],
+        soLuong: [],
+        ngayThi: '',
+        ca: '',
+        phong: [],
+        cbo1: '',
+        cbo2: '',
+        tc: '',
+        hinhThuc: [],
+        thoiGian: [],
+        danhSachThiSinh: [],
+
+        diaDiem:examSessions,
+        tc: '',
+        namHoc,
+        loaiDaoTao,
+        loaiKyThi,
+        hocKy,
+
+
+      }
+
+      let phongTemp = [];
+      let soChoNeed = 0;
+
+      // Duyệt qua các phòng để phân bổ sinh viên
+      for (let i = 0; i < soPhongConLai.length; i++) {
+
+        let phong = soPhongConLai[i];
+
+        // ============== XỬ LÝ TÁCH PHÒNG =================
+
+        if (soChoNeed < mon.tongSoThiSinh) {
+
+          soChoNeed += phong.soCho;
+          phongTemp.push(phong);
+
+          if ((i == soPhongConLai.length - 1 && soChoNeed < mon.tongSoThiSinh)) {
+            toast.error('Không đủ phòng thi!')
+            return
+          }
+
+        }
+        else {
+          if (phongTemp.length > 1) {
+
+            // Nếu đã lấy đủ phòng cần cho môn đó
+            item.phong = phongTemp; // Thêm phòng vào danh sách phòng của môn học
+            setListPhongFilter(pre => [...pre, phongTemp]);
+
+            const valNguyen = Math.floor(mon.tongSoThiSinh / phongTemp.length)
+            let soLuong = new Array(phongTemp.length).fill(valNguyen);
+
+            let conLai = (mon.tongSoThiSinh) - (valNguyen * phongTemp.length)
+
+            if (conLai > 0) {
+              for (let i = 0; i < phongTemp.length; i++) {
+                // Xử lý phần tử phongTemp[i] tại đây
+                if (phongTemp[i].soCho > valNguyen && soLuong[i] < phongTemp[i].soCho && conLai != 0) {
+                  soLuong[i] += 1
+                  conLai -= 1
+                }
+              }
+            }
+
+            // SỐ LƯỢNG MỖI PHÒNG
+            item.soLuong.push(soLuong);
+            item.hocPhan.push(mon.info.tenHocPhan);
+
+            // SET THÔNG TIN MÔN THI
+            item.maHocPhan.push(mon.info.maHocPhan)
+            item.lop.push(mon.lop)
+            item.hinhThuc.push(mon.info.hinhThuc)
+            item.thoiGian.push(mon.info.thoiGian)
+
+            item.tc = mon.info.soTinChi
+            item.danhSachThiSinh.push(mon.sinhVien)
+
+            // XÓA PHÒNG ==========
+            soPhongConLai = soPhongConLai.filter(phong => !phongTemp.some(p => p.tenPhong == phong.tenPhong));
+            listMonClone = listMonClone.filter(monG => monG.info.tenHocPhan !== mon.info.tenHocPhan);
+            break;
+
+          }
+          // ====== TH KHÔNG TÁCH ===========
+          else {
+
+            let soLuongGop = mon.tongSoThiSinh  // ĐỂ XEM CÓ GỘP TIẾP KHÔNG
+
+            item.phong = phongTemp;
+            setListPhongFilter(pre => [...pre, phongTemp]);
+
+            item.soLuong.push(mon.tongSoThiSinh);
+
+            item.hocPhan.push(mon.info.tenHocPhan);
+
+            item.maHocPhan.push(mon.info.maHocPhan)
+            item.lop.push(mon.lop)
+            item.hinhThuc.push(mon.info.hinhThuc)
+            item.thoiGian.push(mon.info.thoiGian)
+
+            item.tc = mon.info.soTinChi
+            item.danhSachThiSinh.push(mon.sinhVien)
+
+            const check = mon.tongSoThiSinh / phong.soCho
+
+            if (check < 0.95) {
+
+              // ============ TÌM MÔN KHỚP NHẤT 
+              let closestMatch = null; // Biến để lưu trữ kết quả phù hợp nhất
+              let smallestDifference = Number.MAX_VALUE;
+
+              listMonClone.forEach((mons) => {
+
+                const total = mon.tongSoThiSinh + mons.tongSoThiSinh;
+                const difference = Math.abs(phong.soCho - total);
+
+                if (difference < smallestDifference && total <= phong.soCho) {
+                  smallestDifference = difference;
+                  closestMatch = mons;
+                }
+              });
+
+              if (closestMatch != null) {
+                item.hocPhan.push(closestMatch.info.tenHocPhan);
+                item.soLuong.push(closestMatch.tongSoThiSinh);
+
+                item.maHocPhan.push(closestMatch.info.maHocPhan)
+                item.lop.push(closestMatch.lop)
+                item.hinhThuc.push(closestMatch.info.hinhThuc)
+                item.thoiGian.push(closestMatch.info.thoiGian)
+
+                item.tc = mon.info.soTinChi
+                item.danhSachThiSinh.push(mon.sinhVien)
+
+                listMonClone = listMonClone.filter(monG => monG.hocPhan != closestMatch.hocPhan);
+                hocPhanDaDuyet.push(closestMatch.info.tenHocPhan)
+
+                // ĐỂ XEM CÓ GỘP TIẾP KHÔNG
+                soLuongGop += closestMatch.soLuong
+              }
+
+              // ====== GỘP TIẾP =======
+              const check2 = soLuongGop / phong.soCho
+              if (check2 < 0.96) {
+
+                let closestMatch2 = null; // Biến để lưu trữ kết quả phù hợp nhất
+                let smallestDifference = Number.MAX_VALUE; // Biến lưu khoảng cách nhỏ nhất, khởi tạo với giá trị lớn nhất
+
+                listMonClone.forEach((mons) => {
+
+                  const total = mon.soLuong + mons.soLuong;
+                  const difference = Math.abs(phong.soCho - total);
+
+                  if (difference < smallestDifference && total <= phong.soCho) {
+                    smallestDifference = difference;
+                    closestMatch2 = mons;
+                  }
+                });
+
+                if (closestMatch2 != null) {
+                  item.soLuong.push(closestMatch2.tongSoThiSinh);
+
+                  item.hocPhan.push(closestMatch2.info.tenHocPhan)
+                  item.maHocPhan.push(closestMatch2.info.maHocPhan)
+                  item.lop.push(closestMatch2.lop)
+                  item.hinhThuc.push(closestMatch2.info.hinhThuc)
+                  item.thoiGian.push(closestMatch2.info.thoiGian)
+
+                  item.tc = mon.info.soTinChi
+                  item.danhSachThiSinh.push(mon.sinhVien)
+
+                  listMonClone = listMonClone.filter(monG => monG.info.tenHocPhan != closestMatch2.info.tenHocPhan);
+                  hocPhanDaDuyet.push(closestMatch2.info.tenHocPhan)
+
+                  // Sau vòng lặp, `closestMatch` sẽ chứa môn có tổng số lượng gần khớp nhất
+                }
+              }
+            }
+
+            // XÓA PHÒNG ==========
+            soPhongConLai = soPhongConLai.filter(phong => !phongTemp.some(p => p.tenPhong == phong.tenPhong));
+            listMonClone = listMonClone.filter(monG => monG.info.tenHocPhan !== mon.info.tenHocPhan);
+
+            break;
+
+          }
+        }
+      }
+      // Thêm item vào kết quả cuối cùng
+      resultFinal.push(item);
+    };
+
+    // = =========== XỬ LÝ TIẾP ================
+    if (resultFinal.length > 0) {
+
+
+      let listNgay = getValidDates()
+      const soMonChoMoiNgay = Math.floor(resultFinal.length / listNgay.length);
+      const soDeChiaCa = Math.round(soMonChoMoiNgay / 2);
+
+      let monDaPhan = []
+
+      //======== FOR NGÀY ========
+      for (let i = 0; i < listNgay.length; i++) {
+
+        if (monDaPhan.length < resultFinal.length) {
+          const ngay = listNgay[i];
+
+          let count = 0
+
+          let lopDaCoTrongNgay = []
+
+
+          //// DUYỆT CÁC MÔN ==========
+          for (let i = 0; i < resultFinal.length; i++) {
+            let items = resultFinal[i];
+
+            const listPhang = resultFinal[i].lop.flat()
+            const lopDaCoTrongNgayPhang = lopDaCoTrongNgay.flat()
+
+            if (listPhang.some(item => lopDaCoTrongNgayPhang.includes(item)) || monDaPhan.includes(resultFinal[i]._id)) {
+              continue;
+            }
+            else {
+              if (count < soMonChoMoiNgay) {
+                if (count < soDeChiaCa) {
+                  resultFinal[i].ca = '1';
+                }
+                else {
+                  resultFinal[i].ca = '5';
+                }
+                resultFinal[i].ngayThi = ngay;
+                monDaPhan.push(resultFinal[i]._id)
+                lopDaCoTrongNgay.push(resultFinal[i].lop)
+
+                count += 1;
+              }
+              else {
+                break;
+              }
+            }
+          }
+        }
+
+      }
+
+      // CHECK cái chưa có ngày vì lẻ
+      for (let i = 0; i < resultFinal.length; i++) {
+        const ele = resultFinal[i];
+        const listPhang = ele.lop.flat();
+
+        if (ele.ngayThi === '') {
+          // Vòng lặp tiếp sử dụng `for...of`
+          for (const ele2 of resultFinal) {
+            const listPhang2 = ele2.lop.flat();
+
+            if (!(listPhang.some(item => listPhang2.includes(item))) && ele2.ngayThi !== '' && ele2.maHocPhan.length < (soMonChoMoiNgay + 1)) { //// LƯU Ý CHỖ NÀY LÀ 2 HAY 1
+              resultFinal[i].ngayThi = ele2.ngayThi;
+              break;
+            }
+          }
+
+        }
+      }
+      // ===============================
+
+      // ========   XỬ LÝ GIẢNG VÊN =======================
+      for (let i = 0; i < resultFinal.length; i++) {
+        // Nếu danh sách giảng viên đã cạn kiệt, hiển thị thông báo và dừng việc gán
+        if (danhSachGV.length === 0) {
+          toast.error("Không còn giảng viên để gán!");
+          return;
+        }
+
+        //Lấy ngẫu nhiên một giảng viên cho `cbo1`
+        const randomIndex1 = Math.floor(Math.random() * danhSachGV.length);
+        resultFinal[i].cbo1 = danhSachGV[randomIndex1].username;
+        // Xóa giảng viên đã được gán
+        danhSachGV.splice(randomIndex1, 1);
+
+        // Nếu danh sách giảng viên lại hết sau khi gán cho `cbo1`, hiển thị thông báo và dừng tiếp
+        if (danhSachGV.length === 0) {
+          toast.error("Không còn giảng viên để gán cho cbo2!");
+          return;
+        }
+
+        // Lấy ngẫu nhiên một giảng viên cho `cbo2`
+        const randomIndex2 = Math.floor(Math.random() * danhSachGV.length);
+        resultFinal[i].cbo2 = danhSachGV[randomIndex2].username;
+        // Xóa giảng viên đã được gán
+        danhSachGV.splice(randomIndex2, 1);
+      }
+      // ========================================================
+    }
+
+    setResultFinals(resultFinal)
+    setActiveTab("2");
+
+  }
+
+  // useEffect(() => {
+  //   console.log('Re222:', resultFinals)
+
+  // }, [resultFinals])
 
   return loading ? (
     <Loader />
@@ -912,15 +962,22 @@ const PcCoiThi = () => {
                     </div>
                   </div>
                 </div>
+                <Button
+                  className="button-chinh-quy-khac mt-1"
+                  type="primary"
+                  onClick={() => fetchDataHP()}
+                >
+                  {loading2 ? 'Đang xử lý...' : 'NEXT'}
+                  {!loading2 && <RightOutlined />}
+                </Button>
+
               </div>
-
-
 
               {/* Right Side with 3 Boxes */}
               <div className="space-y-3 flex-grow h-full">
                 <div className="p-4 bg-white shadow-md rounded-lg h-[32%] flex flex-col">
                   <h3 className="text-lg text-heading3-bold ">SỐ MÔN THI</h3>
-                  <p className="text-heading1-bold text-center text-blue-600 mt-auto mb-auto">{soMonThi}</p>
+                  <p className="text-heading1-bold text-center text-blue-600 mt-auto mb-auto">{soMonThi.length}</p>
                 </div>
 
                 <div className="p-4 bg-white shadow-md rounded-lg h-[32%] flex flex-col">
@@ -1018,11 +1075,11 @@ const PcCoiThi = () => {
 
               <div className="flex flex-col gap-3">
                 <div className=" flex items-center gap-2">
-                  <label className="block text-sm font-semibold mb-1">Ca:</label>
+                  <label className="block text-sm font-semibold mb-1">Địa điểm:</label>
                   <Checkbox.Group
                     options={[
-                      { label: "1", value: 1 },
-                      { label: "3", value: 3 },
+                      { label: "DHPY", value: 'DHPY' },
+                      { label: "Khác", value: 'KHAC' },
                     ]}
                     value={examSessions}
                     onChange={(checkedValues) => setExamSessions(checkedValues)}
@@ -1041,10 +1098,22 @@ const PcCoiThi = () => {
                       className="h-full text-center"
                       style={{ backgroundColor: '#f0f8ff' }} // Màu nền nhẹ
                     >
+                      <p className="text-heading3-bold text-center"> {result?.length}</p>
+
                       <ul className="list-decimal pl-5 text-left max-h-[300px] overflow-auto bg-[#f0f8ff]">
-                        {listHocPhanSelect?.map((hocPhan, index) => (
-                          <li key={hocPhan.tenHocPhan} className="flex justify-between items-center">
-                            <span>{index + 1}. {hocPhan.tenHocPhan} ({hocPhan.lop?.join(', ')})</span>
+                        {result?.map((hocPhan, index) => (
+                          <li key={hocPhan?.info?.maHocPhan} className="flex justify-between items-center">
+                            <span
+                              className="font-bold"
+                              onClick={() => {
+                                setSelectedHocPhan(hocPhan);  // Lưu học phần đã chọn
+                                setListSVToClass(hocPhan?.sinhVien);  // Nếu cần xử lý thêm
+                              }}
+                              style={{ cursor: 'pointer', color: selectedHocPhan === hocPhan ? 'blue' : 'inherit' }} // Thay đổi màu sắc khi chọn
+                            >
+                              {index + 1}. {hocPhan?.info?.tenHocPhan}
+                            </span>
+
                             <DeleteOutlined
                               className="text-red-500 cursor-pointer"
                               onClick={() => handleDeleteHocPhan(index)}
@@ -1060,63 +1129,34 @@ const PcCoiThi = () => {
                 </Col>
 
                 <Col span={5} className="h-[60%] overflow-y-auto">
-                  <div className="shadow-lg  text-center ">
+                  <div className="shadow-lg  text-center bg-white">
                     <Card
                       title={<span><UserOutlined /> Danh sách SV</span>}
                       bordered={false}
                       className="h-full text-center"
-                      style={{ backgroundColor: '#fafafa' }}
+                      style={{ backgroundColor: 'white' }}
                     >
-                      {dataSinhVien?.map((phong, index) => (
-                        <div key={phong[1]} className="flex justify-between items-center">
-                          <p className="text-base-bold">- {phong[2]}</p>
-                          <DeleteOutlined
+                      <p className="text-heading3-bold text-center"> {listSVToClass?.length}</p>
+                      {listSVToClass?.map((SV, index) => (
+                        <div key={SV.maSV} className="flex justify-between items-center ">
+                          <p className="text-base-bold">{index + 1}. {SV.hoTen}</p>
+                          {/* <DeleteOutlined
                             className="text-red-500 cursor-pointer"
                           //onClick={() => handleDeletePhong(index)}
-                          />
+                          /> */}
                         </div>
                       ))}
-
-                      <div className="flex gap-4 mt-3 flex-col items-center">
-                        {/* <Button className="button-lien-thong-vlvh text-white w-[50%] flex justify-center" onClick={() => { setOpen(true); setTitle('Chọn phòng') }}>Chọn Sinh viên</Button> */}
-                        <div className="">
-                          <Spin spinning={isUploading}>
-                            <label htmlFor="excelUpload">
-                              <Button
-                                className="button-chinh-quy-khac"
-                                type="primary"
-                                icon={<UploadOutlined />}
-                                onClick={() => fileInputRef.current.click()}
-                                disabled={isUploading}
-                              >
-                                {isUploading ? 'Đang tải lên...' : 'Import'}
-                              </Button>
-                            </label>
-                          </Spin>
-
-                          <div className="hidden">
-                            <input
-                              type="file"
-                              accept=".xlsx, .xls"
-                              onChange={importSinhVien}
-                              className="hidden"
-                              id="excelUpload"
-                              ref={fileInputRef}
-                            />
-                          </div>
-                        </div>
-                      </div>
 
                     </Card>
                   </div>
                 </Col>
-                <Col span={3} className="h-[55%] overflow-y-auto">
-                  <div className="shadow-lg text-center m">
+                <Col span={3} className="h-[55%] overflow-y-auto ">
+                  <div className="shadow-lg text-center bg-white">
                     <Card
                       title={<span><HomeOutlined /> PHÒNG THI</span>}
                       bordered={false}
                       className="h-full text-center"
-                      style={{ backgroundColor: '#f5f5f5' }} // Màu nền
+                      style={{ backgroundColor: 'white' }} // Màu nền
                     >
 
                       <ul className="list-decimal text-left max-h-[300px] overflow-auto bg-[#f5f5f5]">
@@ -1153,105 +1193,20 @@ const PcCoiThi = () => {
                           columns={columns}
                           dataSource={listGVSelect}
                           rowKey="_id"
-                          pagination={false} // Tắt phân trang trên Table
+                          pagination={false}
                         />
-                        {/* {listGVSelect.map((gv, index) => (
-                          <div
-                            key={`${gv.id}-${index}`}
-                            className="flex justify-between items-center p-2 border border-gray-300 rounded-lg"
-                            style={{ backgroundColor: getRandomColor() }} // Áp dụng màu ngẫu nhiên
-                          >
-                            <div className="flex items-center">
-                              <UserOutlined className="text-gray-500 mr-2" style={{ fontSize: '24px' }} />
-                              <span className="text-base-bold text-white">{gv.username}</span>
-                            </div>
-                            <DeleteOutlined
-                              className="text-red-500 cursor-pointer ml-2"
-                              onClick={() => handleDeleteGV(index)}
-                            />
-                          </div>
-                        ))} */}
                       </div>
                     </Card>
-
-                  </div>
-                  <div className="flex gap-4 mt-3 justify-center">
                     <Button className="button-boi-duong text-white" onClick={() => { setOpen(true); setTitle('Chọn cán bộ') }}>Chọn cán bộ</Button>
-                    <div className="">
-                      <Spin spinning={isUploading}>
-                        <label htmlFor="excelUpload">
-                          <Button
-                            className="button-chinh-quy-khac"
-                            type="primary"
-                            icon={<UploadOutlined />}
-                            onClick={() => fileInputRef.current.click()}
-                            disabled={isUploading}
-                          >
-                            {isUploading ? 'Đang tải lên...' : 'Import'}
-                          </Button>
-                        </label>
-                      </Spin>
-
-                      <div className="hidden">
-                        <input
-                          type="file"
-                          accept=".xlsx, .xls"
-                          onChange={importGV}
-                          className="hidden"
-                          id="excelUpload"
-                          ref={fileInputRef}
-                        />
-                      </div>
-                    </div>
                   </div>
+
                 </Col>
               </Row>
             </div >
-            <div className="bg-white text-center rounded-md p-0">
-              <Button type="primary" className="button-chinh-quy" onClick={handleCreate}>Tạo lịch thi</Button>
+
+            <div className=" text-center rounded-md p-0">
+              <Button type="primary" className="button-chinh-quy" onClick={phanBoSinhVien}>Tạo lịch thi</Button>
             </div>
-
-            {title === 'Chọn học phần' && (
-              <Modal
-                title={title}
-                open={open}
-                confirmLoading={confirmLoading}
-                onCancel={handleCancel}
-                onOk={() => setOpen(false)}
-                width={1500}
-                centered
-                styles={{ height: '600px', overflowY: 'auto' }}
-              >
-                <div className="text-center">
-                  <Input.Search
-                    className="w-[30%] text-center"
-                    placeholder="Tìm kiếm học phần ..."
-                    onSearch={(value) => setListHocPhan(filteredListHocPhan.filter((phong) =>
-                      phong.tenHocPhan.toLowerCase().includes(value.toLowerCase())
-                    ))}
-                    onChange={(e) => setSearchHocPhan(e.target.value)}
-                    style={{ marginBottom: '16px' }}
-                  />
-                </div>
-
-                <Checkbox onChange={onCheckAllChange} >
-                  Chọn tất cả
-                </Checkbox>
-
-                <ul className="list-decimal pl-5 text-left">
-                  {filteredListHocPhan.map((hocPhan) => (
-                    <li key={hocPhan.tenHocPhan}>
-                      <Checkbox
-                        onChange={(e) => handleSelectHocPhan(e.target.checked, hocPhan)}
-                        checked={listHocPhanSelect?.includes(hocPhan)}
-                      >
-                        {hocPhan.tenHocPhan} ({hocPhan.lop?.join(', ')})
-                      </Checkbox>
-                    </li>
-                  ))}
-                </ul>
-              </Modal>
-            )}
 
             {title === 'Chọn phòng' && (
               <Modal
@@ -1377,7 +1332,7 @@ const PcCoiThi = () => {
                         onChange={(e) => handleSelectGV(e.target.checked, gv)}
                         checked={listGVSelect.includes(gv)}
                       >
-                        <UserOutlined className="text-gray-500 mr-2" style={{ fontSize: '24px', color: getRandomColor() }} />
+                        <UserOutlined className="text-gray-500 mr-2" style={{ fontSize: '24px' }} />
                         <span className="text-base-bold">{gv.username}</span>
                       </Checkbox>
                     </div>
@@ -1390,25 +1345,15 @@ const PcCoiThi = () => {
 
           <TabPane tab="Kết quả" key="2">
             <TablePcCoiThi
-              list={list.sort((a, b) => {
-                const [dayA, monthA, yearA] = a.ngayThi.split("/").map(Number);
-                const [dayB, monthB, yearB] = b.ngayThi.split("/").map(Number);
-
-                const dateA = new Date(yearA, monthA - 1, dayA);
-                const dateB = new Date(yearB, monthB - 1, dayB);
-
-                return dateA - dateB;
-              })}
+              list={resultFinals}
               namHoc={namHoc}
               loaiKyThi={loaiKyThi}
               loaiDaoTao={loaiDaoTao}
               hocKy={hocKy}
-
+              listNgayThi={getValidDates()}
+              listPhong={listPhongFilter?.flat()}
             />
           </TabPane>'
-
-
-
         </Tabs>
 
       </div >
@@ -1419,3 +1364,11 @@ const PcCoiThi = () => {
 };
 
 export default PcCoiThi;
+
+
+
+
+
+
+
+// Xử lý lưu kết quả model

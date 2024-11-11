@@ -51,10 +51,30 @@ export const POST = async (req) => {
 
     // Lấy dữ liệu từ request
     const data = await req.json();
-    console.log('da',data)
+    console.log('da', data);
+
+    // Chuyển các trường có dấu phẩy thành mảng
+    const transformedData = {
+      hocPhan: data.hocPhan.split(',').map(item => item.trim()),
+      lop: data.lop.split(',').map(item => item.trim()),
+      ngayThi: data.ngayThi,
+      ca: data.ca || 0,
+      cbo1: data.cbo1 || '',
+      cbo2: data.cbo2 || '',
+      thoiGian: data.thoiGian.split(',').map(item => item.trim()),
+      phong: data.phong.split(',').map(item => item.trim()),
+      diaDiem: data.diaDiem || '',
+      ghiChu: data.ghiChu || '',
+      namHoc: data.namHoc,
+      loaiKyThi: data.loaiKyThi,
+      hocKy: data.hocKy,
+      hinhThuc: data.hinhThuc.split(',').map(item => item.trim()),
+      tc: data.tc.split(',').map(item => item.trim()),
+      loai: data.loai || ""
+    };
 
     // Kiểm tra xem dữ liệu có hợp lệ không
-    const { hocPhan, lop, ngayThi, namHoc, loaiKyThi } = data;
+    const { hocPhan, lop, ngayThi, namHoc, loaiKyThi } = transformedData;
     if (!hocPhan || !lop || !ngayThi || !namHoc || !loaiKyThi) {
       return new Response(JSON.stringify({ message: "Dữ liệu không hợp lệ, vui lòng điền đầy đủ các trường bắt buộc." }), { status: 400 });
     }
@@ -62,22 +82,21 @@ export const POST = async (req) => {
     // Tạo một bản ghi mới cho Phân Công Giảng Dạy
     const newAssignment = new PcCoiThi({
       hocPhan,
-      lop: data.lop,
-      // hocPhan: Array.isArray(hocPhan) ? hocPhan : [hocPhan],
-      // lop: Array.isArray(lop) ? lop : [lop],
+      lop,
       ngayThi,
-      ca: data.ca || 0,
-      cbo1: data.cbo1 || '',
-      cbo2: data.cbo2 || '',
-      thoiGian: data.thoiGian,
-      diaDiem: data.diaDiem || '',
-      ghiChu: data.ghiChu || '',
-      phong:data.phong,
+      ca: transformedData.ca,
+      cbo1: transformedData.cbo1,
+      cbo2: transformedData.cbo2,
+      thoiGian: transformedData.thoiGian,
+      phong: transformedData.phong,
+      diaDiem: transformedData.diaDiem,
+      ghiChu: transformedData.ghiChu,
       namHoc,
-      loaiKyThi:data.loaiKyThi,
-      loaiDaoTao: data.loai || "",
-      hinhThuc: data.hinhThuc,
-      ky: data.hocKy
+      loaiKyThi: transformedData.loaiKyThi,
+      loaiDaoTao: transformedData.loai,
+      hinhThuc: transformedData.hinhThuc,
+      ky: transformedData.hocKy,
+      tc: transformedData.tc
     });
 
     // Lưu bản ghi mới vào database
@@ -91,6 +110,7 @@ export const POST = async (req) => {
     return new Response(JSON.stringify({ message: `Lỗi: ${err.message}` }), { status: 500 });
   }
 };
+
 
 export const PUT = async (req) => {
   try {

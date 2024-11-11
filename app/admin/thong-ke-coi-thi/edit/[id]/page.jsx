@@ -8,6 +8,7 @@ import { useSession } from "next-auth/react";
 import { ArrowLeftOutlined } from "@ant-design/icons";
 import { useRouter, useParams } from "next/navigation";
 import dayjs from 'dayjs'; // Import dayjs for date handling
+import { Road_Rage } from "next/font/google";
 
 const { Option } = Select;
 
@@ -19,6 +20,7 @@ const formSchema = {
   cbo1: '',
   cbo2: "",
   thoiGian: [],
+  hinhThuc: [],
   phong: '',
   diaDiem: '',
   ghiChu: "",
@@ -48,30 +50,26 @@ const PcCoiThiForm = () => {
           const res = await fetch(`/api/admin/pc-coi-thi/edit?id=${id}`);
           if (res.ok) {
             const data = await res.json();
-            console.log("Ngày thi trước khi format:", data.ngayThi);
-  
-            // Kiểm tra và xử lý định dạng ngày
-            let formattedNgayThi = dayjs(data.ngayThi, 'DD/MM/YYYY', true);
-  
-            // Nếu không đúng định dạng, thử lại với một định dạng khác
-            if (!formattedNgayThi.isValid()) {
-              formattedNgayThi = dayjs(data.ngayThi, 'YYYY-MM-DD', true); // Ví dụ định dạng khác
-            }
-  
+
+            // Trong phần xử lý ngày tháng
+            let formattedNgayThi = dayjs(data.ngayThi, 'DD-MM-YYYY', true); // Định dạng 'DD-MM-YYYY'
+
+            // Nếu ngày thi hợp lệ, tiếp tục format lại thành định dạng bạn muốn
             if (formattedNgayThi.isValid()) {
               const dataFormat = {
-                ...data, 
-                ngayThi: formattedNgayThi.format('DD/MM/YYYY'),
-                hocKy: data.ky
+                ...data,
+                ngayThi: formattedNgayThi.format('DD/MM/YYYY'), // Chuyển đổi sang 'DD/MM/YYYY' hoặc định dạng cần thiết
+                hocKy: data.ky,
+                lop: data?.lop?.map(lop => Array.isArray(lop) ? lop.join(', ') : lop).join(' - ')
               };
-  
+
               setEditRecord(dataFormat);
               setLoai(dataFormat?.loaiDaoTao);
-              console.log("Data đã format:", dataFormat);
               reset(dataFormat);
             } else {
               toast.error("Ngày thi không hợp lệ!");
             }
+
           } else {
             toast.error("Không thể tải dữ liệu!");
           }
@@ -81,27 +79,32 @@ const PcCoiThiForm = () => {
           toast.error("Có lỗi xảy ra khi tải dữ liệu!");
         }
       };
-  
+
       fetchRecord();
     }
   }, [id, reset]);
-  
-  
+
+
 
 
   const onSubmit = async (data) => {
-    // Chuyển đổi chuỗi nhập vào thành mảng
+    let formattedNgayThi = data.ngayThi;
+
+    // Kiểm tra nếu ngày thi không phải là NaN và định dạng lại ngày tháng
+    if (data.ngayThi) {
+      const formattedDate = dayjs(data.ngayThi, 'DD/MM/YYYY').format('DD-MM-YYYY');
+      formattedNgayThi = formattedDate;
+    }
+
+    // Tạo đối tượng dữ liệu mới với ngày đã được định dạng
     const transformedData = {
       ...data,
-      // hocPhan: typeof data.hocPhan === 'string' ? data.hocPhan.split(',').map(item => item.trim()) : data.hocPhan,
-      // lop: typeof data.lop === 'string' ? data.lop.split(',').map(item => item.trim()) : data.lop,
-      //thoiGian: typeof data.thoiGian === 'string' ? data.thoiGian.split(',').map(item => parseInt(item.trim(), 10)) : data.thoiGian
+      ngayThi: formattedNgayThi,
     };
 
     // Tiếp tục logic gửi dữ liệu
     try {
       const url = `/api/admin/pc-coi-thi`;
-
       const res = await fetch(url, {
         method: "PUT",
         body: JSON.stringify({ ...transformedData, id: id, loai }),
@@ -110,7 +113,7 @@ const PcCoiThiForm = () => {
 
       if (res.ok) {
         toast.success("Cập nhật thành công!");
-        //router.push("/admin/pc-coi-thi");
+        // router.push("/admin/pc-coi-thi");
       } else {
         toast.error("Cập nhật thất bại!");
       }
@@ -118,6 +121,8 @@ const PcCoiThiForm = () => {
       toast.error("Có lỗi xảy ra!");
     }
   };
+
+
 
   const resetForm = () => {
     reset(formSchema);
@@ -181,9 +186,10 @@ const PcCoiThiForm = () => {
                   <DatePicker
                     {...field}
                     format="DD/MM/YYYY"
-                    onChange={(date, dateString) => field.onChange(dateString)}
-                    value={field.value ? dayjs(field.value, 'DD/MM/YYYY') : null}
+                    onChange={(date, dateString) => field.onChange(dateString)} // Truyền lại chuỗi ngày đã chọn
+                    value={field.value ? dayjs(field.value, 'DD/MM/YYYY') : null} // Chuyển chuỗi ngày thành đối tượng dayjs
                   />
+
                 )}
               />
             </Form.Item>
@@ -222,6 +228,47 @@ const PcCoiThiForm = () => {
           </Col>
         </Row>
         <Row gutter={16}>
+          <Col span={6}>
+            <Form.Item label="Hình thức thi" validateStatus={errors.hinhThuc ? 'error' : ''} help={errors.hinhThuc?.message}>
+              <Controller
+                name="hinhThuc"
+                control={control}
+                rules={{ required: "Vui lòng nhập Hình thức thi" }}
+                render={({ field }) => <Input placeholder="Nhập Hình thức thi, cách nhau bởi dấu phẩy" {...field} />}
+              />
+            </Form.Item>
+          </Col>
+          <Col span={4}>
+            <Form.Item label="Tín chỉ" validateStatus={errors.tc ? 'error' : ''} help={errors.tc?.message}>
+              <Controller
+                name="tc"
+                control={control}
+                rules={{ required: "Vui lòng nhập Số tín chỉ" }}
+                render={({ field }) => <InputNumber placeholder="Số tín chỉ .." {...field} />}
+              />
+            </Form.Item>
+          </Col>
+          <Col span={6}>
+            <Form.Item label="Địa điểm thi" validateStatus={errors.diaDiem ? 'error' : ''} help={errors.diaDiem?.message}>
+              <Controller
+                name="diaDiem"
+                control={control}
+                rules={{ required: "Vui lòng nhập địa điểm thi" }}
+                render={({ field }) => <Input placeholder="Nhập địa điểm thi..." {...field} />}
+              />
+            </Form.Item>
+          </Col>
+          <Col span={8}>
+            <Form.Item label="Ghi chú" validateStatus={errors.ghiChu ? 'error' : ''} help={errors.ghiChu?.message}>
+              <Controller
+                name="ghiChu"
+                control={control}
+                render={({ field }) => <Input.TextArea placeholder="Nhập ghi chú..." {...field} />}
+              />
+            </Form.Item>
+          </Col>
+        </Row>
+        <Row gutter={16}>
           <Col span={12}>
             <Form.Item label="Cán bộ coi thi 1" validateStatus={errors.cbo1 ? 'error' : ''} help={errors.cbo1?.message}>
               <Controller
@@ -247,27 +294,7 @@ const PcCoiThiForm = () => {
 
 
         </Row>
-        <Row gutter={16}>
-          <Col span={12}>
-            <Form.Item label="Địa điểm thi" validateStatus={errors.diaDiem ? 'error' : ''} help={errors.diaDiem?.message}>
-              <Controller
-                name="diaDiem"
-                control={control}
-                rules={{ required: "Vui lòng nhập địa điểm thi" }}
-                render={({ field }) => <Input placeholder="Nhập địa điểm thi..." {...field} />}
-              />
-            </Form.Item>
-          </Col>
-          <Col span={12}>
-            <Form.Item label="Ghi chú" validateStatus={errors.ghiChu ? 'error' : ''} help={errors.ghiChu?.message}>
-              <Controller
-                name="ghiChu"
-                control={control}
-                render={({ field }) => <Input.TextArea placeholder="Nhập ghi chú..." {...field} />}
-              />
-            </Form.Item>
-          </Col>
-        </Row>
+
         <Row gutter={16}>
           <Col span={8}>
             <Form.Item label="Năm học" validateStatus={errors.namHoc ? 'error' : ''} help={errors.namHoc?.message}>
@@ -289,6 +316,7 @@ const PcCoiThiForm = () => {
                   <Select placeholder="Chọn học kỳ..." {...field}>
                     <Option value="1">1</Option>
                     <Option value="2">2</Option>
+                    <Option value="he">3</Option>
                   </Select>
                 )}
               />
@@ -302,9 +330,13 @@ const PcCoiThiForm = () => {
                 rules={{ required: "Vui lòng chọn loại kỳ thi" }}
                 render={({ field }) => (
                   <Select placeholder="Chọn loại kỳ thi..." {...field}>
-                    <Option value="Chính thức">Chính thức</Option>
-                    <Option value="Phụ">Phụ</Option>
-                    <Option value="Hè">Hè</Option>
+                    <Option value="1">Chính thức</Option>
+                    <Option value="2">Đợt 2</Option>
+                    <Option value="3">Đợt 3</Option>
+                    <Option value="4">Đợt 4</Option>
+                    <Option value="5">Đợt 5</Option>
+                    <Option value="6">Đợt 6</Option>
+                    <Option value="7">Đợt 7</Option>
                   </Select>
                 )}
               />

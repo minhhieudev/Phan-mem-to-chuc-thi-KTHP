@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useForm, Controller } from "react-hook-form";
-import { Button, Input, Form, Space, Typography, Table, Popconfirm, InputNumber, Select } from "antd";
+import { Button, Input, Form, Space, Typography, Table, Popconfirm, InputNumber, Select, Pagination } from "antd";
 import toast from "react-hot-toast";
 import Loader from "../../../components/Loader";
 import { SearchOutlined } from '@ant-design/icons';
@@ -24,11 +24,19 @@ const PhongThiForm = () => {
         defaultValues: formSchema,
     });
     const [current, setCurrent] = useState(1);
-    const [pageSize] = useState(5);
-    const [searchName, setSearchName] = useState(""); 
+    const [searchName, setSearchName] = useState("");
     const [roomTypeFilter, setRoomTypeFilter] = useState("");
     const [roomTypeFilter2, setRoomTypeFilter2] = useState("");
+    const [roomTypeFilter3, setRoomTypeFilter3] = useState("");
     const [loading, setLoading] = useState(true);
+
+    const [pageSize, setPageSize] = useState(10);
+
+    // Phân trang dữ liệu
+    const paginatedData = filteredList.slice(
+        (current - 1) * pageSize,
+        current * pageSize
+    );
 
     useEffect(() => {
         fetchData();
@@ -60,8 +68,12 @@ const PhongThiForm = () => {
             filteredData = filteredData.filter(phong => phong.loai === roomTypeFilter2);
         }
 
+        if (roomTypeFilter3) {
+            filteredData = filteredData.filter(phong => phong.tinhTrang == roomTypeFilter3);
+        }
+
         setFilteredList(filteredData);
-    }, [searchName, roomTypeFilter, roomTypeFilter2, dataList]);
+    }, [searchName, roomTypeFilter, roomTypeFilter2, roomTypeFilter3, dataList]);
 
     const fetchData = async () => {
         try {
@@ -277,6 +289,8 @@ const PhongThiForm = () => {
                         />
 
                         <Select
+                            allowClear
+
                             placeholder="Chọn tên phòng"
                             onChange={(value) => setRoomTypeFilter(value)}
                             style={{ width: 200 }}
@@ -288,6 +302,8 @@ const PhongThiForm = () => {
                         </Select>
 
                         <Select
+                            allowClear
+
                             placeholder="Chọn loại phòng"
                             onChange={(value) => setRoomTypeFilter2(value)}
                             style={{ width: 200 }}
@@ -297,19 +313,50 @@ const PhongThiForm = () => {
                             <Select.Option value="Phòng máy">Phòng máy</Select.Option>
                             <Select.Option value="Phòng GDTC">Phòng GDTC</Select.Option>
                         </Select>
+
+                        <Select
+                            allowClear
+                            placeholder="Trạng thái"
+                            onChange={(value) => setRoomTypeFilter3(value)}
+                            style={{ width: 200 }}
+                        >
+                            <Select.Option value="">Tất cả</Select.Option>
+                            <Select.Option value="1">1</Select.Option>
+                            <Select.Option value="0">0</Select.Option>
+                        </Select>
                     </div>
                 </div>
 
                 {loading ? (
                     <Loader />
                 ) : (
-                    <Table
-                        columns={columns}
-                        dataSource={filteredList}
-                        pagination={{ current, pageSize, total: filteredList.length, onChange: page => setCurrent(page) }}
-                        rowKey="_id"
-                    />
+
+                    <div>
+                        <div className="flex-grow overflow-auto" style={{ maxHeight: 'calc(85vh - 120px)' }}>
+                            <Table
+                                dataSource={paginatedData}
+                                columns={columns}
+                                rowKey="_id"
+                                pagination={false}
+                            />
+                        </div>
+                        <Pagination
+                            current={current}
+                            pageSize={pageSize}
+                            total={filteredList.length}
+                            onChange={(page, size) => {
+                                setCurrent(page);
+                                setPageSize(size);
+                            }}
+                            pageSizeOptions={['10', '25', '50', '100', '200']}
+                            showSizeChanger
+                            className="flex justify-end"
+                        />
+                    </div>
                 )}
+
+
+
             </div>
         </div>
     );

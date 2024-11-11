@@ -24,8 +24,6 @@ export const POST = async (req) => {
             soTinChi: hp[2],
             hinhThuc: hp[3],
             thoiGian: hp[4],
-            giangVien: hp[5],
-            thiT7CN: hp[6] || 0
            
           },
           { new: true, upsert: true } 

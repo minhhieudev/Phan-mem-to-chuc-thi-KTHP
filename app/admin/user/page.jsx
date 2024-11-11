@@ -44,7 +44,7 @@ const UserForm = () => {
         (current - 1) * pageSize,
         current * pageSize
     );
-    
+
     useEffect(() => {
         fetchData();
         getListKhoa()
@@ -247,7 +247,7 @@ const UserForm = () => {
             key: 'action',
             render: (_, record) => (
                 <Space size="small">
-                    <Button size="small"  onClick={() => handleEdit(record)} type="primary">Sửa</Button>
+                    <Button size="small" onClick={() => handleEdit(record)} type="primary">Sửa</Button>
                     <Popconfirm
                         title="Bạn có chắc chắn muốn xoá?"
                         onConfirm={() => handleDelete(record._id)}
@@ -258,7 +258,7 @@ const UserForm = () => {
                     </Popconfirm>
                 </Space>
             ),
-            width:20
+            width: 20
         },
     ];
 

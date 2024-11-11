@@ -48,6 +48,7 @@ export const POST = async (req) => {
     const processedItems = await Promise.all(
       list.map(async (item) => {
         const {
+          _id,
           ca,
           cbo1,
           cbo2,
@@ -60,27 +61,46 @@ export const POST = async (req) => {
           hinhThuc,
           thoiGian,
           loaiDaoTao,
-          hocKy
+          hocKy,
+          maHocPhan,
+          tc,
+          diaDiem,
+          soLuong,
+          danhSachThiSinh
         } = item;
+
+        // Làm phẳng danh sách thí sinh nếu tồn tại
+        const flatDanhSachThiSinh = danhSachThiSinh ? danhSachThiSinh.flat() : [];
+
+        // Trích xuất mảng tenPhong từ phong
+        const flatPhong = phong ? phong.map(p => p.tenPhong).flat() : [];
 
         // Tìm và cập nhật nếu tồn tại, nếu không thì tạo mới
         const updatedItem = await PcCoiThi.findOneAndUpdate(
-          { namHoc, loaiKyThi, ngayThi, phong, hocPhan, lop, ky:hocKy },
+          { id: _id },
           {
             $set: {
+              maHocPhan,
+              hocPhan,
               ca,
               cbo1,
               cbo2,
-              phong,
+              phong: flatPhong, // Lưu mảng chỉ chứa tenPhong
               ngayThi,
               loaiDaoTao,
               hinhThuc,
               thoiGian,
-              lop
-
+              lop,
+              namHoc,
+              loaiKyThi,
+              ky: hocKy,
+              tc,
+              diaDiem,
+              soLuong,
+              danhSachThiSinh: flatDanhSachThiSinh // Sử dụng danh sách đã được làm phẳng
             }
           },
-          { new: true, upsert: true } 
+          { new: true, upsert: true }
         );
 
         return updatedItem;
@@ -88,13 +108,14 @@ export const POST = async (req) => {
     );
 
     // Trả về danh sách đã xử lý
-    return new Response(JSON.stringify(processedItems), { status: 201 });
+    return new Response(JSON.stringify({}), { status: 201 });
 
   } catch (err) {
     console.error("Lỗi khi xử lý yêu cầu:", err);
     return new Response(JSON.stringify({ message: "Failed to process" }), { status: 500 });
   }
 };
+
 
 export const PUT = async (req) => {
   try {

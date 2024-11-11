@@ -12,10 +12,11 @@ import dayjs from 'dayjs'; // Import dayjs for date handling
 const { Option } = Select;
 
 const formSchema = {
-  hocPhan: [],
+  hocPhan: '',
   //lop: [],
   lop: '',
   ngayThi: '',
+  tc: '',
   ca: 0,
   cbo1: '',
   cbo2: "",
@@ -42,15 +43,19 @@ const PcCoiThiForm = () => {
   const [loai, setLoai] = useState('Chính quy');
 
   const onSubmit = async (data) => {
-    // Chuyển đổi chuỗi nhập vào thành mảng
+
+    let formattedNgayThi = data.ngayThi;
+
+    if (data.ngayThi) {
+      const formattedDate = dayjs(data.ngayThi, 'DD/MM/YYYY').format('DD-MM-YYYY');
+      formattedNgayThi = formattedDate;
+    }
+
     const transformedData = {
       ...data,
-      // hocPhan: typeof data.hocPhan === 'string' ? data.hocPhan.split(',').map(item => item.trim()) : data.hocPhan,
-      // lop: typeof data.lop === 'string' ? data.lop.split(',').map(item => item.trim()) : data.lop,
-      //thoiGian: typeof data.thoiGian === 'string' ? data.thoiGian.split(',').map(item => parseInt(item.trim(), 10)) : data.thoiGian
+      ngayThi: formattedNgayThi,
     };
 
-    // Tiếp tục logic gửi dữ liệu
     try {
       const url = `/api/admin/pc-coi-thi`;
 
@@ -133,8 +138,8 @@ const PcCoiThiForm = () => {
                   <DatePicker
                     {...field}
                     format="DD/MM/YYYY"
-                    onChange={(date, dateString) => field.onChange(dateString)}
-                    value={field.value ? dayjs(field.value, 'DD/MM/YYYY') : null}
+                    onChange={(date, dateString) => field.onChange(dateString)} // Truyền lại chuỗi ngày đã chọn
+                    value={field.value ? dayjs(field.value, 'DD/MM/YYYY') : null} // Chuyển chuỗi ngày thành đối tượng dayjs
                   />
                 )}
               />
@@ -177,7 +182,7 @@ const PcCoiThiForm = () => {
 
 
         <Row gutter={16}>
-          <Col span={8}>
+          <Col span={6}>
             <Form.Item label="Hình thức" validateStatus={errors.thoiGian ? 'error' : ''} help={errors.hinhThuc?.message}>
               <Controller
                 name="hinhThuc"
@@ -187,7 +192,17 @@ const PcCoiThiForm = () => {
               />
             </Form.Item>
           </Col>
-          <Col span={8}>
+          <Col span={6}>
+            <Form.Item label="Tín chỉ" validateStatus={errors.tc ? 'error' : ''} help={errors.tc?.message}>
+              <Controller
+                name="tc"
+                control={control}
+                rules={{ required: "Vui lòng nhập Tín chỉ" }}
+                render={({ field }) => <Input placeholder="Nhập Tín chỉ, cách nhau bởi dấu phẩy" {...field} />}
+              />
+            </Form.Item>
+          </Col>
+          <Col span={6}>
             <Form.Item label="Địa điểm thi" validateStatus={errors.diaDiem ? 'error' : ''} help={errors.diaDiem?.message}>
               <Controller
                 name="diaDiem"
@@ -197,7 +212,7 @@ const PcCoiThiForm = () => {
               />
             </Form.Item>
           </Col>
-          <Col span={8}>
+          <Col span={6}>
             <Form.Item label="Ghi chú" validateStatus={errors.ghiChu ? 'error' : ''} help={errors.ghiChu?.message}>
               <Controller
                 name="ghiChu"
@@ -258,6 +273,7 @@ const PcCoiThiForm = () => {
                   <Select placeholder="Chọn học kỳ..." {...field}>
                     <Option value="1">1</Option>
                     <Option value="2">2</Option>
+                    <Option value="he">Hè</Option>
                   </Select>
                 )}
               />
@@ -271,16 +287,13 @@ const PcCoiThiForm = () => {
                 rules={{ required: "Vui lòng chọn loại kỳ thi" }}
                 render={({ field }) => (
                   <Select placeholder="Chọn loại kỳ thi..." {...field}>
-                    <Option value="Học kỳ 1">Học kỳ 1</Option>
-                    <Option value="Học kỳ 1 (đợt 2)">Học kỳ 1 (đợt 2)</Option>
-                    <Option value="Học kỳ 1 (đợt 3)">Học kỳ 1 (đợt 3)</Option>
-                    <Option value="Học kỳ 2">Học kỳ 2</Option>
-                    <Option value="Học kỳ 2 (đợt 2)">Học kỳ 2 (đợt 2)</Option>
-                    <Option value="Học kỳ 2 (đợt 3)">Học kỳ 2 (đợt 3)</Option>
-                    <Option value="Kỳ thi phụ (đợt 1)">Kỳ thi phụ (đợt 1)</Option>
-                    <Option value="Kỳ thi phụ (đợt 2)">Kỳ thi phụ (đợt 2)</Option>
-                    <Option value="Kỳ thi phụ (đợt 3)">Kỳ thi phụ (đợt 3)</Option>
-                    <Option value="Học kỳ hè">Học kỳ hè</Option>
+                    <Option value="1">Chính thức</Option>
+                    <Option value="2">Đợt 2</Option>
+                    <Option value="3">Đợt 3</Option>
+                    <Option value="4">Đợt 4</Option>
+                    <Option value="5">Đợt 5</Option>
+                    <Option value="6">Đợt 6</Option>
+                    <Option value="7">Đợt 7</Option>
                   </Select>
                 )}
               />

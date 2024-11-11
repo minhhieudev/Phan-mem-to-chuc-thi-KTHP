@@ -21,7 +21,7 @@ export const GET = async (req, res) => {
 export const POST = async (req, res) => {
   try {
     await connectToDB();
-    const { tenHocPhan, soTinChi, maHocPhan, hinhThuc, thoiGian, giangVien, thiT7CN } = await req.json();
+    const { tenHocPhan, soTinChi, maHocPhan, hinhThuc, thoiGian } = await req.json();
 
     // Kiểm tra nếu học phần với maHocPhan đã tồn tại, nếu có thì cập nhật, nếu không thì tạo mới
     let existingHocPhanThi = await HocPhanThiModel.findOne({ maHocPhan });
@@ -31,8 +31,6 @@ export const POST = async (req, res) => {
       existingHocPhanThi.soTinChi = soTinChi;
       existingHocPhanThi.hinhThuc = hinhThuc;
       existingHocPhanThi.thoiGian = thoiGian;
-      existingHocPhanThi.giangVien = giangVien;
-      existingHocPhanThi.thiT7CN = thiT7CN;
 
       await existingHocPhanThi.save();
 
@@ -44,8 +42,7 @@ export const POST = async (req, res) => {
         maHocPhan,
         hinhThuc,
         thoiGian,
-        giangVien,
-        thiT7CN,
+       
       });
 
       await newHocPhanThi.save();
@@ -75,8 +72,6 @@ export const PUT = async (req, res) => {
 
     hocPhanThiToUpdate.hinhThuc = hinhThuc;
     hocPhanThiToUpdate.thoiGian = thoiGian;
-    hocPhanThiToUpdate.giangVien = giangVien;
-    hocPhanThiToUpdate.thiT7CN = thiT7CN;
 
     await hocPhanThiToUpdate.save();
 

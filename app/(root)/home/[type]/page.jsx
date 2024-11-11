@@ -231,7 +231,7 @@ const Pages = () => {
                   {sortedGroupedData.today.map((exam, index) => (
                     <Card
                       key={index}
-                      title={exam.hocPhan.toUpperCase()}
+                      title={exam.hocPhan.join(', ').toUpperCase()}  // Join the array into a string and convert to uppercase
                       className="rounded-lg shadow-lg overflow-hidden w-full md:w-60"
                       style={{
                         backgroundColor: getCardColor(exam.ngayThi),
@@ -239,7 +239,7 @@ const Pages = () => {
                         transition: "transform 0.3s ease",
                       }}
                       hoverable
-                      onClick={() => alert(`Bạn đã chọn môn: ${exam.hocPhan}`)}
+                      onClick={() => alert(`Bạn đã chọn môn: ${exam.hocPhan.join(', ')}`)}  // Join array for alert
                     >
                       <div className="p-4">
                         <p className="text-black mb-1 text-lg font-bold">
@@ -259,6 +259,8 @@ const Pages = () => {
                         </p>
                       </div>
                     </Card>
+
+
                   ))}
                 </div>
               </div>
@@ -271,7 +273,7 @@ const Pages = () => {
                   {sortedGroupedData.upcoming.map((exam, index) => (
                     <Card
                       key={index}
-                      title={exam.hocPhan.toUpperCase()}
+                      title={exam.hocPhan.join(', ').toUpperCase()}
                       className="rounded-lg shadow-lg overflow-hidden w-full md:w-60"
                       style={{
                         backgroundColor: getCardColor(exam.ngayThi),
