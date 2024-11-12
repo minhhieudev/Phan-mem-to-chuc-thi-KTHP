@@ -8,7 +8,9 @@ import { useSession } from "next-auth/react";
 import { exportLichThi } from '../fileExport'
 
 const TablePcCoiThi = ({ list, namHoc, loaiKyThi, loaiDaoTao, hocKy, listPhong, listNgayThi }) => {
-  const [data, setData] = useState(list);
+  const [data2, setData2] = useState(list);
+
+  const [data, setData] = useState([]);
   const [editingKey, setEditingKey] = useState("");
   const [editingRow, setEditingRow] = useState({});
   const [current, setCurrent] = useState(1);
@@ -35,6 +37,13 @@ const TablePcCoiThi = ({ list, namHoc, loaiKyThi, loaiDaoTao, hocKy, listPhong, 
     setEditingKey(record._id);
     setEditingRow({ ...record });
   };
+
+  const save = () => {
+    const updatedData = data2.map((item) => (item._id === editingKey ? editingRow : item));
+    setData(updatedData);
+    setEditingKey("");
+    toast.success("Thay đổi thành công!");
+  }
 
   const showModal = (danhSachThiSinh) => {
     const flattenedDanhSach = danhSachThiSinh.flat();
@@ -64,13 +73,14 @@ const TablePcCoiThi = ({ list, namHoc, loaiKyThi, loaiDaoTao, hocKy, listPhong, 
   };
 
   const handleDelete = (recordId) => {
-    const newData = data.filter((item) => item._id !== recordId);
-    setData(newData);
+    const newData = data2.filter((item) => item._id !== recordId);
+    setData2(newData);
     toast.success("Đã xoá thành công!");
   };
 
   const onSearch = () => {
-    let filteredData = list;
+    setData([]);
+    let filteredData = data2;
 
     if (searchText) {
       filteredData = filteredData.filter((item) =>
@@ -105,9 +115,32 @@ const TablePcCoiThi = ({ list, namHoc, loaiKyThi, loaiDaoTao, hocKy, listPhong, 
   };
 
   useEffect(() => {
+
+    setData2((prevData2) => {
+      // Sử dụng bản sao của `prevData2` để cập nhật
+      const updatedData2 = [...prevData2];
+
+      // Duyệt qua từng phần tử trong `filteredData`
+      data.forEach((item) => {
+        const index = updatedData2.findIndex((oldItem) => oldItem._id === item._id);
+        if (index !== -1) {
+          // Nếu phần tử đã có trong `data2`, cập nhật phần tử đó
+          updatedData2[index] = item;
+        } else {
+          // Nếu phần tử chưa có trong `data2`, thêm vào `data2`
+          updatedData2.push(item);
+        }
+      });
+
+      return updatedData2;
+    });
+
+  }, [data]);
+
+  useEffect(() => {
     onSearch(); // gọi lại hàm lọc khi bất kỳ bộ lọc nào thay đổi
   }, [searchText, ngayThiFilter, caThiFilter, phongThiFilter, giangVienFilter]);
-  
+
 
 
   const columns = [
@@ -122,15 +155,15 @@ const TablePcCoiThi = ({ list, namHoc, loaiKyThi, loaiDaoTao, hocKy, listPhong, 
       render: (text, record) =>
         isEditing(record) ? (
           <Input
-            value={editingRow.hocPhan.join(' - ')} 
+            value={editingRow.hocPhan.join(' - ')}
             onChange={(e) => setEditingRow({
               ...editingRow,
-              hocPhan: e.target.value.split(' - ') 
+              hocPhan: e.target.value.split(' - ')
             })}
           />
         ) : (
           <span style={{ color: "green", fontWeight: "bold" }}>
-            {text.join(' - ')}  
+            {text.join(' - ')}
           </span>
         ),
     },
@@ -140,15 +173,15 @@ const TablePcCoiThi = ({ list, namHoc, loaiKyThi, loaiDaoTao, hocKy, listPhong, 
       render: (text, record) =>
         isEditing(record) ? (
           <Input
-            value={editingRow.lop.map(arr => arr.join(' - ')).join(', ')} 
+            value={editingRow.lop.map(arr => arr.join(' - ')).join(', ')}
             onChange={(e) => setEditingRow({
               ...editingRow,
-              lop: e.target.value.split(',').map(group => group.split(' - '))  
+              lop: e.target.value.split(',').map(group => group.split(' - '))
             })}
           />
         ) : (
           <span style={{ color: "red", fontWeight: "bold" }}>
-            {text.map(arr => arr.join(' - ')).join(', ')} 
+            {text.map(arr => arr.join(' - ')).join(', ')}
           </span>
         ),
     },
@@ -188,15 +221,15 @@ const TablePcCoiThi = ({ list, namHoc, loaiKyThi, loaiDaoTao, hocKy, listPhong, 
       render: (text, record) =>
         isEditing(record) ? (
           <Input
-            value={editingRow.phong && editingRow.phong.map(p => p.tenPhong).join(" - ")}  
+            value={editingRow.phong && editingRow.phong.map(p => p.tenPhong).join(" - ")}
             onChange={(e) => setEditingRow({
               ...editingRow,
-              phong: e.target.value.split(" - ").map(tenPhong => ({ tenPhong })) 
+              phong: e.target.value.split(" - ").map(tenPhong => ({ tenPhong }))
             })}
           />
         ) : (
           <span style={{ fontWeight: "bold" }}>
-            {text.map(p => p.tenPhong).join(" - ")} 
+            {text.map(p => p.tenPhong).join(" - ")}
           </span>
         ),
       width: 40,
@@ -239,8 +272,8 @@ const TablePcCoiThi = ({ list, namHoc, loaiKyThi, loaiDaoTao, hocKy, listPhong, 
             value={editingRow.hinhThuc.join(', ')}  // Chuyển mảng thành chuỗi để hiển thị
             onChange={(e) =>
               // Cập nhật mảng khi người dùng thay đổi giá trị
-              setEditingRow({ 
-                ...editingRow, 
+              setEditingRow({
+                ...editingRow,
                 hinhThuc: e.target.value.split(',').map(item => item.trim())  // Chuyển lại thành mảng sau khi người dùng nhập
               })
             }
@@ -279,8 +312,8 @@ const TablePcCoiThi = ({ list, namHoc, loaiKyThi, loaiDaoTao, hocKy, listPhong, 
             value={editingRow.soLuong.join(', ')}  // Chuyển mảng thành chuỗi để hiển thị
             onChange={(e) =>
               // Cập nhật mảng 'soLuong' khi người dùng thay đổi giá trị
-              setEditingRow({ 
-                ...editingRow, 
+              setEditingRow({
+                ...editingRow,
                 soLuong: e.target.value.split(',').map(item => item.trim())  // Chuyển lại thành mảng
               })
             }
@@ -296,10 +329,10 @@ const TablePcCoiThi = ({ list, namHoc, loaiKyThi, loaiDaoTao, hocKy, listPhong, 
       dataIndex: 'danhSachThiSinh',
       key: 'danhSachThiSinh',
       render: (text, record) => (
-        <Button size="small"  type="dashed" danger onClick={() => showModal(text)}>
+        <Button size="small" type="dashed" danger onClick={() => showModal(text)}>
           Xem
         </Button>
-        
+
       ),
       width: 15,
 
@@ -439,10 +472,11 @@ const TablePcCoiThi = ({ list, namHoc, loaiKyThi, loaiDaoTao, hocKy, listPhong, 
           </div>
           <Table
             columns={columns}
-            dataSource={data}
+            dataSource={data.length == [] ? data2 : data}
             rowKey="_id"
             pagination={false}
           />
+
         </div>
       )}
 
@@ -487,13 +521,13 @@ const TablePcCoiThi = ({ list, namHoc, loaiKyThi, loaiDaoTao, hocKy, listPhong, 
       <div className="mt-2 flex justify-around">
         <div className="b text-center rounded-md  flex justify-center gap-10">
           <Button type="primary" className="button-chinh-quy" onClick={handleSubmit}>Lưu</Button>
-          <Button onClick={() => exportLichThi(data, `LỊCH COI THI KẾT THÚC HỌC PHẦN - HỆ`, hocKy, namHoc, loaiDaoTao)} type="primary" className="button-lien-thong-vlvh" >Xuất Excel</Button>
+          <Button onClick={() => exportLichThi(data2, `LỊCH COI THI KẾT THÚC HỌC PHẦN - HỆ`, hocKy, namHoc, loaiDaoTao)} type="primary" className="button-lien-thong-vlvh" >Xuất Excel</Button>
 
         </div>
         <Pagination
           current={current}
           pageSize={pageSize}
-          total={data.length}
+          total={data.length == 0 ? data2.length : data.length}
           onChange={(page, size) => {
             setCurrent(page);
             setPageSize(size);
