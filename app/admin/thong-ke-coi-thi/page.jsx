@@ -5,6 +5,7 @@ import { Select, Input, Table, Popconfirm, Spin, Button, Space, Pagination, Moda
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
 import { FileExcelOutlined } from '@ant-design/icons';
+import { exportLichThi } from '../../../components/fileExport'
 
 
 const { Option } = Select;
@@ -154,7 +155,7 @@ const PcCoiThiTable = () => {
       width: 90,
       render: (text) => (
         <span style={{ fontWeight: "bold" }}>
-           {Array.isArray(text) ? text.join(', ') : text}
+          {Array.isArray(text) ? text.join(', ') : text}
         </span>
       ),
     },
@@ -324,10 +325,11 @@ const PcCoiThiTable = () => {
       <div className="mt-2 flex justify-between">
         <Button
           className="button-lien-thong-vlvh text-white font-bold shadow-md "
-        //onClick={() => exportToExcelTongHop() }
+          onClick={() => exportLichThi(paginatedData, `LỊCH COI THI KẾT THÚC HỌC PHẦN - HỆ`, hocKy, namHoc, loai)}
         ><FileExcelOutlined />
           Xuất file Excel
         </Button>
+
         <Pagination
           current={current}
           pageSize={pageSize}
