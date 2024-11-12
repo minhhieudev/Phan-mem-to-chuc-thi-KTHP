@@ -612,13 +612,12 @@ const PcCoiThi = () => {
         phong: [],
         cbo1: '',
         cbo2: '',
-        tc: '',
+        tc: [],
         hinhThuc: [],
         thoiGian: [],
         danhSachThiSinh: [],
 
-        diaDiem:examSessions,
-        tc: '',
+        diaDiem: examSessions,
         namHoc,
         loaiDaoTao,
         loaiKyThi,
@@ -680,7 +679,7 @@ const PcCoiThi = () => {
             item.hinhThuc.push(mon.info.hinhThuc)
             item.thoiGian.push(mon.info.thoiGian)
 
-            item.tc = mon.info.soTinChi
+            item.tc.push(mon.info.soTinChi)
             item.danhSachThiSinh.push(mon.sinhVien)
 
             // XÓA PHÒNG ==========
@@ -706,7 +705,7 @@ const PcCoiThi = () => {
             item.hinhThuc.push(mon.info.hinhThuc)
             item.thoiGian.push(mon.info.thoiGian)
 
-            item.tc = mon.info.soTinChi
+            item.tc.push(mon.info.soTinChi)
             item.danhSachThiSinh.push(mon.sinhVien)
 
             const check = mon.tongSoThiSinh / phong.soCho
@@ -737,7 +736,7 @@ const PcCoiThi = () => {
                 item.hinhThuc.push(closestMatch.info.hinhThuc)
                 item.thoiGian.push(closestMatch.info.thoiGian)
 
-                item.tc = mon.info.soTinChi
+                item.tc.push(mon.info.soTinChi)
                 item.danhSachThiSinh.push(mon.sinhVien)
 
                 listMonClone = listMonClone.filter(monG => monG.hocPhan != closestMatch.hocPhan);
@@ -774,7 +773,7 @@ const PcCoiThi = () => {
                   item.hinhThuc.push(closestMatch2.info.hinhThuc)
                   item.thoiGian.push(closestMatch2.info.thoiGian)
 
-                  item.tc = mon.info.soTinChi
+                  item.tc.push(mon.info.soTinChi)
                   item.danhSachThiSinh.push(mon.sinhVien)
 
                   listMonClone = listMonClone.filter(monG => monG.info.tenHocPhan != closestMatch2.info.tenHocPhan);
@@ -918,6 +917,9 @@ const PcCoiThi = () => {
       <div className="py-1 px-3 bg-gray-100 rounded-lg shadow-lg mt-2 h-[90vh]">
         <Tabs activeKey={activeTab} onChange={(key) => setActiveTab(key)}>
 
+        <TabPane tab="Thông tin kỳ thi" key="4">
+
+        </TabPane>
           <TabPane tab="Dữ liệu sinh viên" key="3">
             <div className="flex gap-3 h-[82vh] ">
               {/* Left Container */}
@@ -932,8 +934,8 @@ const PcCoiThi = () => {
 
 
                 </div>
-                <div className="border-dashed border-2 border-blue-500 rounded-lg p-2 text-center bg-blue-50 hover:bg-blue-100 transition-all duration-300">
-                  <InboxOutlined style={{ fontSize: '48px', color: '#1890ff' }} />
+                <div className="border-dashed border-2 border-blue-500 rounded-lg p-1 text-center bg-blue-50 hover:bg-blue-100 transition-all duration-300">
+                  <InboxOutlined style={{ fontSize: '25px', color: '#1890ff' }} />
                   <p className="text-blue-600 mt-2"> Chọn file</p>
                   <div className="">
                     <Spin spinning={isUploading}>
@@ -963,7 +965,7 @@ const PcCoiThi = () => {
                   </div>
                 </div>
                 <Button
-                  className="button-chinh-quy-khac mt-1"
+                  className="button-chinh-quy mt-1"
                   type="primary"
                   onClick={() => fetchDataHP()}
                 >
@@ -996,10 +998,10 @@ const PcCoiThi = () => {
           </TabPane>
 
           <TabPane tab="Tạo lịch thi" key="1">
-            <div className="text-heading3-bold text-blue-600 text-center ">THÔNG TIN KỲ THI</div>
-            <div className="flex justify-between gap-3 mt-2">
-              <div className=" flex items-center gap-2">
-                <label className="block text-sm font-semibold mb-1 ">Loại đào tạo:</label>
+            <div className="text-heading4-bold text-blue-600 text-center ">THÔNG TIN KỲ THI</div>
+            <div className="flex justify-between gap-2 mt-0">
+              <div className=" flex items-center gap-1">
+                <label className="block text-sm font-semibold mb-1 ">Loại:</label>
                 <Select
                   size="small"
                   value={loaiDaoTao}
@@ -1041,7 +1043,7 @@ const PcCoiThi = () => {
               </div>
 
               <div className=" flex items-center gap-2 ">
-                <label className="block text-sm font-semibold mb-1 ">Loại kỳ thi:</label>
+                <label className="block text-sm font-semibold mb-1 ">Kỳ thi:</label>
                 <Select size="small"
                   value={loaiKyThi}
                   placeholder="Chọn loại kỳ thi"
@@ -1059,8 +1061,8 @@ const PcCoiThi = () => {
                 </Select>
               </div>
 
-              <div className=" flex items-center gap-2">
-                <label className="block text-sm font-semibold mb-1 ">Ngày thi:</label>
+              <div className=" flex items-center gap-2 w-[22%]">
+                <label className="block text-sm font-semibold mb-1 ">Ngày:</label>
                 <RangePicker
                   placeholder={['Từ ngày', 'Đến ngày']}
                   onChange={(dates) => {
@@ -1100,7 +1102,7 @@ const PcCoiThi = () => {
                     >
                       <p className="text-heading3-bold text-center"> {result?.length}</p>
 
-                      <ul className="list-decimal pl-5 text-left max-h-[300px] overflow-auto bg-[#f0f8ff]">
+                      <ul className="list-decimal pl-5 text-left max-h-[360px] overflow-auto bg-[#f0f8ff]">
                         {result?.map((hocPhan, index) => (
                           <li key={hocPhan?.info?.maHocPhan} className="flex justify-between items-center">
                             <span
@@ -1136,16 +1138,18 @@ const PcCoiThi = () => {
                       className="h-full text-center"
                       style={{ backgroundColor: 'white' }}
                     >
-                      <p className="text-heading3-bold text-center"> {listSVToClass?.length}</p>
-                      {listSVToClass?.map((SV, index) => (
-                        <div key={SV.maSV} className="flex justify-between items-center ">
-                          <p className="text-base-bold">{index + 1}. {SV.hoTen}</p>
-                          {/* <DeleteOutlined
+                      <div className="max-h-[395px] overflow-auto">
+                        <p className="text-heading3-bold text-center"> {listSVToClass?.length}</p>
+                        {listSVToClass?.map((SV, index) => (
+                          <div key={SV.maSV} className="flex justify-between items-center ">
+                            <p className="text-base-bold">{index + 1}. {SV.hoTen}</p>
+                            {/* <DeleteOutlined
                             className="text-red-500 cursor-pointer"
                           //onClick={() => handleDeletePhong(index)}
                           /> */}
-                        </div>
-                      ))}
+                          </div>
+                        ))}
+                      </div>
 
                     </Card>
                   </div>
@@ -1159,7 +1163,7 @@ const PcCoiThi = () => {
                       style={{ backgroundColor: 'white' }} // Màu nền
                     >
 
-                      <ul className="list-decimal text-left max-h-[300px] overflow-auto bg-[#f5f5f5]">
+                      <ul className="list-decimal text-left max-h-[340px] overflow-auto bg-white">
                         {listPhongSelect.map((phong, index) => (
                           <div key={phong.tenPhong} className="flex justify-between items-center">
                             <p className="text-base-bold">- {phong.tenPhong}</p>
@@ -1172,7 +1176,7 @@ const PcCoiThi = () => {
                       </ul>
 
                       <div className="flex gap-4 mt-3 flex-col">
-                        <Button className="button-lien-thong-vlvh-nd71 text-white" onClick={() => { setOpen(true); setTitle('Chọn phòng') }}>Chọn phòng thi</Button>
+                        <Button size="small" className="button-lien-thong-vlvh-nd71 text-white" onClick={() => { setOpen(true); setTitle('Chọn phòng') }}>Chọn phòng</Button>
 
                       </div>
 
@@ -1180,7 +1184,7 @@ const PcCoiThi = () => {
                   </div>
                 </Col>
                 <Col span={9} className=" ">
-                  <div className="shadow-lg text-center text-base-bold h-[49vh] ">
+                  <div className="shadow-lg text-center text-base-bold h-[60vh] ">
                     <Card
                       title={<span><UserOutlined /> CÁN BỘ COI THI</span>}
                       bordered={false}
@@ -1189,7 +1193,7 @@ const PcCoiThi = () => {
                     >
                       <div className="h-full w-full ">
                         <Table
-                          scroll={{ y: '360px' }}
+                          scroll={{ y: '340px' }}
                           columns={columns}
                           dataSource={listGVSelect}
                           rowKey="_id"
@@ -1197,14 +1201,14 @@ const PcCoiThi = () => {
                         />
                       </div>
                     </Card>
-                    <Button className="button-boi-duong text-white" onClick={() => { setOpen(true); setTitle('Chọn cán bộ') }}>Chọn cán bộ</Button>
+                    <Button size="small" className="button-boi-duong text-white" onClick={() => { setOpen(true); setTitle('Chọn cán bộ') }}>Chọn cán bộ</Button>
                   </div>
 
                 </Col>
               </Row>
             </div >
 
-            <div className=" text-center rounded-md p-0">
+            <div className=" text-center rounded-md p-0 mt-2">
               <Button type="primary" className="button-chinh-quy" onClick={phanBoSinhVien}>Tạo lịch thi</Button>
             </div>
 

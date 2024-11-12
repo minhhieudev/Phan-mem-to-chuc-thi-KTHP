@@ -193,8 +193,8 @@ const SendEmail = () => {
                             </Form.Item>
 
                             <Form.Item label={<span className="font-semibold text-blue-600">Đính kèm tập tin</span>} name="attachments">
-                                <div className="border-dashed border-2 border-blue-500 rounded-lg p-2 text-center bg-blue-50 hover:bg-blue-100 transition-all duration-300">
-                                    <InboxOutlined style={{ fontSize: '48px', color: '#1890ff' }} />
+                                <div className="border-dashed border-2 border-blue-500 rounded-lg p-1 text-center bg-blue-50 hover:bg-blue-100 transition-all duration-300">
+                                    <InboxOutlined style={{ fontSize: '30px', color: '#1890ff' }} />
                                     <p className="text-blue-600 mt-2"> Chọn file gửi Email</p>
                                     <CldUploadButton
                                         className="button-huong-dan rounded-md shadow-md mt-2"
@@ -216,7 +216,7 @@ const SendEmail = () => {
                                     htmlType="submit"
                                     loading={loading}
                                     icon={<SendOutlined />}
-                                    className="bg-blue-600 text-white mt-1 hover:bg-blue-700 rounded-lg"
+                                    className="bg-blue-600 text-white mt-0 hover:bg-blue-700 rounded-lg"
                                 >
                                     Gửi Email
                                 </Button>

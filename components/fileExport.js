@@ -6,6 +6,7 @@ export const exportLichThi = (dataList, title, hocKy, namHoc, loaiDaoTao) => {
     console.error("No data available to export");
     return;
   }
+  console.log('Data:', dataList)
 
   let loai = ''
   if (loaiDaoTao == 'Chính quy') {
@@ -23,8 +24,7 @@ export const exportLichThi = (dataList, title, hocKy, namHoc, loaiDaoTao) => {
     ["", "", "", `THUỘC HỌC KỲ ${hocKy}, NĂM HỌC ${namHoc}`,],
     [],
     [
-      "      TT", "Học phần", "Nhóm / Lớp", "Ngày thi", "Ca", "Phòng thi", "Cán bộ 1",
-      "Cán bộ 2", "Hình thức", "Thời gian", "Ghi chú"
+      "      STT",'Mã học phần', "Tên Học phần",'Hình thức thi','TC', "Lớp đại diện", "Ngày thi", "Buổi thi", "Phòng thi", "Thời gian", "Số lượng"
     ],
   ])
 
@@ -38,15 +38,21 @@ export const exportLichThi = (dataList, title, hocKy, namHoc, loaiDaoTao) => {
   dataList.forEach((data, index) => {
     const row = [
       index + 1,
-      data.hocPhan,
-      data.lop,
+      data.maHocPhan.join(', '),
+      data.hocPhan.join(', '),
+      
+      data.hinhThuc.join(', '),
+      data.tc.join(', '),
+      data.lop.map(arr => arr.join(' - ')).join(', '),
+
       data.ngayThi,
-      data.ca,
-      data.phong,
-      data.cbo1,
-      data.cbo2,
-      data.hinhThuc,
-      data.thoiGian,
+
+      data.ca == '1'?'Sáng' : 'Chiều',
+      data.phong.map(p => p.tenPhong).join(", "),
+      data.thoiGian.join(', '),
+
+      data.soLuong.join(', '),
+
     ];
     XLSX.utils.sheet_add_aoa(ws, [row], { origin: -1 });
   })
