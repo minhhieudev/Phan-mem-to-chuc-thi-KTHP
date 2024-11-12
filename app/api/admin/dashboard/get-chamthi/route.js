@@ -7,10 +7,8 @@ export const GET = async (req) => {
   try {
     await connectToDB();
 
-    // Kiểm tra xem req.url có tồn tại không
-   // const url = req.url || 'http://localhost'; // hoặc một URL mặc định nào đó
     const { searchParams } = new URL(req.url);
-    
+
     const namHoc = searchParams.get('namHoc');
     const loaiKyThi = searchParams.get('loaiKyThi');
     const loai = searchParams.get('loai');
@@ -30,10 +28,18 @@ export const GET = async (req) => {
     if (loai) {
       filter.loai = loai;
     }
-    
+
+    // Lấy danh sách phân công chấm thi
     const assignments = await PcChamThi.find(filter);
 
-    return new Response(JSON.stringify(assignments), { status: 200 });
+    // Tính tổng số bài từ trường 'soBai'
+    const totalSoBai = assignments.reduce((total, assignment) => {
+      // Kiểm tra và cộng dồn trường 'soBai'
+      return total + (Number(assignment.soBai) || 0);
+    }, 0);
+
+    // Trả về kết quả tổng số bài
+    return new Response(JSON.stringify({ totalSoBai }), { status: 200 });
   } catch (err) {
     console.error("Lỗi khi lấy danh sách phân công chấm thi:", err);
     return new Response(JSON.stringify({ message: `Lỗi: ${err.message}` }), { status: 500 });

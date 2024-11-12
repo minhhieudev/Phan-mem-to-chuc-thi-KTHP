@@ -197,19 +197,6 @@ const HocPhanThiForm = () => {
             key: 'soTinChi',
             width: 70
         },
-        // {
-        //     title: 'Số SVĐK',
-        //     dataIndex: 'soSVDK',
-        //     key: 'soSVDK',
-        //     width: 70
-
-        // },
-        // {
-        //     title: 'Lớp',
-        //     dataIndex: 'lop',
-        //     key: 'lop',
-        //     render: (text) => text.join(', '),
-        // },
         {
             title: 'Hình thức',
             dataIndex: 'hinhThuc',
@@ -224,20 +211,6 @@ const HocPhanThiForm = () => {
             key: 'thoiGian',
             width: 70
         },
-        // {
-        //     title: 'Thi T7,CN',
-        //     dataIndex: 'thiT7CN',
-        //     key: 'thiT7CN',
-        //     render: (text) => text ? "Có" : "Không",
-        //     width: 70
-
-        // },
-        // {
-        //     title: 'Giảng viên',
-        //     dataIndex: 'giangVien',
-        //     key: 'giangVien',
-        //     render: (text) => <span style={{ fontWeight: 'bold', color: 'blue' }}>{text}</span>,
-        // },
         {
             title: 'Hành động',
             key: 'action',
@@ -318,48 +291,6 @@ const HocPhanThiForm = () => {
             {formVisible && (
                 <div className="px-3 py-2 shadow-xl bg-white rounded-xl flex-[25%]">
                     <Title className="text-center" level={3}>QUẢN LÝ HỌC PHẦN THI</Title>
-                    {/* Form toggle button */}
-
-                    {/* <div className="flex gap-1">
-                        <div className="text-small-bold">LOẠI:</div>
-                        <Select value={loaiF} size="small" placeholder="Chọn loại hình đào tạo..." onChange={(value) => setLoaiF(value)}>
-                            <Option value="Chính quy">Chính quy</Option>
-                            <Option value="Liên thông vừa làm vừa học">Liên thông vừa làm vừa học</Option>
-                        </Select>
-                    </div>
-                    <div className="grid grid-cols-2 gap-1 mt-2">
-
-
-                        <div className=" flex items-center gap-1">
-                            <label className="block text-sm font-semibold mb-1">Năm học:</label>
-                            <Select size="small"
-                                placeholder="Chọn năm học"
-                                onChange={(value) => setNamHocF(value)}
-                                className="w-[50%]"
-                                value={namHocF}
-                            >
-                                <Option value="2021-2022">2021-2022</Option>
-                                <Option value="2022-2023">2022-2023</Option>
-                                <Option value="2023-2024">2023-2024</Option>
-                                <Option value="2024-2025">2024-2025</Option>
-                            </Select>
-                        </div>
-
-                        <div className=" flex items-center gap-1">
-                            <label className="block text-sm font-semibold mb-1">Học kỳ:</label>
-                            <Select size="small" allowClear
-                                placeholder="Chọn học kỳ"
-                                onChange={(value) => setHocKyF(value)}
-                                className="w-[50%]"
-                                value={hocKyF}
-                            >
-                                <Option value="1">1</Option>
-                                <Option value="2">2</Option>
-                                <Option value="he">Hè</Option>
-                            </Select>
-                        </div>
-
-                    </div> */}
 
                     <Form onFinish={handleSubmit(onSubmit)} layout="vertical" className="space-y-5 mt-6">
                         <Row gutter={16}>
@@ -396,15 +327,6 @@ const HocPhanThiForm = () => {
 
 
                         <div className="grid grid-cols-2 gap-4">
-                            {/* <Form.Item
-                                label={<span className="font-bold text-xl">Thời gian</span>}
-                            >
-                                <Controller
-                                    name="thoiGian"
-                                    control={control}
-                                    render={({ field }) => <InputNumber className="input-text" placeholder="Thời gian thi ..." {...field} />}
-                                />
-                            </Form.Item> */}
                             <Form.Item
                                 label={<span className="font-bold text-xl">Số tín chỉ <span className="text-red-600">*</span></span>}
                                 validateStatus={errors.soTinChi ? 'error' : ''}
@@ -418,35 +340,8 @@ const HocPhanThiForm = () => {
                                 />
                             </Form.Item>
 
-                            {/* <Form.Item
-                                label={<span className="font-bold text-xl">Thi T7, CN?</span>}
-                            >
-                                <Controller
-                                    name="thiT7CN"
-                                    control={control}
-                                    render={({ field }) => (
-                                        <Checkbox
-                                            checked={field.value === 1}
-                                            onChange={(e) => field.onChange(e.target.checked ? 1 : 0)}
-                                        >
-                                            Có
-                                        </Checkbox>
-                                    )}
-                                />
-                            </Form.Item> */}
-
-
                         </div>
                         <div className="grid grid-cols-2 gap-4">
-                            {/* <Form.Item
-                                label={<span className="font-bold text-xl">Thời gian</span>}
-                            >
-                                <Controller
-                                    name="thoiGian"
-                                    control={control}
-                                    render={({ field }) => <InputNumber className="input-text" placeholder="Thời gian thi ..." {...field} />}
-                                />
-                            </Form.Item> */}
                             <Form.Item
                                 label={<span className="font-bold text-xl">Hình thức thi</span>}
                                 validateStatus={errors.hinhThuc ? 'error' : ''}

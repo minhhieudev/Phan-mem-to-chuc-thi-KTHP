@@ -25,14 +25,14 @@ const Dashboard = () => {
             dataIndex: "soBuoiCoiThi",
             key: "soBuoiCoiThi",
             render: (text) => <span style={{ fontWeight: 'bold', color: 'green' }}>{text}</span>,
-            width:110
+            width: 110
         },
         {
             title: "Số buổi chấm thi",
             dataIndex: "soBuoiChamThi",
             key: "soBuoiChamThi",
             render: (text) => <span style={{ fontWeight: 'bold', color: 'red' }}>{text}</span>,
-            width:110
+            width: 110
         }
     ];
     const columns2 = [
@@ -83,6 +83,11 @@ const Dashboard = () => {
     const [listLichMoi, setListLichMoi] = useState([]);
     const [timeType, setTimeType] = useState('month');
 
+    const [selectedKhoaCode, setSelectedKhoaCode] = useState(''); // Lưu mã khoa (2 ký tự)
+
+    const handleSelectKhoaCode = (code) => {
+        setSelectedKhoaCode(code);
+    };
 
     const fetchKhoaData = async () => {
         try {
@@ -147,6 +152,18 @@ const Dashboard = () => {
                 const data = await res1.json();
                 console.log('Res hocphan:', data)
                 setThongKeCoiThi(data)
+                // Xử lý dữ liệu nếu cần
+            } else {
+                toast.error("Failed to fetch thống kê coi thi !");
+            }
+
+            const res3 = await fetch(`/api/admin/dashboard/get-chamthi?namHoc=${namHoc}&hocKy=${hocKy}&khoa=${selectedKhoa}`, {
+                method: "GET",
+                headers: { "Content-Type": "application/json" },
+            });
+            if (res3.ok) {
+                const data = await res3.json();
+                setThongKeChamThi(data)
                 // Xử lý dữ liệu nếu cần
             } else {
                 toast.error("Failed to fetch thống kê coi thi !");
@@ -217,15 +234,27 @@ const Dashboard = () => {
             item.username.toLowerCase().includes(searchTerm)
         );
     }, [listCount, searchTerm]);
+
     // Tạo danh sách đã lọc dựa trên searchTerm
     const filteredList2 = useMemo(() => {
-        if (!searchTerm2) return listLichMoi;
-        return listLichMoi.filter(item =>
-            item.hocPhan.toLowerCase().includes(searchTerm2) ||
-            item.cbo1.toLowerCase().includes(searchTerm2) ||
-            item.cbo2.toLowerCase().includes(searchTerm2)
-        );
-    }, [listLichMoi, searchTerm2]);
+        console.log('LLL:', listLichMoi)
+        return listLichMoi.filter(item => {
+            // Kiểm tra xem có mã môn học nào bắt đầu bằng selectedKhoaCode không (không phân biệt chữ hoa/thường)
+            const matchesKhoaCode = !selectedKhoaCode ||
+                item.maHocPhan.some(code => code.toLowerCase().startsWith(selectedKhoaCode.toLowerCase()));
+
+            // Kiểm tra điều kiện tìm kiếm với searchTerm2, không phân biệt chữ hoa/thường
+            const lowerSearchTerm = searchTerm2?.toLowerCase() || '';
+            const matchesSearchTerm = !searchTerm2 ||
+                item.tenHocPhan.toLowerCase().includes(lowerSearchTerm) ||
+                item.cbo1.toLowerCase().includes(lowerSearchTerm) ||
+                item.cbo2.toLowerCase().includes(lowerSearchTerm);
+
+            // Chỉ trả về những item thỏa mãn cả hai điều kiện
+            return matchesKhoaCode && matchesSearchTerm;
+        });
+    }, [listLichMoi, selectedKhoaCode, searchTerm2]);
+
 
     // Phân trang dữ liệu đã lọc
     const paginatedData = useMemo(() => {
@@ -297,24 +326,47 @@ const Dashboard = () => {
                     <div className="flex items-center">
                         <FileOutlined style={{ fontSize: "90px" }} className="mr-4 text-purple-500" /> {/* Đổi icon */}
                         <div>
-                            <h2 className="text-xl font-bold mb-2">{thongKeChamThi.completedCount} bài thi</h2>
-                            <p>Đã chấm</p>
+                            <h2 className="text-xl font-bold mb-2">CÓ {thongKeChamThi.totalSoBai} </h2>
+                            <p>BÀI THI</p>
                         </div>
                     </div>
-                    <Progress
+                    {/* <Progress
                         type="dashboard"
                         steps={10}
                         percent={thongKeChamThi.completionPercentage}
                         trailColor="rgba(0, 0, 0, 0.06)"
                         strokeWidth={20}
-                    />
+                    /> */}
                 </div>
             </div>
 
             <div className="grid grid-cols-5 gap-2 h-[67vh]">
                 <div className="col-span-3 bg-white px-2 py-3 rounded-lg shadow-md">
                     <div className="flex justify-between font-bold">
-                        <h2 className="text-xl font-bold mb-2">Lịch thi sắp diễn ra</h2>
+                        <h2 className="text-xl font-bold mb-2">Sắp diễn ra</h2>
+                        <div className="w-[25%] flex items-center gap-1">
+                            <label className="block text-sm font-semibold mb-1">Khoa:</label>
+                            <Select
+                                allowClear
+                                size="small"
+                                placeholder="Chọn mã môn"
+                                onChange={(value) => handleSelectKhoaCode(value)} // Đảm bảo gọi hàm này khi chọn
+                                className="w-[90%]"
+                            >
+                                <Option value="KC">Kỹ thuật - Công nghệ</Option>
+                                <Option value="KT">Kinh tế</Option>
+                                <Option value="LC">Lý luận chính trị</Option>
+                                <Option value="MN">Mầm non</Option>
+                                <Option value="NG">Ngoại ngữ</Option>
+                                <Option value="NN">Nông nghiệp</Option>
+                                <Option value="NT">Nghệ thuật</Option>
+                                <Option value="SP">Sư phạm</Option>
+                                <Option value="TC">Giáo dục thể chất</Option>
+                                <Option value="TN">Tự nhiên</Option>
+                                <Option value="XH">Xã hội nhân văn</Option>
+                            </Select>
+
+                        </div>
                         <Radio.Group onChange={(e) => setTimeType(e.target.value)} defaultValue="month">
                             <Radio value="month">Tháng</Radio>
                             <Radio value="week">Tuần</Radio>

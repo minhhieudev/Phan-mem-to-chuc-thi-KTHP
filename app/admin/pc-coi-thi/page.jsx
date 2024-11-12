@@ -14,7 +14,7 @@ const { TabPane } = Tabs;
 const { RangePicker } = DatePicker;
 
 const PcCoiThi = () => {
-  const [activeTab, setActiveTab] = useState("3");
+  const [activeTab, setActiveTab] = useState("4");
 
   const [listGV, setListGV] = useState([]);
   const [listPhong, setListPhong] = useState([]);
@@ -202,21 +202,6 @@ const PcCoiThi = () => {
     }
     setFilteredListGV(filteredData);
   }, [selectKhoa, listGV, searchGV]);
-
-  const formatDate = (dateString) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString();
-  };
-
-  const getRandomColor = () => {
-    const randomValue = () => Math.floor(Math.random() * 128) + 64;
-
-    const r = randomValue().toString(16).padStart(2, '0');
-    const g = randomValue().toString(16).padStart(2, '0');
-    const b = randomValue().toString(16).padStart(2, '0');
-
-    return `#${r}${g}${b}`;
-  };
 
   // Xử lý đọc Excel
 
@@ -914,12 +899,143 @@ const PcCoiThi = () => {
     <Loader />
   ) : (
     <div>
-      <div className="py-1 px-3 bg-gray-100 rounded-lg shadow-lg mt-2 h-[90vh]">
+      <div className="py-1 px-3 bg-white rounded-lg shadow-lg mt-2 h-[90vh]">
         <Tabs activeKey={activeTab} onChange={(key) => setActiveTab(key)}>
 
-        <TabPane tab="Thông tin kỳ thi" key="4">
+          <TabPane tab="Thông tin kỳ thi" key="4" className="bg-white rounded-lg h-[80vh]">
+            <div className="text-heading4-bold text-blue-600 text-center ">THÔNG TIN KỲ THI</div>
+            <div className="flex justify-between gap-2 mt-0">
+              <div className=" flex items-center gap-1">
+                <label className="block text-sm font-semibold mb-1 ">Loại:</label>
+                <Select
+                  size="small"
+                  value={loaiDaoTao}
+                  placeholder="Chọn loại đào tạo"
+                  onChange={(value) => setLoaiDaoTao(value)}
+                  className=""
+                >
+                  <Option value="Chính quy">Chính quy</Option>
+                  <Option value="Liên thông vừa làm vừa học">Liên thông vừa làm vừa học</Option>
+                </Select>
+              </div>
+              <div className=" flex items-center gap-2">
+                <label className="block text-sm font-semibold mb-1 ">Năm học:</label>
+                <Select size="small"
+                  value={namHoc}
+                  placeholder="Chọn năm học"
+                  onChange={(value) => setNamHoc(value)}
+                  className=""
+                >
+                  <Option value="2021-2022">2021-2022</Option>
+                  <Option value="2022-2023">2022-2023</Option>
+                  <Option value="2023-2024">2023-2024</Option>
+                  <Option value="2024-2025">2024-2025</Option>
+                </Select>
+              </div>
+              <div className=" flex items-center gap-2 ">
+                <label className="block text-sm font-semibold mb-1 ">Học kỳ:</label>
+                <Select size="small"
+                  value={hocKy}
+                  placeholder="Chọn học kỳ"
+                  onChange={(value) => setHocKy(value)}
+                  className="w-[60px]"
+                >
+                  <Option value="1">1</Option>
+                  <Option value="2">2</Option>
+                  <Option value="he">Hè</Option>
+                </Select>
 
-        </TabPane>
+              </div>
+
+              <div className=" flex items-center gap-2 ">
+                <label className="block text-sm font-semibold mb-1 ">Kỳ thi:</label>
+                <Select size="small"
+                  value={loaiKyThi}
+                  placeholder="Chọn loại kỳ thi"
+                  onChange={(value) => setLoaiKyThi(value)}
+                  className="w-[152px]"
+                >
+                  <Option value="1">Chính thức</Option>
+                  <Option value="2">Đợt 2</Option>
+                  <Option value="3">Đợt 3</Option>
+                  <Option value="4">Đợt 4</Option>
+                  <Option value="5">Đợt 5</Option>
+                  <Option value="6">Đợt 6</Option>
+                  <Option value="7">Đợt 7</Option>
+
+                </Select>
+              </div>
+
+              <div className=" flex items-center gap-2 w-[22%]">
+                <label className="block text-sm font-semibold mb-1 ">Ngày:</label>
+                <RangePicker
+                  placeholder={['Từ ngày', 'Đến ngày']}
+                  onChange={(dates) => {
+                    if (dates && dates.length === 2) {
+                      const startDate = dates[0]?.toDate();
+                      const endDate = dates[1]?.toDate();
+                      setExamDateRange({ startDate, endDate });
+                      console.log(examDateRange)
+                    }
+                  }}
+                />
+              </div>
+
+              <div className="flex flex-col gap-3">
+                <div className=" flex items-center gap-2">
+                  <label className="block text-sm font-semibold mb-1">Địa điểm:</label>
+                  <Checkbox.Group
+                    options={[
+                      { label: "DHPY", value: 'DHPY' },
+                      { label: "Khác", value: 'KHAC' },
+                    ]}
+                    value={examSessions}
+                    onChange={(checkedValues) => setExamSessions(checkedValues)}
+                  />
+                </div>
+              </div>
+
+            </div>
+            <div className="flex justify-around items-center  flex-wrap  h-[80%]  mt-6">
+              <Button
+                className={`custom-button-1 button-chinh-quy w-full max-w-[300px]`}
+              >
+                <div className='text'> HỆ {loaiDaoTao.toUpperCase()}</div>
+              </Button>
+              <Button
+                className={`custom-button-1 button-chinh-quy-khac w-full max-w-[300px]`}
+              //onClick={() => handlePage('cham-thi')}
+              >
+                <div className='text'>{namHoc}</div>
+              </Button>
+              <Button
+                className={`custom-button-1 button-boi-duong w-full max-w-[300px]`}
+              >
+                <div className='text'>HỌC KỲ {hocKy}</div>
+              </Button>
+              <Button
+                className={`custom-button-1 button-lien-thong-chinh-quy w-full max-w-[300px]`}
+              //onClick={() => handlePage('cham-thi')}
+              >
+                <div className='text'>{loaiKyThi.toLocaleUpperCase()== '1'? 'CHÍNH THỨC':`ĐỢT ${loaiKyThi.toLocaleUpperCase()}`}</div>
+              </Button>
+              <Button className={`custom-button-1 button-lien-thong-vlvh w-full max-w-[300px]`}>
+                <div className='text'>
+                  {examDateRange.startDate?.toLocaleDateString()}<br />
+                  - <br />
+                  {examDateRange.endDate?.toLocaleDateString()}
+                </div>
+
+              </Button>
+
+              <Button
+                className={`custom-button-1  button-lien-thong-vlvh-nd71 w-full max-w-[300px]`}
+              //onClick={() => handlePage('cham-thi')}
+              >
+                <div className='text'>{examSessions}</div>
+              </Button>
+            </div>
+          </TabPane>
           <TabPane tab="Dữ liệu sinh viên" key="3">
             <div className="flex gap-3 h-[82vh] ">
               {/* Left Container */}
@@ -998,101 +1114,10 @@ const PcCoiThi = () => {
           </TabPane>
 
           <TabPane tab="Tạo lịch thi" key="1">
-            <div className="text-heading4-bold text-blue-600 text-center ">THÔNG TIN KỲ THI</div>
-            <div className="flex justify-between gap-2 mt-0">
-              <div className=" flex items-center gap-1">
-                <label className="block text-sm font-semibold mb-1 ">Loại:</label>
-                <Select
-                  size="small"
-                  value={loaiDaoTao}
-                  placeholder="Chọn loại đào tạo"
-                  onChange={(value) => setLoaiDaoTao(value)}
-                  className=""
-                >
-                  <Option value="Chính quy">Chính quy</Option>
-                  <Option value="Liên thông vừa làm vừa học">Liên thông vừa làm vừa học</Option>
-                </Select>
-              </div>
-              <div className=" flex items-center gap-2">
-                <label className="block text-sm font-semibold mb-1 ">Năm học:</label>
-                <Select size="small"
-                  value={namHoc}
-                  placeholder="Chọn năm học"
-                  onChange={(value) => setNamHoc(value)}
-                  className=""
-                >
-                  <Option value="2021-2022">2021-2022</Option>
-                  <Option value="2022-2023">2022-2023</Option>
-                  <Option value="2023-2024">2023-2024</Option>
-                  <Option value="2024-2025">2024-2025</Option>
-                </Select>
-              </div>
-              <div className=" flex items-center gap-2 ">
-                <label className="block text-sm font-semibold mb-1 ">Học kỳ:</label>
-                <Select size="small"
-                  value={hocKy}
-                  placeholder="Chọn học kỳ"
-                  onChange={(value) => setHocKy(value)}
-                  className="w-[60px]"
-                >
-                  <Option value="1">1</Option>
-                  <Option value="2">2</Option>
-                  <Option value="he">Hè</Option>
-                </Select>
 
-              </div>
-
-              <div className=" flex items-center gap-2 ">
-                <label className="block text-sm font-semibold mb-1 ">Kỳ thi:</label>
-                <Select size="small"
-                  value={loaiKyThi}
-                  placeholder="Chọn loại kỳ thi"
-                  onChange={(value) => setLoaiKyThi(value)}
-                  className="w-[152px]"
-                >
-                  <Option value="1">Chính thức</Option>
-                  <Option value="2">Đợt 2</Option>
-                  <Option value="3">Đợt 3</Option>
-                  <Option value="4">Đợt 4</Option>
-                  <Option value="5">Đợt 5</Option>
-                  <Option value="6">Đợt 6</Option>
-                  <Option value="7">Đợt 7</Option>
-
-                </Select>
-              </div>
-
-              <div className=" flex items-center gap-2 w-[22%]">
-                <label className="block text-sm font-semibold mb-1 ">Ngày:</label>
-                <RangePicker
-                  placeholder={['Từ ngày', 'Đến ngày']}
-                  onChange={(dates) => {
-                    if (dates && dates.length === 2) {
-                      const startDate = dates[0]?.toDate();
-                      const endDate = dates[1]?.toDate();
-                      setExamDateRange({ startDate, endDate });
-                    }
-                  }}
-                />
-              </div>
-
-              <div className="flex flex-col gap-3">
-                <div className=" flex items-center gap-2">
-                  <label className="block text-sm font-semibold mb-1">Địa điểm:</label>
-                  <Checkbox.Group
-                    options={[
-                      { label: "DHPY", value: 'DHPY' },
-                      { label: "Khác", value: 'KHAC' },
-                    ]}
-                    value={examSessions}
-                    onChange={(checkedValues) => setExamSessions(checkedValues)}
-                  />
-                </div>
-              </div>
-
-            </div>
             <div className="w-full mt-2">
               <Row gutter={10}>
-                <Col span={7} className="h-[60%] overflow-y-auto">
+                <Col span={7} className=" overflow-y-auto">
                   <div className="shadow-lg ">
                     <Card
                       title={<span><BookOutlined /> HỌC PHẦN</span>}
@@ -1102,7 +1127,7 @@ const PcCoiThi = () => {
                     >
                       <p className="text-heading3-bold text-center"> {result?.length}</p>
 
-                      <ul className="list-decimal pl-5 text-left max-h-[360px] overflow-auto bg-[#f0f8ff]">
+                      <ul className="list-decimal pl-5 text-left max-h-[450px] overflow-auto bg-[#f0f8ff]">
                         {result?.map((hocPhan, index) => (
                           <li key={hocPhan?.info?.maHocPhan} className="flex justify-between items-center">
                             <span
@@ -1138,7 +1163,7 @@ const PcCoiThi = () => {
                       className="h-full text-center"
                       style={{ backgroundColor: 'white' }}
                     >
-                      <div className="max-h-[395px] overflow-auto">
+                      <div className="max-h-[470px] overflow-auto">
                         <p className="text-heading3-bold text-center"> {listSVToClass?.length}</p>
                         {listSVToClass?.map((SV, index) => (
                           <div key={SV.maSV} className="flex justify-between items-center ">
@@ -1163,7 +1188,7 @@ const PcCoiThi = () => {
                       style={{ backgroundColor: 'white' }} // Màu nền
                     >
 
-                      <ul className="list-decimal text-left max-h-[340px] overflow-auto bg-white">
+                      <ul className="list-decimal text-left max-h-[400px] overflow-auto bg-white">
                         {listPhongSelect.map((phong, index) => (
                           <div key={phong.tenPhong} className="flex justify-between items-center">
                             <p className="text-base-bold">- {phong.tenPhong}</p>
@@ -1184,7 +1209,7 @@ const PcCoiThi = () => {
                   </div>
                 </Col>
                 <Col span={9} className=" ">
-                  <div className="shadow-lg text-center text-base-bold h-[60vh] ">
+                  <div className="shadow-lg text-center text-base-bold h-[75vh] ">
                     <Card
                       title={<span><UserOutlined /> CÁN BỘ COI THI</span>}
                       bordered={false}
@@ -1193,7 +1218,7 @@ const PcCoiThi = () => {
                     >
                       <div className="h-full w-full ">
                         <Table
-                          scroll={{ y: '340px' }}
+                          scroll={{ y: '400px' }}
                           columns={columns}
                           dataSource={listGVSelect}
                           rowKey="_id"
