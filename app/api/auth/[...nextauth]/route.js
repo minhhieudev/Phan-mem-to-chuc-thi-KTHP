@@ -43,13 +43,13 @@ const handler = NextAuth({
       return token;
     },
     async session({ session, token }) {
-      const mongodbUser = await User.findOne({ email: session.user.email })
-      session.user._id = mongodbUser._id.toString()
-
-      session.user = { ...session.user, ...mongodbUser._doc }
+      const mongodbUser = await User.findOne({ email: session.user.email });
+      session.user._id = mongodbUser._id.toString();
+      session.user = { ...session.user, ...mongodbUser._doc };
       return session;
     },
   },
+  
 });
 
 export { handler as GET, handler as POST };

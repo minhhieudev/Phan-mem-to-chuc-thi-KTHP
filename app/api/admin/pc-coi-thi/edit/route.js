@@ -18,11 +18,36 @@ export const GET = async (req) => {
       return new Response("Không tìm thấy thông tin phân công coi thi", { status: 404 });
     }
 
-    // Trả về phản hồi thành công với dữ liệu PcCoiThi
-    return new Response(JSON.stringify(PcCoiThi), { status: 200 });
+    return new Response(JSON.stringify(PcCoiThi), {
+      status: 200,
+      headers: {
+        'Access-Control-Allow-Origin': 'http://localhost:3000',
+        'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+        'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+      },
+    });
+
   } catch (err) {
     // Bắt lỗi và trả về phản hồi lỗi
     console.error("Error fetching PcCoiThi:", err);
-    return new Response(`Lỗi: ${err.message}`, { status: 500 });
+    return new Response(JSON.stringify({ message: `Error: ${err.message}` }), {
+      status: 500,
+      headers: {
+        'Access-Control-Allow-Origin': 'http://localhost:3000',
+      },
+    });
   }
 };
+
+// Xử lý yêu cầu preflight
+export const OPTIONS = () => {
+  return new Response(null, {
+    status: 204,
+    headers: {
+      'Access-Control-Allow-Origin': 'http://localhost:3000',
+      'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+    },
+  });
+};
+

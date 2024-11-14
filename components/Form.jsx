@@ -9,66 +9,68 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import toast from "react-hot-toast";
-import { signIn } from "next-auth/react"
+import { useState, useEffect } from "react";
+import { signIn } from "next-auth/react";
+import CircularProgress from "@mui/material/CircularProgress"; // Import CircularProgress
+import { useSession } from "next-auth/react";
 
 const Form = ({ type }) => {
   const {
     register,
     handleSubmit,
-    watch,
     formState: { errors },
   } = useForm();
 
   const router = useRouter();
+  const [loading, setLoading] = useState(false);
+  const { data: session, status } = useSession(); // Get session data
+
+  useEffect(() => {
+    // When session is authenticated, redirect based on user role
+    if (status === "authenticated") {
+      const userRole = session?.user?.role; // Access role from session
+      if (userRole === "admin") {
+        router.push("/admin"); // Redirect to /admin if user is an admin
+      } else {
+        router.push("/home"); // Redirect to /home for other roles
+      }
+    }
+  }, [session, status, router]); // Re-run when session or status changes
 
   const onSubmit = async (data) => {
-    if (type === "register") {
-      const res = await fetch("/api/auth/register", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(data),
-      });
+    setLoading(true);
+    try {
+      if (type === "login") {
+        const res = await signIn("credentials", {
+          ...data,
+          redirect: false, // Don't automatically redirect
+        });
 
-      if (res.ok) {
-        router.push("/");
+        // Check for login success using res.error (instead of session status)
+        if (res?.error) {
+          toast.error("Invalid email or password");
+        }
+        // No need to do anything extra for the redirect; use the useEffect hook instead
       }
-
-      if (res.error) {
-        toast.error("Something went wrong");
-      }
-    }
-
-    if (type === "login") {
-      const res = await signIn("credentials", {
-        ...data,
-        redirect: false,
-      })
-
-      if (res.ok) {
-        router.push("/home");
-      }
-
-      if (res.error) {
-        toast.error("Invalid email or password");
-      }
+    } finally {
+      setLoading(false);
     }
   };
-
-
 
   return (
     <div className="auth">
       <div className="content">
-        <img src="https://upload.wikimedia.org/wikipedia/vi/2/2e/Dai_hoc_phu_yen_logo.png" alt="logo" className="logo" />
+        <img
+          src="https://upload.wikimedia.org/wikipedia/vi/2/2e/Dai_hoc_phu_yen_logo.png"
+          alt="logo"
+          className="logo"
+        />
 
         <form className="form" onSubmit={handleSubmit(onSubmit)}>
           {type === "register" && (
             <div>
               <div className="input">
                 <input
-                  defaultValue=""
                   {...register("username", {
                     required: "Username is required",
                     validate: (value) => {
@@ -131,22 +133,10 @@ const Form = ({ type }) => {
             )}
           </div>
 
-          <button className="button" type="submit">
-            {type === "register" ? "Đăng ký" : "Đăng nhập"}
+          <button className="button" type="submit" disabled={loading}>
+            {loading ? <CircularProgress size={24} color="inherit" /> : type === "register" ? "Đăng ký" : "Đăng nhập"}
           </button>
         </form>
-
-        {/* {type === "register" ? (
-          <Link href="/" className="link flex gap-1">
-            <p className="text-center">Bạn đã có tài khoản? </p>
-            <p className="text-red-400">Đăng nhập</p>
-          </Link>
-        ) : (
-          <Link href="/register" className="link flex gap-1">
-            <p className="text-center">Bạn chưa có tài khoản? </p>
-            <p className="text-red-400">Đăng ký ngay</p>
-          </Link>
-        )} */}
       </div>
     </div>
   );

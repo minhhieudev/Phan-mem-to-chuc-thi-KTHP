@@ -33,7 +33,12 @@ const UserForm = () => {
     const [loading, setLoading] = useState(true);
 
     const [khoaOptions, setKhoaOptions] = useState([]);
-    const quyenOptions = ["Giảng viên", "Giáo vụ", "Admin"];
+    const quyenOptions = [
+        { key: 'user', value: 'Giảng viên' },
+        { key: 'giaoVu', value: 'Giáo vụ' },
+        { key: 'admin', value: 'Admin' }
+    ];
+
 
     const fileInputRef = useRef(null);
     const [isUploading, setIsUploading] = useState(false); // Trạng thái upload
@@ -351,9 +356,9 @@ const UserForm = () => {
                                         control={control}
                                         render={({ field }) => (
                                             <Select className="w-full" placeholder="Chọn quyền" {...field}>
-                                                {quyenOptions.map(role => (
-                                                    <Option key={role} value={role}>
-                                                        {role}
+                                                {quyenOptions.map(({ key, value }) => (
+                                                    <Option key={key} value={key}>
+                                                        {value}
                                                     </Option>
                                                 ))}
                                             </Select>
@@ -441,9 +446,9 @@ const UserForm = () => {
                                 value={selectedRole}
                                 onChange={value => setSelectedRole(value)}
                             >
-                                {quyenOptions.map(role => (
-                                    <Option key={role} value={role}>
-                                        {role}
+                                {quyenOptions.map(({ key, value }) => (
+                                    <Option key={key} value={key}>
+                                        {value}
                                     </Option>
                                 ))}
                             </Select>

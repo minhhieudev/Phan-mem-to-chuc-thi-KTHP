@@ -11,7 +11,7 @@ const TopBar = () => {
   const pathname = usePathname();
 
   const handleLogout = async () => {
-    signOut({ callbackUrl: "/" });
+    signOut({ callbackUrl: window.location.origin }); // Trở lại trang chủ
   };
 
   const { data: session } = useSession();
@@ -30,25 +30,18 @@ const TopBar = () => {
       </div>
 
       <div className="menu">
-        {user?.role == 'admin' &&
+        {/* {user?.role == 'admin' &&
           <Link
             href="/admin"
             className={`${pathname === "/admin" ? "text-red-1" : ""
               } text-heading4-bold`}
           >
             Admin
-          </Link>}
-        <Link
-          href="/home"
-          className={`${pathname === "/home" ? "text-red-1" : ""
-            } text-heading4-bold`}
-        >
-          Home
-        </Link>
-        <Logout
-          sx={{ color: "#737373", cursor: "pointer" }}
-          onClick={handleLogout}
-        />
+          </Link>} */}
+        <div className="text-heading4-bold text-green-400">
+          {user?.username}
+        </div>
+
         <Link href="/profile">
           <img
             src={user?.profileImage || "/assets/person.jpg"}
@@ -56,6 +49,11 @@ const TopBar = () => {
             className="profilePhoto"
           />
         </Link>
+
+        <Logout
+          sx={{ color: "#737373", cursor: "pointer" }}
+          onClick={handleLogout}
+        />
       </div>
     </div>
   );
