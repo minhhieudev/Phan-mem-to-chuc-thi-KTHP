@@ -543,67 +543,42 @@ const PcCoiThi = () => {
   // Hàm đếm số lượng môn thi theo ngày
   const countByNgayThi = (array) => {
     const counts = {};
-  
-    // Đếm số lượng phần tử theo ngayThi, đồng thời đếm số lượng phòng thi và số lượng ca 1, ca 3
-    array.forEach(item => {
-      const ngayThi = item.ngayThi;
-      const caThi = item.ca;
-  
-      // Khởi tạo nếu chưa có ngày thi trong counts
-      if (!counts[ngayThi]) {
-        counts[ngayThi] = {
-          soLuong: 0, // Tổng số lượng môn thi
-          soLuongCa1: 0, // Số lượng ca 1
-          soLuongCa3: 0, // Số lượng ca 3
-          soPhongCa1: 0,
-          soPhongCa3: 0,
-        };
-      }
-  
-      // Tăng số lượng môn thi cho ngàyThi hiện tại
-      counts[ngayThi].soLuong++;
-  
-      // Đếm số lượng ca 1 và ca 3
-      if (caThi === '1') {
-        counts[ngayThi].soLuongCa1++;
-        counts[ngayThi].soPhongCa1 += item.phong.length
-      } else if (caThi === '3') {
-        counts[ngayThi].soLuongCa3++;
-        counts[ngayThi].soPhongCa3 += item.phong.length
 
+    // Đếm số lượng phần tử theo ngayThi
+    array.forEach(item => {
+      if (counts[item.ngayThi]) {
+        counts[item.ngayThi]++;
+      } else {
+        counts[item.ngayThi] = 1;
       }
     });
-  
+
     // Chuyển đổi đối tượng counts thành mảng phần tử
     const result = Object.keys(counts).map(ngay => ({
       ngayThi: ngay,
-      soLuong: counts[ngay].soLuong, // Tổng số lượng môn thi
-      soLuongCa1: counts[ngay].soLuongCa1, // Số lượng ca 1
-      soLuongCa3: counts[ngay].soLuongCa3, // Số lượng ca 3
-      soPhongCa1: counts[ngay].soPhongCa1, // Số lượng ca 3
-      soPhongCa3: counts[ngay].soPhongCa3, // Số lượng ca 3
+      soLuong: counts[ngay]
     }));
-  
+
     return result;
   };
-  
 
   const phanCongCanBo = (resultFinal) => {
+
     if (tableGV.length < 0) {
-      toast.error('Chưa chọn giảng viên !');
-      return;
+      toast.error('Chưa chọn giảng viên !')
+      return
     }
     let isComplete = true;
-  
-    console.log('resultFinal trước khi phần công cán bộ:', resultFinal);
-  
+
+    console.log('DĐ', resultFinal)
+
     // Nhóm dữ liệu theo ngày thi
     const groupedByNgayThi = Object.values(
       resultFinal.reduce((acc, item) => {
-        // Gán lại cbo1 và cbo2 thành chuỗi rỗng
+        // Gán lại `cbo1` và `cbo2` thành chuỗi rỗng
         item.cbo1 = '';
         item.cbo2 = '';
-  
+
         if (!acc[item.ngayThi]) {
           acc[item.ngayThi] = [];
         }
@@ -611,64 +586,68 @@ const PcCoiThi = () => {
         return acc;
       }, {})
     );
-  
+
     // Duyệt qua từng nhóm theo ngày thi
     for (let i = 0; i < groupedByNgayThi.length; i++) {
       const item = groupedByNgayThi[i];
       const ngay = item[0].ngayThi;
-  
+
       // Lọc giảng viên theo ngày thi
       let danhSachGVTheoNgayThi = tableGV.filter(gv => gv.ngayThi === ngay);
+      // Biến flag để kiểm tra đã lấy danh sách giảng viên chưa
       let hasReinitializedGV = false;
-  
+
       // Sắp xếp các nhóm theo ca (đảm bảo '1' trước)
       const sortedItem = item.sort((a, b) => a.ca.localeCompare(b.ca));
-  
+
       // Duyệt qua từng group trong item đã sắp xếp
       sortedItem.forEach((group) => {
-        const phongCount = group.phong.length; // Số phòng thi của nhóm
-  
         if (group.ca === '1') {
           // Nếu ca là 1, phân công giảng viên và kiểm tra số lượng
-          if (danhSachGVTheoNgayThi.length < phongCount * 2) {
+          if (danhSachGVTheoNgayThi.length < 2) {
             toast.error(`Không đủ giảng viên cho nhóm ca 1 ngày thi ${ngay}`);
             isComplete = false;
             return;
+            group.cbo1 = null;
+            group.cbo2 = null;
           } else {
-            // Phân công giảng viên cho các phòng thi
-            group.cbo1 = danhSachGVTheoNgayThi.slice(0, phongCount).map(gv => gv.username).join(' - '); // Nối giảng viên cho cbo1
-            group.cbo2 = danhSachGVTheoNgayThi.slice(phongCount, phongCount * 2).map(gv => gv.username).join(' - '); // Nối giảng viên cho cbo2
-  
+            // Phân công giảng viên cho nhóm
+            group.cbo1 = danhSachGVTheoNgayThi[0]?.username; // Gán giảng viên cho cbo1
+            group.cbo2 = danhSachGVTheoNgayThi[1]?.username; // Gán giảng viên cho cbo2
+
             // Xóa giảng viên đã phân công khỏi danh sách giảng viên của ngày thi
-            danhSachGVTheoNgayThi = danhSachGVTheoNgayThi.slice(phongCount * 2);
+            danhSachGVTheoNgayThi = danhSachGVTheoNgayThi.slice(2);
           }
-        } else if (group.ca === '3') {
+        } else if (group.ca === '5') {
           // Nếu ca là 5, cần lấy lại danh sách giảng viên nếu thiếu và chỉ lấy lại 1 lần
-          if (!hasReinitializedGV && danhSachGVTheoNgayThi.length < phongCount * 2) {
+          if (!hasReinitializedGV && danhSachGVTheoNgayThi.length < 2) {
             // Lấy lại danh sách giảng viên cho ngày thi
             danhSachGVTheoNgayThi = tableGV.filter(gv => gv.ngayThi === ngay);
             hasReinitializedGV = true;  // Đánh dấu đã lấy lại danh sách giảng viên
-  
+
             // Kiểm tra lại sau khi lấy lại danh sách giảng viên
-            if (danhSachGVTheoNgayThi.length < phongCount * 2) {
-              toast.error(`Không đủ giảng viên cho nhóm ca 3 ngày thi ${ngay}`);
+            if (danhSachGVTheoNgayThi.length < 2) {
+              toast.error(`Không đủ giảng viên cho nhóm ca 5 ngày thi ${ngay}`);
               isComplete = false;
               return;
+
+              group.cbo1 = null;
+              group.cbo2 = null;
             } else {
-              // Phân công giảng viên cho các phòng thi
-              group.cbo1 = danhSachGVTheoNgayThi.slice(0, phongCount).map(gv => gv.username).join('-'); // Nối giảng viên cho cbo1
-              group.cbo2 = danhSachGVTheoNgayThi.slice(phongCount, phongCount * 2).map(gv => gv.username).join('-'); // Nối giảng viên cho cbo2
-  
+              // Phân công giảng viên cho nhóm
+              group.cbo1 = danhSachGVTheoNgayThi[0]?.username; // Gán giảng viên cho cbo1
+              group.cbo2 = danhSachGVTheoNgayThi[1]?.username; // Gán giảng viên cho cbo2
+
               // Xóa giảng viên đã phân công khỏi danh sách giảng viên của ngày thi
-              danhSachGVTheoNgayThi = danhSachGVTheoNgayThi.slice(phongCount * 2);
+              danhSachGVTheoNgayThi = danhSachGVTheoNgayThi.slice(2);
             }
-          } else if (danhSachGVTheoNgayThi.length >= phongCount * 2) {
+          } else if (danhSachGVTheoNgayThi.length >= 2) {
             // Nếu đủ giảng viên ban đầu
-            group.cbo1 = danhSachGVTheoNgayThi.slice(0, phongCount).map(gv => gv.username).join('-');
-            group.cbo2 = danhSachGVTheoNgayThi.slice(phongCount, phongCount * 2).map(gv => gv.username).join('-');
-  
+            group.cbo1 = danhSachGVTheoNgayThi[0]?.username;
+            group.cbo2 = danhSachGVTheoNgayThi[1]?.username;
+
             // Xóa giảng viên đã phân công khỏi danh sách giảng viên của ngày thi
-            danhSachGVTheoNgayThi = danhSachGVTheoNgayThi.slice(phongCount * 2);
+            danhSachGVTheoNgayThi = danhSachGVTheoNgayThi.slice(2);
           } else {
             // Nếu không đủ giảng viên sau khi lấy lại danh sách
             group.cbo1 = null;
@@ -677,12 +656,13 @@ const PcCoiThi = () => {
         }
       });
     }
-  
+
     // Cập nhật lại kết quả sau khi phân công
     setResultFinals(groupedByNgayThi.flat());
     setActiveTab("2");
+
   };
-  
+
 
   // -== HÀM TRẢ VỀ MẢNG NGÀY ĐỂ RANDOM ========
   const getValidDates = () => {
@@ -725,26 +705,15 @@ const PcCoiThi = () => {
       return
     }
 
-
-
-
-
-
-
-
-
-
+    let mon = result
     // Lọc ra các môn có hinhThuc là 'TH'
-    let mon = result.filter(mon => mon.info.hinhThuc !== 'TH');
+    const monTH = mon.filter(mon => mon.hinhThuc === 'TH');
+    mon = mon.filter(mon => mon.hinhThuc !== 'TH');
 
     let listMon = mon;
     let listMonClone = mon;
     let resultFinal = [];
 
-    //========== XỬ LÝ MÔN THỰC HÀNH Ở ĐÂY ==========
-    let resultFinalTH = [];
-
-    const monTH = result.filter(mon => mon.info.hinhThuc === 'TH');
     const { phongHoc, phongMay } = listPhongSelect.reduce((acc, phong) => {
       if (phong.loai === "Phòng học") {
         acc.phongHoc.push(phong);
@@ -754,78 +723,10 @@ const PcCoiThi = () => {
       return acc;
     }, { phongHoc: [], phongMay: [] });
 
-    monTH.forEach(mon => {
-      let soLuongConLai = mon.tongSoThiSinh; // Số lượng sinh viên cần phân phòng cho môn
-      let phongIndex = 0; // Vị trí phòng hiện tại
-      let listPhong = phongMay; // Danh sách phòng có sẵn
-      let selectedPhong = []; // Mảng để lưu các phòng đã chọn
-      let soLuongPhong = []; // Mảng lưu số lượng sinh viên phân cho từng phòng
+    // console.log('Phòng học:', phongHoc);
+    // console.log('Phòng máy:', phongMay);
 
-      // Tạo đối tượng item ban đầu
-      let item = {
-        _id: Math.random().toString(36).substr(2, 9),
-        maHocPhan: [mon.info.maHocPhan],
-        hocPhan: [mon.info.tenHocPhan],
-        lop: [mon.lop],
-        soLuong: [], // Mảng số lượng sinh viên ứng với từng phòng
-        ngayThi: '',
-        ca: '',
-        phong: [],  // Danh sách phòng sẽ được thêm sau
-        cbo1:  '',
-        cbo2:  '',
-        tc: [mon.info.soTinChi],
-        hinhThuc: [mon.info.hinhThuc],
-        thoiGian: [mon.info.thoiGian],
-        danhSachThiSinh: [mon.sinhVien], // Danh sách sinh viên
-        diaDiem: examSessions,
-        namHoc,
-        loaiDaoTao,
-        loaiKyThi,
-        hocKy,
-      };
-
-
-      // Tiến hành phân phòng
-      while (soLuongConLai > 0) {
-        if (phongIndex >= listPhong.length) {
-          toast.error(`Không còn phòng để phân cho môn ${mon.info.tenHocPhan}`);
-          break; // Thoát vòng lặp nếu hết phòng
-        }
-
-        const phong = listPhong[phongIndex]; // Lấy phòng hiện tại
-        const soCho = phong.soCho; // Sức chứa của phòng
-
-        selectedPhong.push(phong); // Thêm phòng vào danh sách chọn
-
-        phongIndex++; // Di chuyển đến phòng tiếp theo
-        soLuongConLai -= soCho
-      }
-
-      // Chia đều sinh viên cho các phòng đã chọn
-      if (selectedPhong.length > 0) {
-        // Chia đều số lượng sinh viên cho các phòng
-        let soLuongMoiPhong = Math.floor(mon.tongSoThiSinh / selectedPhong.length); // Lấy số lượng sinh viên tối đa cho mỗi phòng
-        let soLuongDuPhong = mon.tongSoThiSinh % selectedPhong.length; // Lấy phần dư nếu có
-
-        selectedPhong.forEach((phong, index) => {
-          let soLuong = soLuongMoiPhong;
-          if (index < soLuongDuPhong) {
-            soLuong += 1; // Thêm dư vào các phòng đầu tiên
-          }
-          soLuongPhong.push(soLuong);
-        });
-
-        // Cập nhật danh sách phòng và số lượng sinh viên vào item
-        item.phong = selectedPhong; // Lấy tên phòng
-        item.soLuong = soLuongPhong; // Lưu số lượng sinh viên vào từng phòng
-      } else {
-        console.warn(`Không đủ phòng để phân cho môn ${mon.info.tenHocPhan}`);
-      }
-
-      // Thêm item vào kết quả cuối cùng
-      resultFinalTH.push(item);
-    });
-    //=============================================================================================
+    //========== XỬ LÝ MÔN THỰC HÀNH Ở ĐÂY ==========
 
     let soPhongConLai = phongHoc
       .sort((a, b) => b.soCho - a.soCho); // Sắp xếp theo soCho giảm dần
@@ -874,6 +775,8 @@ const PcCoiThi = () => {
         loaiDaoTao,
         loaiKyThi,
         hocKy,
+
+
       }
 
       //// ==========  XỬ LÝ PHÒNG =============
@@ -963,11 +866,13 @@ const PcCoiThi = () => {
             const check = mon.tongSoThiSinh / phong.soCho
 
             if (check < 0.95) {
-              // ====== TÌM MÔN KHỚP NHẤT ======
-              let closestMatch = null;
+
+              // ============ TÌM MÔN KHỚP NHẤT 
+              let closestMatch = null; // Biến để lưu trữ kết quả phù hợp nhất
               let smallestDifference = Number.MAX_VALUE;
 
               listMonClone.forEach((mons) => {
+
                 const total = mon.tongSoThiSinh + mons.tongSoThiSinh;
                 const difference = Math.abs(phong.soCho - total);
 
@@ -981,30 +886,31 @@ const PcCoiThi = () => {
                 item.hocPhan.push(closestMatch.info.tenHocPhan);
                 item.soLuong.push(closestMatch.tongSoThiSinh);
 
-                item.maHocPhan.push(closestMatch.info.maHocPhan);
-                item.lop.push(closestMatch.lop);
-                item.hinhThuc.push(closestMatch.info.hinhThuc);
-                item.thoiGian.push(closestMatch.info.thoiGian);
+                item.maHocPhan.push(closestMatch.info.maHocPhan)
+                item.lop.push(closestMatch.lop)
+                item.hinhThuc.push(closestMatch.info.hinhThuc)
+                item.thoiGian.push(closestMatch.info.thoiGian)
 
-                item.tc.push(mon.info.soTinChi);
-                item.danhSachThiSinh.push(mon.sinhVien);
+                item.tc.push(mon.info.soTinChi)
+                item.danhSachThiSinh.push(mon.sinhVien)
 
-                // Loại bỏ môn đã gộp khỏi danh sách
-                listMonClone = listMonClone.filter(monG => monG.info.tenHocPhan !== closestMatch.info.tenHocPhan);
-                hocPhanDaDuyet.push(closestMatch.info.tenHocPhan);
+                listMonClone = listMonClone.filter(monG => monG.hocPhan != closestMatch.hocPhan);
+                hocPhanDaDuyet.push(closestMatch.info.tenHocPhan)
 
-                // Cập nhật số lượng gộp
-                soLuongGop += closestMatch.tongSoThiSinh;
+                // ĐỂ XEM CÓ GỘP TIẾP KHÔNG
+                soLuongGop += closestMatch.soLuong
               }
 
-              // ====== GỘP TIẾP ======
-              const check2 = soLuongGop / phong.soCho;
+              // ====== GỘP TIẾP =======
+              const check2 = soLuongGop / phong.soCho
               if (check2 < 0.96) {
-                let closestMatch2 = null;
-                let smallestDifference = Number.MAX_VALUE;
+
+                let closestMatch2 = null; // Biến để lưu trữ kết quả phù hợp nhất
+                let smallestDifference = Number.MAX_VALUE; // Biến lưu khoảng cách nhỏ nhất, khởi tạo với giá trị lớn nhất
 
                 listMonClone.forEach((mons) => {
-                  const total = soLuongGop + mons.tongSoThiSinh; // Sử dụng tổng đã gộp
+
+                  const total = mon.soLuong + mons.soLuong;
                   const difference = Math.abs(phong.soCho - total);
 
                   if (difference < smallestDifference && total <= phong.soCho) {
@@ -1015,25 +921,23 @@ const PcCoiThi = () => {
 
                 if (closestMatch2 != null) {
                   item.soLuong.push(closestMatch2.tongSoThiSinh);
-                  item.hocPhan.push(closestMatch2.info.tenHocPhan);
-                  item.maHocPhan.push(closestMatch2.info.maHocPhan);
-                  item.lop.push(closestMatch2.lop);
-                  item.hinhThuc.push(closestMatch2.info.hinhThuc);
-                  item.thoiGian.push(closestMatch2.info.thoiGian);
 
-                  item.tc.push(closestMatch2.info.soTinChi); // Đảm bảo gán đúng thông tin từ `closestMatch2`
-                  item.danhSachThiSinh.push(closestMatch2.sinhVien);
+                  item.hocPhan.push(closestMatch2.info.tenHocPhan)
+                  item.maHocPhan.push(closestMatch2.info.maHocPhan)
+                  item.lop.push(closestMatch2.lop)
+                  item.hinhThuc.push(closestMatch2.info.hinhThuc)
+                  item.thoiGian.push(closestMatch2.info.thoiGian)
 
-                  // Loại bỏ môn đã gộp khỏi danh sách
-                  listMonClone = listMonClone.filter(monG => monG.info.tenHocPhan !== closestMatch2.info.tenHocPhan);
-                  hocPhanDaDuyet.push(closestMatch2.info.tenHocPhan);
+                  item.tc.push(mon.info.soTinChi)
+                  item.danhSachThiSinh.push(mon.sinhVien)
 
-                  // Cập nhật số lượng gộp tiếp theo
-                  soLuongGop += closestMatch2.tongSoThiSinh;
+                  listMonClone = listMonClone.filter(monG => monG.info.tenHocPhan != closestMatch2.info.tenHocPhan);
+                  hocPhanDaDuyet.push(closestMatch2.info.tenHocPhan)
+
+                  // Sau vòng lặp, `closestMatch` sẽ chứa môn có tổng số lượng gần khớp nhất
                 }
               }
             }
-
 
             // XÓA PHÒNG ==========
             soPhongConLai = soPhongConLai.filter(phong => !phongTemp.some(p => p.tenPhong == phong.tenPhong));
@@ -1045,12 +949,9 @@ const PcCoiThi = () => {
         }
       }
       // Thêm item vào kết quả cuối cùng
+      console.log('ccccc', item)
       resultFinal.push(item);
     };
-    resultFinal = [...resultFinal, ...resultFinalTH];
-    console.log('111111111111', resultFinal)
-// =       =============================== =============
-
 
     // = =========== XỬ LÝ TIẾP  CA VỚI NGÀY ================
     if (resultFinal.length > 0) {
@@ -1089,7 +990,7 @@ const PcCoiThi = () => {
                   resultFinal[i].ca = '1';
                 }
                 else {
-                  resultFinal[i].ca = '3';
+                  resultFinal[i].ca = '5';
                 }
                 resultFinal[i].ngayThi = ngay;
                 monDaPhan.push(resultFinal[i]._id)
@@ -1118,7 +1019,7 @@ const PcCoiThi = () => {
 
             if (!(listPhang.some(item => listPhang2.includes(item))) && ele2.ngayThi !== '' && ele2.maHocPhan.length < (soMonChoMoiNgay + 1)) { //// LƯU Ý CHỖ NÀY LÀ 2 HAY 1
               resultFinal[i].ngayThi = ele2.ngayThi;
-              resultFinal[i].ca = ele2.ca === '1' ? '3' : '1';
+              resultFinal[i].ca = ele2.ca === '1' ? '5' : '1';
               break;
             }
           }
@@ -1126,22 +1027,21 @@ const PcCoiThi = () => {
         }
       }
 
+      if (resultFinal.length > 0) {
+        const data = countByNgayThi(resultFinal)
+        setMonThiMoiNgay(data)
+      }
+
+
+
+      if (resultFinal.length > 0) {
+        setResultFinals(resultFinal)
+        setActiveTab('5')
+      }
+      // ===============================
 
       // ========================================================
     }
-    if (resultFinal.length > 0) {
-      const data = countByNgayThi(resultFinal)
-      setMonThiMoiNgay(data)
-    }
-
-
-
-    if (resultFinal.length > 0) {
-      setResultFinals(resultFinal)
-      setActiveTab('5')
-    }
-    // ===============================
-
 
   }
 
@@ -1225,6 +1125,7 @@ const PcCoiThi = () => {
                       const startDate = dates[0]?.toDate();
                       const endDate = dates[1]?.toDate();
                       setExamDateRange({ startDate, endDate });
+                      console.log(examDateRange)
                     }
                   }}
                 />
@@ -1543,10 +1444,6 @@ const PcCoiThi = () => {
                   >
                     <p className="font-bold text-red-500">Ngày thi: {item.ngayThi}</p>
                     <p className="font-bold text-green-500">Số lượng môn thi: {item.soLuong}</p>
-                    <p className="font-bold text-orange-500">Số phòng ca sáng: {item.soPhongCa1}</p>
-                    <p className="font-bold text-orange-500">Số phòng ca chiều: {item.soPhongCa3}</p>
-                    <p className="font-bold text-blue-500">Số môn ca sáng: {item.soLuongCa1}</p>
-                    <p className="font-bold text-blue-500">Số môn ca chiều: {item.soLuongCa3}</p>
                     <hr />
                   </div>
                 ))}
@@ -1669,3 +1566,11 @@ const PcCoiThi = () => {
 };
 
 export default PcCoiThi;
+
+
+
+
+
+
+
+// Xử lý lưu kết quả model

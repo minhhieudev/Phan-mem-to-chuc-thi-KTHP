@@ -38,8 +38,15 @@ const TablePcCoiThi = ({ list, namHoc, loaiKyThi, loaiDaoTao, hocKy, listPhong, 
     setEditingRow({ ...record });
   };
 
+  useEffect(() => {
+    if (list && list.length > 0) {
+      setData2(list);
+      console.log('AAA', list)
+    }
+  }, [list]);
+
   const save = () => {
-    const updatedData = data2.map((item) => (item._id === editingKey ? editingRow : item));
+    const updatedData = data2.map((item, index) => (item._id === editingKey ? editingRow : item));
     setData(updatedData);
     setEditingKey("");
     toast.success("Thay đổi thành công!");
@@ -399,6 +406,7 @@ const TablePcCoiThi = ({ list, namHoc, loaiKyThi, loaiDaoTao, hocKy, listPhong, 
       toast.error("An error occurred while saving data");
     }
   }
+  const uniqueNgayThi = [...new Set(data2?.map(item => item.ngayThi))];
 
   return (
     <div className="flex flex-col">
@@ -430,8 +438,10 @@ const TablePcCoiThi = ({ list, namHoc, loaiKyThi, loaiDaoTao, hocKy, listPhong, 
               onChange={value => setNgayThiFilter(value)}
               value={ngayThiFilter}
             >
-              {listNgayThi?.map((ngayThi, index) => (
-                <Option key={index} value={ngayThi}>{ngayThi}</Option>
+              {uniqueNgayThi.map((ngayThi, index) => (
+                <Option key={index} value={ngayThi}>
+                  {ngayThi}
+                </Option>
               ))}
             </Select>
 
@@ -491,6 +501,11 @@ const TablePcCoiThi = ({ list, namHoc, loaiKyThi, loaiDaoTao, hocKy, listPhong, 
           bordered
           dataSource={currentList}
           columns={[
+            {
+              title: 'STT',
+              dataIndex: 'index',
+              render: (text, record, index) => <span style={{ fontWeight: 'bold' }}>{index + 1}</span>,
+            },
             {
               title: 'Họ và Tên',
               dataIndex: 'hoTen',
