@@ -82,7 +82,7 @@ const SideBar = () => {
       
       <Link href="/admin/khoa" className={`flex items-center gap-3 p-3 rounded-lg transition border-b-2 ${textColor("/admin/khoa")}`}>
         <BookOutlined style={{ fontSize: "20px", ...iconStyles.khoa }} />
-        <span>Khoa</span>
+        <span>Quản lý khoa</span>
       </Link>
 
       <Link href="/admin/send-email" className={`flex items-center gap-3 p-3 rounded-lg transition border-b-2 ${textColor("/admin/send-email")}`}>

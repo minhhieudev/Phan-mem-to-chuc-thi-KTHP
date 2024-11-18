@@ -40,7 +40,7 @@ const Dashboard = () => {
             title: "Học phần",
             dataIndex: "hocPhan",
             key: "hocPhan",
-            render: (text) => <span style={{ fontWeight: 'bold', color: 'blue' }}>{text}</span>
+            render: (text) => <span style={{ fontWeight: 'bold', color: 'blue' }}>{text.join(' - ')}</span>
         },
         {
             title: "Ngày thi",
