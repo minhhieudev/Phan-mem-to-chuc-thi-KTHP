@@ -47,7 +47,7 @@ const SideBar = () => {
       
       <Link href="/admin/pc-coi-thi" className={`flex items-center gap-3 p-3 rounded-lg transition border-b-2 ${textColor("/admin/pc-coi-thi")}`}>
         <ClockCircleOutlined style={{ fontSize: "20px", ...iconStyles.coiThi }} />
-        <span>Tạo lịch thi</span>
+        <span>Phân công coi thi</span>
       </Link>
       
       <Link href="/admin/pc-cham-thi" className={`flex items-center gap-3 p-3 rounded-lg transition border-b-2 ${textColor("/admin/pc-cham-thi")}`}>
