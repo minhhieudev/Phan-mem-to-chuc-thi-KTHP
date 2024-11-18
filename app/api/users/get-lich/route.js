@@ -2,7 +2,6 @@ export const dynamic = 'force-dynamic';
 import { connectToDB } from '@mongodb';
 import PcCoiThi from '@models/PcCoiThi';
 
-
 export const GET = async (req) => {
   try {
     await connectToDB();
@@ -21,15 +20,15 @@ export const GET = async (req) => {
       filter.namHoc = namHoc;
     }
 
-    if (ky && ky !== 'null'&& ky !== 'undefined') {
+    if (ky && ky !== 'null' && ky !== 'undefined') {
       filter.ky = ky;
     }
 
-    // Kiểm tra điều kiện username cho cán bộ coi thi 1 hoặc 2
+    // Kiểm tra điều kiện username cho cán bộ coi thi 1 hoặc 2 (là mảng)
     if (username) {
       filter.$or = [
-        { cbo1: { $regex: username, $options: 'i' } },
-        { cbo2: { $regex: username, $options: 'i' } }
+        { cbo1: { $elemMatch: { $regex: username, $options: 'i' } } },
+        { cbo2: { $elemMatch: { $regex: username, $options: 'i' } } }
       ];
     }
 

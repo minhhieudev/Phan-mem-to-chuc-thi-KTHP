@@ -29,8 +29,8 @@ export const GET = async (req) => {
 
     let giangViens = [];
 
-    if (khoa){
-      giangViens = await User.find({ khoa, role:'user' });
+    if (khoa) {
+      giangViens = await User.find({ khoa, role: 'user' });
     } else {
       giangViens = await User.find(); // Nếu không có khoa, lấy tất cả giảng viên
     }
@@ -63,15 +63,21 @@ export const GET = async (req) => {
 
     // Đếm số buổi cói thi cho mỗi giảng viên
     phanCongCoiThi.forEach(pc => {
-      [pc.cbo1, pc.cbo2].forEach(cb => {
-        if (cb) {
-          const giangVien = result.find(gv => gv.username == cb);
-          if (giangVien) {
-            giangVien.soBuoiCoiThi += 1;
-          }
+      // Lặp qua mảng cbo1 và cbo2 thay vì coi là các giá trị đơn lẻ
+      [pc.cbo1, pc.cbo2].forEach(cbArray => {
+        if (Array.isArray(cbArray)) {
+          cbArray.forEach(cb => {
+            if (cb) {
+              const giangVien = result.find(gv => gv.username == cb);
+              if (giangVien) {
+                giangVien.soBuoiCoiThi += 1;
+              }
+            }
+          });
         }
       });
     });
+
 
     return new Response(JSON.stringify(result), { status: 200 });
 

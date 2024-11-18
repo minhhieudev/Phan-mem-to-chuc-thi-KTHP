@@ -1,6 +1,7 @@
 export const dynamic = 'force-dynamic';
 import User from "@models/User";
 import { connectToDB } from "@mongodb";
+import { hash } from 'bcryptjs'; 
 
 // GET all users
 export const GET = async (req, res) => {
@@ -22,6 +23,9 @@ export const POST = async (req, res) => {
     await connectToDB();
     const { username, email, khoa, role } = await req.json();
 
+    // Mã hóa mật khẩu
+    const hashedPassword = await hash('123456@', 10)
+
     // Kiểm tra email đã tồn tại
     let existingUser = await User.findOne({ email });
 
@@ -30,16 +34,18 @@ export const POST = async (req, res) => {
       existingUser.username = username;
       existingUser.khoa = khoa;
       existingUser.role = role;
+      existingUser.password = hashedPassword; // Cập nhật mật khẩu đã mã hóa
       await existingUser.save();
 
       return new Response(JSON.stringify(existingUser), { status: 200 });
     } else {
-      // Nếu chưa tồn tại, tạo mới user
+      // Nếu chưa tồn tại, tạo mới user với mật khẩu đã mã hóa
       const newUser = new User({
         username,
         email,
         khoa,
         role,
+        password: hashedPassword, // Lưu mật khẩu đã mã hóa
       });
 
       await newUser.save();

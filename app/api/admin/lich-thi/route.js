@@ -70,11 +70,17 @@ export const POST = async (req) => {
           danhSachThiSinh
         } = item;
 
+        // Chuyển cbo1 và cbo2 từ chuỗi thành mảng các phần tử
+        const cbo1Array = cbo1 ? cbo1.split(' - ') : [];
+        const cbo2Array = cbo2 ? cbo2.split(' - ') : [];
+
         // Làm phẳng danh sách thí sinh nếu tồn tại
         const flatDanhSachThiSinh = danhSachThiSinh ? danhSachThiSinh.flat() : [];
 
         // Trích xuất mảng tenPhong từ phong
         const flatPhong = phong ? phong.map(p => p.tenPhong).flat() : [];
+
+        const flatSoLuong = Array.isArray(soLuong) ? soLuong.flat() : [soLuong];
 
         // Tìm và cập nhật nếu tồn tại, nếu không thì tạo mới
         const updatedItem = await PcCoiThi.findOneAndUpdate(
@@ -84,8 +90,8 @@ export const POST = async (req) => {
               maHocPhan,
               hocPhan,
               ca,
-              cbo1,
-              cbo2,
+              cbo1: cbo1Array, // Lưu mảng thay vì chuỗi
+              cbo2: cbo2Array, // Lưu mảng thay vì chuỗi
               phong: flatPhong, // Lưu mảng chỉ chứa tenPhong
               ngayThi,
               loaiDaoTao,
@@ -97,7 +103,7 @@ export const POST = async (req) => {
               ky: hocKy,
               tc,
               diaDiem,
-              soLuong,
+              soLuong: flatSoLuong,
               danhSachThiSinh: flatDanhSachThiSinh // Sử dụng danh sách đã được làm phẳng
             }
           },
@@ -107,6 +113,7 @@ export const POST = async (req) => {
         return updatedItem;
       })
     );
+
 
     // Trả về danh sách đã xử lý
     return new Response(JSON.stringify({}), { status: 201 });

@@ -17,10 +17,10 @@ const PcCoiThiSchema = new mongoose.Schema({
     type: Number,  // Ca thi
   },
   cbo1: {
-    type: String,  // Cán bộ 1
+    type: [String]  // Cán bộ 1
   },
   cbo2: {
-    type: String,  // Cán bộ 2
+    type: [String]  // Cán bộ 2
   },
   hinhThuc: {
     type: [String],  // Hình thức thi

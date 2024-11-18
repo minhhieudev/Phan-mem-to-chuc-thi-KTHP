@@ -58,9 +58,9 @@ const PcCoiThiTable = () => {
 
   useEffect(() => {
     const filtered = dataList.filter((item) =>
-      item?.cbo1?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      item?.cbo2?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      item?.hocPhan?.toLowerCase().includes(searchTerm.toLowerCase())
+      (item?.cbo1 && item.cbo1.some(val => val.toLowerCase().includes(searchTerm.toLowerCase()))) ||
+      (item?.cbo2 && item.cbo2.some(val => val.toLowerCase().includes(searchTerm.toLowerCase()))) ||
+      (item?.hocPhan?.toLowerCase().includes(searchTerm.toLowerCase()))
     );
     setFilteredData(filtered);
   }, [searchTerm, dataList]);
@@ -163,13 +163,13 @@ const PcCoiThiTable = () => {
       title: 'Cán bộ 1',
       dataIndex: 'cbo1',
       key: 'cbo1',
-      render: (text) => <span style={{ fontWeight: 'bold', color: 'blue' }}>{text}</span>,
+      render: (text) => <span style={{ fontWeight: 'bold', color: 'blue' }}>{text.join(' - ')}</span>,
     },
     {
       title: 'Cán bộ 2',
       dataIndex: 'cbo2',
       key: 'cbo2',
-      render: (text) => <span style={{ fontWeight: 'bold', color: 'blue' }}>{text}</span>,
+      render: (text) => <span style={{ fontWeight: 'bold', color: 'blue' }}>{text.join(' - ')}</span>,
     },
     {
       title: 'HT',
