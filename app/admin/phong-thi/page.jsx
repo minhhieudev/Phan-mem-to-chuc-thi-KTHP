@@ -332,7 +332,7 @@ const PhongThiForm = () => {
                 ) : (
 
                     <div>
-                        <div className="flex-grow overflow-auto" style={{ maxHeight: 'calc(85vh - 120px)' }}>
+                        <div className="flex-grow overflow-auto" style={{ maxHeight: 'calc(85vh - 130px)' }}>
                             <Table
                                 dataSource={paginatedData}
                                 columns={columns}

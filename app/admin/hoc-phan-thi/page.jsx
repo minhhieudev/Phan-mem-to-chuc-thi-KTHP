@@ -537,7 +537,7 @@ const HocPhanThiForm = () => {
                 </div>
                 {loading ? <Loader /> : (
 
-                    <div className="flex-grow overflow-auto" style={{ maxHeight: 'calc(90vh - 110px)' }}>
+                    <div className="flex-grow overflow-auto" style={{ maxHeight: 'calc(90vh - 120px)' }}>
                         <Table
                             columns={columns}
                             dataSource={paginatedData}

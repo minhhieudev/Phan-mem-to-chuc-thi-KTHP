@@ -40,7 +40,7 @@ const Dashboard = () => {
             title: "Học phần",
             dataIndex: "hocPhan",
             key: "hocPhan",
-            render: (text) => <span style={{ fontWeight: 'bold', color: 'blue' }}>{text.join(' - ')}</span>
+            render: (text) => <span style={{ fontWeight: 'bold', color: 'blue' }}>{Array.isArray(text) ? text.join(' - ') : text}</span>
         },
         {
             title: "Ngày thi",
@@ -52,15 +52,16 @@ const Dashboard = () => {
             title: "Cán bộ 1",
             dataIndex: "cbo1",
             key: "cbo1",
-            render: (text) => <span style={{ fontWeight: 'bold', color: 'red' }}>{text.join(' - ')}</span>
+            render: (text) => <span style={{ fontWeight: 'bold', color: 'red' }}>{Array.isArray(text) ? text.join(' - ') : text}</span>
         },
         {
             title: "Cán bộ 2",
             dataIndex: "cbo2",
             key: "cbo2",
-            render: (text) => <span style={{ fontWeight: 'bold', color: 'red' }}>{text.join(' - ')}</span>
+            render: (text) => <span style={{ fontWeight: 'bold', color: 'red' }}>{Array.isArray(text) ? text.join(' - ') : text}</span>
         }
     ];
+    
 
     const [selectedKhoa, setSelectedKhoa] = useState('Kỹ thuật - Công nghệ');
     const [khoaList, setKhoaList] = useState([]);
