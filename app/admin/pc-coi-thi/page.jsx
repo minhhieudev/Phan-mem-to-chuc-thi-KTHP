@@ -211,62 +211,142 @@ const PcCoiThi = () => {
 
   const importSinhVien = (e) => {
     setDataSinhVien([]);
-    setIsUploading(true)
+    setIsUploading(true);
     const file = e.target.files[0];
-
-    // Kiểm tra xem có file được chọn hay không
+  
     if (!file) {
       console.warn("Không có file nào được chọn.");
-      setIsUploading(false)
-
-      return; // Thoát sớm nếu không có file
+      setIsUploading(false);
+      return;
     }
+  
     const reader = new FileReader();
-
+  
     reader.onload = (event) => {
       const data = event.target.result;
       const workbook = XLSX.read(data, { type: "binary" });
-      const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
-      const ListData = XLSX.utils.sheet_to_json(firstSheet, { header: 1 });
-      ListData.shift();
+  
+      let currentMaMon = ""; // Biến lưu mã học phần hiện tại
+      const formattedData = [];
+  
+      // Đọc tất cả các sheet trong file Excel
+      workbook.SheetNames.forEach((sheetName) => {
+        const sheet = workbook.Sheets[sheetName];
+        const rawData = XLSX.utils.sheet_to_json(sheet, { header: 1 });
+        console.log("rawDatarawDatarawDatarawData:", rawData); // Kiểm tra dữ liệu đã được xử lý
+  
+        rawData.forEach((row) => {
+          console.log(row); // Để kiểm tra dữ liệu đang đọc
+  
+          // Kiểm tra dòng chứa "Mã học phần:"
+          if (row[0] && row[0].toLowerCase().includes("mã học phần:")) {
+            // Dùng regex để lấy mã học phần, bao gồm trường hợp có dấu cách hoặc ký tự lạ
+            const match = row[0].match(/mã học phần:\s*([a-zA-Z0-9]+)/i); // Tìm mã học phần
+            if (match) {
+              currentMaMon = match[1]; // Cập nhật mã học phần
+            }
+          }
+          // Xử lý các dòng sinh viên
+          else if (row.length >= 3 && row[1] && row[2]) {
+            // Loại bỏ các dòng tiêu đề
+            if (row[1] !== "Mã SV" && row[2] !== "Họ và tên") {
+              formattedData.push([row[1], row[2], row[3], currentMaMon || ""]); // Gán mã học phần cho sinh viên
+            }
+          }
+        });
+      });
 
-      // Map dữ liệu thành cấu trúc { maSV, hoTen, lop, maMon }
-      const formattedData = ListData.map((row, index) => ({
+            // Map dữ liệu thành cấu trúc { maSV, hoTen, lop, maMon }
+      const formattedDatas = formattedData.map((row, index) => ({
         key: index.toString(),
         maSV: row[0],
         hoTen: row[1],
         lop: row[2],
         maMon: row[3]
       }));
-
-      // Kiểm tra nếu có dữ liệu sau khi import
-      if (formattedData.length > 0) {
-        setDataSinhVien(formattedData);
-
-        // Tính toán số liệu thống kê
-        const uniqueLops = new Set(formattedData.map(item => item.lop)).size;
-        const uniqueSVs = new Set(formattedData.map(item => item.maSV)).size;
-        const uniqueMonThi = new Set(formattedData.map(item => item.maMon));
-
-        setSoSV(uniqueSVs);       // Tổng số sinh viên
-        setSoLop(uniqueLops);                // Tổng số lớp
-        setSoMonThi([...uniqueMonThi]);
-
-        //setListMaHP([...uniqueMonThi]);
-
-        setIsUploading(false)
-
+  
+      console.log("DATA:", formattedDatas); // Kiểm tra dữ liệu đã được xử lý
+  
+      // Cập nhật dữ liệu vào state
+      if (formattedDatas.length > 0) {
+        setDataSinhVien(formattedDatas);
       } else {
-        toast.error("Lỗi khi đọc file.");
+        toast.error("Không có dữ liệu hợp lệ trong file Excel.");
       }
+      setIsUploading(false);
     };
-
+  
     reader.onerror = () => {
-      toast.error("Đã xảy ra lỗi khi đọc file Excel");
+      toast.error("Đã xảy ra lỗi khi đọc file Excel.");
+      setIsUploading(false);
     };
-
+  
     reader.readAsBinaryString(file);
   };
+  
+  
+  
+
+  // const importSinhVien = (e) => {
+  //   setDataSinhVien([]);
+  //   setIsUploading(true)
+  //   const file = e.target.files[0];
+
+  //   // Kiểm tra xem có file được chọn hay không
+  //   if (!file) {
+  //     console.warn("Không có file nào được chọn.");
+  //     setIsUploading(false)
+
+  //     return; // Thoát sớm nếu không có file
+  //   }
+  //   const reader = new FileReader();
+
+  //   reader.onload = (event) => {
+  //     const data = event.target.result;
+  //     const workbook = XLSX.read(data, { type: "binary" });
+  //     const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+  //     const ListData = XLSX.utils.sheet_to_json(firstSheet, { header: 1 });
+  //     ListData.shift();
+
+  //     console.log('DATA:',ListData);
+
+  //     // Map dữ liệu thành cấu trúc { maSV, hoTen, lop, maMon }
+  //     const formattedData = ListData.map((row, index) => ({
+  //       key: index.toString(),
+  //       maSV: row[0],
+  //       hoTen: row[1],
+  //       lop: row[2],
+  //       maMon: row[3]
+  //     }));
+
+  //     // Kiểm tra nếu có dữ liệu sau khi import
+  //     if (formattedData.length > 0) {
+  //       setDataSinhVien(formattedData);
+
+  //       // Tính toán số liệu thống kê
+  //       const uniqueLops = new Set(formattedData.map(item => item.lop)).size;
+  //       const uniqueSVs = new Set(formattedData.map(item => item.maSV)).size;
+  //       const uniqueMonThi = new Set(formattedData.map(item => item.maMon));
+
+  //       setSoSV(uniqueSVs);       // Tổng số sinh viên
+  //       setSoLop(uniqueLops);                // Tổng số lớp
+  //       setSoMonThi([...uniqueMonThi]);
+
+  //       //setListMaHP([...uniqueMonThi]);
+
+  //       setIsUploading(false)
+
+  //     } else {
+  //       toast.error("Lỗi khi đọc file.");
+  //     }
+  //   };
+
+  //   reader.onerror = () => {
+  //     toast.error("Đã xảy ra lỗi khi đọc file Excel");
+  //   };
+
+  //   reader.readAsBinaryString(file);
+  // };
 
   useEffect(() => {
     if (dataSinhVien.length > 0) {
@@ -449,6 +529,7 @@ const PcCoiThi = () => {
       title: 'STT',
       dataIndex: 'index',
       render: (text, record, index) => <span style={{ fontWeight: 'bold' }}>{index + 1}</span>,
+      width: 50
     },
     {
       title: 'Mã SV',
@@ -537,6 +618,7 @@ const PcCoiThi = () => {
           </Space>
         );
       },
+      width: 130
     },
   ];
 
@@ -753,7 +835,7 @@ const PcCoiThi = () => {
         hocPhan: [mon.info.tenHocPhan],
         lop: [mon.lop],
         soLuong: [], // Mảng số lượng sinh viên ứng với từng phòng
-        ngayThi: listNgay[index+1],
+        ngayThi: listNgay[index + 1],
         ca: '1',
         phong: [],
         cbo1: '',
@@ -1110,7 +1192,7 @@ const PcCoiThi = () => {
         const soDeChiaCa = Math.round(itemDai.length / 2);
 
         for (let j = 0; j < itemDai.length; j++) {
-          if (j < soDeChiaCa){
+          if (j < soDeChiaCa) {
             resultFinal[i][j].ca = '1'
           }
           else {
@@ -1276,7 +1358,7 @@ const PcCoiThi = () => {
           <TabPane tab="Dữ liệu sinh viên" key="3">
             <div className="flex gap-3 h-[82vh] ">
               {/* Left Container */}
-              <div className="flex-[60%] p-1 bg-white rounded-md flex flex-col gap-2">
+              <div className="flex-[60%] p-1 bg-white rounded-md flex flex-col gap-2 border-2">
                 <div className=" h-[75%] p-1">
                   <Table
                     dataSource={dataSinhVien}
@@ -1330,17 +1412,17 @@ const PcCoiThi = () => {
 
               {/* Right Side with 3 Boxes */}
               <div className="space-y-3 flex-grow h-full">
-                <div className="p-4 bg-white shadow-md rounded-lg h-[32%] flex flex-col">
+                <div className="p-4 bg-white shadow-xl rounded-lg h-[32%] flex flex-col border-2">
                   <h3 className="text-lg text-heading3-bold ">SỐ MÔN THI</h3>
                   <p className="text-heading1-bold text-center text-blue-600 mt-auto mb-auto">{soMonThi.length}</p>
                 </div>
 
-                <div className="p-4 bg-white shadow-md rounded-lg h-[32%] flex flex-col">
+                <div className="p-4 bg-white shadow-xl rounded-lg h-[32%] flex flex-col border-2">
                   <h3 className="text-lg text-heading3-bold ">SỐ SINH VIÊN</h3>
                   <p className=" text-heading1-bold text-center text-green-600 mt-auto mb-auto">{soSV}</p>
                 </div>
 
-                <div className="p-4 bg-white shadow-md rounded-lg h-[32%] flex flex-col">
+                <div className="p-4 bg-white shadow-xl rounded-lg h-[32%] flex flex-col border-2">
                   <h3 className="text-lg text-heading3-bold ">SỐ LỚP</h3>
                   <p className=" text-heading1-bold text-center text-red-600 mt-auto mb-auto">{soLop}</p>
                 </div>
