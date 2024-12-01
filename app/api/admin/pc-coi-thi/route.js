@@ -55,8 +55,8 @@ export const POST = async (req) => {
       lop: data.lop.split(',').map(item => item.trim()),
       ngayThi: data.ngayThi,
       ca: data.ca || 0,
-      cbo1: data.cbo1 || '',
-      cbo2: data.cbo2 || '',
+      cbo1: data.cbo1.split(',').map(item => item.trim()),
+      cbo2: data.cbo2.split(',').map(item => item.trim()),
       thoiGian: data.thoiGian.split(',').map(item => item.trim()),
       phong: data.phong.split(',').map(item => item.trim()),
       diaDiem: data.diaDiem || '',
@@ -101,30 +101,38 @@ export const PUT = async (req) => {
     if (!id) {
       return new Response(JSON.stringify({ message: "ID bản ghi không được cung cấp." }), {
         status: 400,
-        headers: getHeaders(),  // Sử dụng hàm getHeaders
+        headers: getHeaders(),
       });
     }
 
-    const updatedAssignment = await PcCoiThi.findByIdAndUpdate(id, data, { new: true });
+    // Convert cbo1 and cbo2 to arrays, if they are provided as strings
+    const transformedData = {
+      ...data,
+      cbo1: data.cbo1 ? data.cbo1.split(',').map(item => item.trim()) : [],
+      cbo2: data.cbo2 ? data.cbo2.split(',').map(item => item.trim()) : []
+    };
+
+    const updatedAssignment = await PcCoiThi.findByIdAndUpdate(id, transformedData, { new: true });
     if (!updatedAssignment) {
       return new Response(JSON.stringify({ message: "Không tìm thấy bản ghi để cập nhật." }), {
         status: 404,
-        headers: getHeaders(),  // Sử dụng hàm getHeaders
+        headers: getHeaders(),
       });
     }
 
     return new Response(JSON.stringify(updatedAssignment), {
       status: 200,
-      headers: getHeaders(),  // Sử dụng hàm getHeaders
+      headers: getHeaders(),
     });
   } catch (err) {
     console.error("Lỗi khi cập nhật bản ghi phân công giảng dạy:", err);
     return new Response(JSON.stringify({ message: `Lỗi: ${err.message}` }), {
       status: 500,
-      headers: getHeaders(),  // Sử dụng hàm getHeaders
+      headers: getHeaders(),
     });
   }
 };
+
 
 export const DELETE = async (req) => {
   try {
