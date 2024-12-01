@@ -753,7 +753,7 @@ const PcCoiThi = () => {
         hocPhan: [mon.info.tenHocPhan],
         lop: [mon.lop],
         soLuong: [], // Mảng số lượng sinh viên ứng với từng phòng
-        ngayThi: listNgay[index+1],
+        ngayThi: listNgay[index + 1],
         ca: '1',
         phong: [],
         cbo1: '',
@@ -1110,7 +1110,7 @@ const PcCoiThi = () => {
         const soDeChiaCa = Math.round(itemDai.length / 2);
 
         for (let j = 0; j < itemDai.length; j++) {
-          if (j < soDeChiaCa){
+          if (j < soDeChiaCa) {
             resultFinal[i][j].ca = '1'
           }
           else {
@@ -1521,23 +1521,25 @@ const PcCoiThi = () => {
 
             <Row>
               <Col span={6} className="bg-gray-200 rounded-lg p-2">
-                <div className="text-heading4-bold text-blue text-center mb-2 mt-1">SỐ MÔN THI TRONG NGÀY</div>
-                {monThiMoiNgay.map((item, index) => (
-                  <div
-                    key={index}
-                    onClick={() => setNgayThiSelect(item.ngayThi)} // Gọi hàm khi phần tử được click
-                    className={`cursor-pointer hover:bg-gray-300 rounded-lg p-2 transition-all ${ngayThiSelect === item.ngayThi ? 'border-2 border-blue-500' : ''
-                      }`}
-                  >
-                    <p className="font-bold text-red-500">Ngày thi: {item.ngayThi}</p>
-                    <p className="font-bold text-green-500">Số lượng môn thi: {item.soLuong}</p>
-                    <p className="font-bold text-orange-500">Số phòng ca sáng: {item.soPhongCa1}</p>
-                    <p className="font-bold text-orange-500">Số phòng ca chiều: {item.soPhongCa3}</p>
-                    <p className="font-bold text-blue-500">Số môn ca sáng: {item.soLuongCa1}</p>
-                    <p className="font-bold text-blue-500">Số môn ca chiều: {item.soLuongCa3}</p>
-                    <hr />
-                  </div>
-                ))}
+                <div className="text-heading4-bold text-blue text-center mb-2 mt-1">SỐ MÔN THI TRONG </div>
+                <div className="  max-h-[500px] overflow-auto">
+                  {monThiMoiNgay.map((item, index) => (
+                    <div
+                      key={index}
+                      onClick={() => setNgayThiSelect(item.ngayThi)} // Gọi hàm khi phần tử được click
+                      className={`cursor-pointer hover:bg-gray-300 bg-white mt-2 rounded-lg p-2 transition-all ${ngayThiSelect === item.ngayThi ? 'border-2 border-blue-500' : ''
+                        }`}
+                    >
+                      <p className="font-bold text-red-500">Ngày thi: {item.ngayThi}</p>
+                      <p className="font-bold text-green-500">Số lượng môn thi: {item.soLuong}</p>
+                      <p className="font-bold text-orange-500">Số phòng ca sáng: {item.soPhongCa1}</p>
+                      <p className="font-bold text-orange-500">Số phòng ca chiều: {item.soPhongCa3}</p>
+                      <p className="font-bold text-blue-500">Số môn ca sáng: {item.soLuongCa1}</p>
+                      <p className="font-bold text-blue-500">Số môn ca chiều: {item.soLuongCa3}</p>
+                      <hr />
+                    </div>
+                  ))}
+                </div>
               </Col>
 
               <Col span={1}>

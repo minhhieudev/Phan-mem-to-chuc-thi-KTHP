@@ -28,7 +28,7 @@ const Dashboard = () => {
             width: 110
         },
         {
-            title: "Số buổi chấm thi",
+            title: "Số bài thi chấm",
             dataIndex: "soBuoiChamThi",
             key: "soBuoiChamThi",
             render: (text) => <span style={{ fontWeight: 'bold', color: 'red' }}>{text}</span>,

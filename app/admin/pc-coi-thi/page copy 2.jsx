@@ -1326,7 +1326,7 @@ const PcCoiThi = () => {
                   type="primary"
                   onClick={() => fetchDataHP()}
                 >
-                  {loading2 ? 'Đang xử lý...' : 'NEXT'}
+                  {loading2 ? 'Đang xử lý...' : 'Xử lý'}
                   {!loading2 && <RightOutlined />}
                 </Button>
 
