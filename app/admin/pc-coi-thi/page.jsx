@@ -124,6 +124,10 @@ const PcCoiThi = () => {
   }, [selectKhoa]);
 
   useEffect(() => {
+    console.log('Rerender')
+  }, []);
+
+  useEffect(() => {
     const fetchData = async () => {
       try {
         const res4 = await fetch(`/api/admin/khoa`, {
@@ -155,7 +159,6 @@ const PcCoiThi = () => {
 
         setLoading(false);
       } catch (error) {
-        console.log("Error:", error)
         message.error("Failed to fetch data");
       }
     };
@@ -233,10 +236,8 @@ const PcCoiThi = () => {
       workbook.SheetNames.forEach((sheetName) => {
         const sheet = workbook.Sheets[sheetName];
         const rawData = XLSX.utils.sheet_to_json(sheet, { header: 1 });
-        console.log("rawDatarawDatarawDatarawData:", rawData); // Kiểm tra dữ liệu đã được xử lý
   
         rawData.forEach((row) => {
-          console.log(row); // Để kiểm tra dữ liệu đang đọc
   
           // Kiểm tra dòng chứa "Mã học phần:"
           if (row[0] && row[0].toLowerCase().includes("mã học phần:")) {
@@ -265,7 +266,6 @@ const PcCoiThi = () => {
         maMon: row[3]
       }));
   
-      console.log("DATA:", formattedDatas); // Kiểm tra dữ liệu đã được xử lý
   
       // Cập nhật dữ liệu vào state
       if (formattedDatas.length > 0) {
@@ -1180,7 +1180,6 @@ const PcCoiThi = () => {
 
     });
     resultFinal = [...resultFinal, ...resultFinalTH];
-    console.log('Kết quả cuối , kết hợp với TH', resultFinal.flat())
     // ========================================= =============
 
 
@@ -1580,10 +1579,10 @@ const PcCoiThi = () => {
                 </Checkbox>
                 <div className="flex gap-3 flex-wrap">
 
-                  {filteredListPhong.map((phong) => (
+                  {filteredListPhong.map((phong, index) => (
                     <div >
                       <Checkbox
-                        key={phong.tenPhong}
+                        key={index}
                         onChange={(e) => handleSelectPhong(e.target.checked, phong)}
                         checked={listPhongSelect.includes(phong)}
                       >

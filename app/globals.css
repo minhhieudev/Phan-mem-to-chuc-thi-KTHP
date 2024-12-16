@@ -54,7 +54,7 @@
 }
 
 .menu {
-  @apply flex items-center gap-8;
+  @apply flex items-center gap-8 max-sm:gap-5;
 }
 
 .profilePhoto {

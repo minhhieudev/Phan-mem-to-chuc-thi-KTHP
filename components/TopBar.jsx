@@ -38,7 +38,7 @@ const TopBar = () => {
           >
             Admin
           </Link>} */}
-        <div className="text-heading4-bold text-green-400">
+        <div className="text-heading4-bold  text-green-600 max-sm:text-base-bold ">
           {user?.username}
         </div>
 

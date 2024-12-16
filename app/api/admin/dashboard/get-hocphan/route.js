@@ -57,7 +57,6 @@ export const GET = async (req) => {
       }
     });
 
-    console.log('Filter:', filter);
 
     // Tính phần trăm hoàn thành
     const totalAssignments = soPhanCongCoiThi.length;

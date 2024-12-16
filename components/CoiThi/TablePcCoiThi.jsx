@@ -2,13 +2,14 @@
 
 import React, { useEffect, useState } from "react";
 import { Table, Popconfirm, Button, Input, Space, Pagination, Spin, Modal, Select } from "antd";
-
 import toast from "react-hot-toast";
 import { useSession } from "next-auth/react";
-import { exportLichThi } from '../fileExport'
+import { exportLichThi, exportLichThiExcel } from '../fileExport'
 
 const TablePcCoiThi = ({ list, namHoc, loaiKyThi, loaiDaoTao, hocKy, listPhong, listNgayThi }) => {
   const [data2, setData2] = useState(list);
+  const [dataUser, setDataUser] = useState([]);
+
 
   const [data, setData] = useState([]);
   const [editingKey, setEditingKey] = useState("");
@@ -41,7 +42,6 @@ const TablePcCoiThi = ({ list, namHoc, loaiKyThi, loaiDaoTao, hocKy, listPhong, 
   useEffect(() => {
     if (list && list.length > 0) {
       setData2(list);
-      console.log('AAA', list)
     }
   }, [list]);
 
@@ -387,26 +387,170 @@ const TablePcCoiThi = ({ list, namHoc, loaiKyThi, loaiDaoTao, hocKy, listPhong, 
     current * pageSize
   );
   const handleSubmit = async () => {
-    //setLoading(true)
+    setLoading(true); // Bắt đầu loading
     try {
-      const res = await fetch("/api/admin/lich-thi", {
+        const res = await fetch("/api/admin/lich-thi", {
+            method: "POST",
+            body: JSON.stringify(list),
+            headers: { "Content-Type": "application/json" },
+        });
+
+        if (res.ok) {
+            toast.success("Lưu thành công");
+        } else {
+            toast.error("Failed to save record");
+        }
+    } catch (err) {
+        toast.error("An error occurred while saving data");
+    } finally {
+        setLoading(false); // Kết thúc loading
+    }
+  };
+  const uniqueNgayThi = [...new Set(data2?.map(item => item.ngayThi))];
+  // Nội dung email
+  const contentEmail = `
+  <div style="font-family: Arial, sans-serif; line-height: 1.5;">
+      <h2 style="color: #2c3e50;">Kính gửi Quý Thầy / Cô,</h2>
+      
+      <p>Trường Đại học Phú Yên xin gửi tới Quý Thầy / Cô thông báo về lịch coi thi cho học kỳ <strong>${hocKy}</strong> năm học <strong>${namHoc}</strong> với loại đào tạo <strong>${loaiDaoTao}</strong>.</p>
+      
+      <p>Trong lịch thi này, Quý Thầy / Cô sẽ thấy các thông tin chi tiết về thời gian, địa điểm và môn thi. Xin vui lòng kiểm tra kỹ lưỡng và phản hồi nếu có bất kỳ thắc mắc hay điều chỉnh nào cần thiết.</p>
+      
+      <h3 style="color: #2980b9;">Thông tin lịch thi:</h3>
+      <ul>
+          <li><strong>Thời gian thi:</strong> [Thời gian cụ thể]</li>
+          <li><strong>Địa điểm thi:</strong> [Địa điểm cụ thể]</li>
+          <li><strong>Môn thi:</strong> [Danh sách môn thi]</li>
+      </ul>
+      
+      <p>Quý Thầy / Cô có thể tải xuống lịch thi từ tệp đính kèm trong email này.</p>
+      
+      <p>Nếu có bất kỳ câu hỏi hay cần thêm thông tin, xin vui lòng liên hệ với Phòng Hành chính - Nhân sự qua email hoặc số điện thoại dưới đây.</p>
+      
+      <p>Trân trọng,<br />
+      Nguyễn Văn B<br />
+      Phòng Đào Tạo<br />
+      Trường Đại học Phú Yên<br />
+      <a href="mailto:email@example.com">email@example.com</a><br />
+      0123 456 789</p>
+  </div>
+`;
+  const handleSendEmail = async () => {
+
+    // Hiển thị modal xác nhận
+    Modal.confirm({
+      title: 'Xác nhận',
+      content: 'Bạn có chắc chắn muốn gửi lịch thi đến tất cả giảng viên?',
+      onOk: async () => {
+        setLoading(true); // Bắt đầu loading
+        // Xuất file và nhận blob
+        const fileBlob = exportLichThi(data2, `LỊCH COI THI KẾT THÚC HỌC PHẦN - HỆ`, hocKy, namHoc, loaiDaoTao);
+
+        if (!(fileBlob instanceof Blob)) {
+          console.error("fileBlob is not a valid Blob");
+          return; // Dừng lại nếu fileBlob không phải là Blob
+        }
+
+        try {
+          // Tự động upload file
+          const result = await uploadFile(fileBlob); // Gọi hàm uploadFile
+
+          const url = result?.secure_url;
+          const filename = result?.original_filename;
+
+          const publicId = result?.public_id;
+          const fileExtension = publicId?.split('.').pop();
+
+          const contentType = fileExtension === 'xlsx'
+            ? 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+            : fileExtension?.startsWith('jpg') || fileExtension?.startsWith('png') || fileExtension?.startsWith('jpeg')
+              ? `image/${fileExtension}`
+              : 'application/octet-stream';
+
+          const fileObject = [{
+            filename: `${filename}.${fileExtension}`,
+            path: url,
+            contentType
+          }];
+
+
+          if (fileObject) {
+            const res = await fetch(`/api/admin/user`, {
+              method: "GET",
+              headers: { "Content-Type": "application/json" },
+            });
+            if (res.ok) {
+              const data = await res.json();
+              setDataUser(data);
+
+              if (dataUser) {
+                // Gọi API gửi email với fileObject
+                const res = await fetch("/api/admin", {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({
+                    subject: "Lịch coi thi",
+                    html: contentEmail,
+                    attachments: fileObject,
+                    email: [...dataUser.map(item => item.email)]
+                  })
+
+                });
+
+                if (res.ok) {
+                  toast.success("Đã gửi email đến tất cả giảng viên!");
+                } else {
+                  toast.error("Có lỗi xảy ra khi gửi email!");
+                }
+
+              }
+            } else {
+              toast.error("Failed to fetch data email user");
+            }
+          }
+
+        } catch (error) {
+          console.error("Error sending email:", error);
+          toast.error("Có lỗi xảy ra khi gửi email!");
+        } finally {
+          setLoading(false); // Kết thúc loading
+        }
+      },
+      onCancel() {
+        console.log('Cancel');
+      },
+    });
+
+
+  };
+
+  // Hàm upload file
+  const uploadFile = async (fileBlob) => {
+    const formData = new FormData();
+    formData.append('file', fileBlob, 'data-sv.xlsx'); // Đặt tên file
+    formData.append('upload_preset', 'e0rggou2'); // Đảm bảo bạn đã cấu hình upload preset trong Cloudinary
+    formData.append('source', 'uw'); // Thêm trường source
+    formData.append('api_key', 'YOUR_API_KEY'); // Thêm API Key của bạn vào đây
+
+    try {
+      const response = await fetch("https://api.cloudinary.com/v1_1/dpxcvonet/upload", {
         method: "POST",
-        body: JSON.stringify(list),
-        headers: { "Content-Type": "application/json" },
+        body: formData,
       });
 
-      if (res.ok) {
-        toast.success("Lưu thành công");
-        setLoading(false)
-
-      } else {
-        toast.error("Failed to save record");
+      if (!response.ok) {
+        const errorData = await response.json(); // Lấy dữ liệu lỗi từ phản hồi
+        throw new Error(`Failed to upload file: ${errorData.error.message}`);
       }
-    } catch (err) {
-      toast.error("An error occurred while saving data");
+
+      return await response.json();
+    } catch (error) {
+      console.error("Error uploading file:", error);
+      throw error; // Ném lỗi để xử lý ở nơi gọi hàm
     }
-  }
-  const uniqueNgayThi = [...new Set(data2?.map(item => item.ngayThi))];
+  };
+
+
 
   return (
     <div className="flex flex-col">
@@ -535,8 +679,11 @@ const TablePcCoiThi = ({ list, namHoc, loaiKyThi, loaiDaoTao, hocKy, listPhong, 
 
       <div className="mt-2 flex justify-around">
         <div className="b text-center rounded-md  flex justify-center gap-10">
-          <Button type="primary" className="button-chinh-quy" onClick={handleSubmit}>Lưu</Button>
-          <Button onClick={() => exportLichThi(data2, `LỊCH COI THI KẾT THÚC HỌC PHẦN - HỆ`, hocKy, namHoc, loaiDaoTao)} type="primary" className="button-lien-thong-vlvh" >Xuất Excel</Button>
+          <Button type="primary" className="button-chinh-quy" onClick={handleSubmit} loading={loading}>
+            Lưu
+          </Button>
+          <Button onClick={() => exportLichThiExcel(data2, `LỊCH COI THI KẾT THÚC HỌC PHẦN - HỆ`, hocKy, namHoc, loaiDaoTao)} type="primary" className="button-lien-thong-vlvh" >Xuất Excel</Button>
+          <Button onClick={handleSendEmail} type="primary" className="button-kiem-nhiem">Gửi email</Button>
 
         </div>
         <Pagination

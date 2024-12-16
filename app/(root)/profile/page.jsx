@@ -27,7 +27,6 @@ const Profile = () => {
       });
       if (res.ok) {
         const data = await res.json();
-        console.log('Khoa List:', data);
         setKhoaList(data);
       } else {
         toast.error("Failed to fetch khoa data");
@@ -53,7 +52,6 @@ const Profile = () => {
 
   useEffect(() => {
     if (user) {
-      console.log('User khoa:', user.khoa);
       reset({
         username: user?.username,
         profileImage: user?.profileImage,
@@ -68,7 +66,6 @@ const Profile = () => {
   };
 
   const updateUser = async (data) => {
-    console.log('Data:', data);
     setLoading(true);
     try {
       const res = await fetch(`/api/users/${user._id}/update`, {
@@ -159,7 +156,6 @@ const Profile = () => {
             }}
             uploadPreset="e0rggou2"
             onClick={() => {
-              console.log("Upload button clicked");
             }}  // Thêm sự kiện onClick để kiểm tra nút được nhấn
           >
             <p className="text-body-bold ml-3">Upload new photo</p>

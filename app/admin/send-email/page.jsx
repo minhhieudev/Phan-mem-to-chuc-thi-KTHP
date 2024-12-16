@@ -94,7 +94,6 @@ const SendEmail = () => {
                 toast.error("Có lỗi xảy ra!");
             }
         } catch (err) {
-            console.log(err);
             toast.error("Có lỗi xảy ra!", err);
         }
     };
@@ -119,7 +118,6 @@ const SendEmail = () => {
         };
 
         setFileUrl((prevUrls) => [...prevUrls, fileObject]);
-        console.log('Url:', fileUrl);
     };
 
     const contentEmail = `

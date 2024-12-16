@@ -15,7 +15,6 @@ export const GET = async (req) => {
     const hocKy = searchParams.get('hocKy');
     const khoa = searchParams.get('khoa');
 
-    console.log('Khoa:', khoa)
 
     let filter = {};
 

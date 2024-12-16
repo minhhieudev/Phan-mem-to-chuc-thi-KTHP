@@ -17,9 +17,6 @@ export const POST = async (req) => {
     });
     
 
-    console.log('data', hocPhanList);
-
-
     // Trả về phản hồi thành công với danh sách các đối tượng tìm được
     return new Response(JSON.stringify(hocPhanList), { status: 200 });
   } catch (err) {

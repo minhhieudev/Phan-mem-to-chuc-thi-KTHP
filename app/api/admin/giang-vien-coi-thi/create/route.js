@@ -54,8 +54,6 @@ export const POST = async (req) => {
     // Lấy dữ liệu từ body của yêu cầu
     const { users } = await req.json();
 
-    console.log("Dữ liệu nhận được:", users);
-
     if (!users || !Array.isArray(users)) {
       return new Response(JSON.stringify({ message: "Invalid data format" }), { status: 400 });
     }

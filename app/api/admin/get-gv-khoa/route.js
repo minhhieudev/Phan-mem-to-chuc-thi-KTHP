@@ -16,10 +16,6 @@ export const GET = async (req, res) => {
 
     const usersWithUserRole = await User.find({ role: 'user', khoa: userInfo.khoa });
 
-    console.log(userInfo)
-    console.log('Khoa:',usersWithUserRole)
-
-
     return new Response(JSON.stringify(usersWithUserRole), { status: 200 });
   } catch (err) {
     console.log(err);

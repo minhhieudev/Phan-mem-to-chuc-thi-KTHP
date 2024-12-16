@@ -28,7 +28,7 @@ const Dashboard = () => {
             width: 110
         },
         {
-            title: "Số bài thi chấm",
+            title: "Số bài chấm",
             dataIndex: "soBuoiChamThi",
             key: "soBuoiChamThi",
             render: (text) => <span style={{ fontWeight: 'bold', color: 'red' }}>{text}</span>,
@@ -40,7 +40,7 @@ const Dashboard = () => {
             title: "Học phần",
             dataIndex: "hocPhan",
             key: "hocPhan",
-            render: (text) => <span style={{ fontWeight: 'bold', color: 'blue' }}>{text}</span>
+            render: (text) => <span style={{ fontWeight: 'bold', color: 'blue' }}>{Array.isArray(text) ? text.join(' - ') : text}</span>
         },
         {
             title: "Ngày thi",
@@ -52,13 +52,13 @@ const Dashboard = () => {
             title: "Cán bộ 1",
             dataIndex: "cbo1",
             key: "cbo1",
-            render: (text) => <span style={{ fontWeight: 'bold', color: 'red' }}>{text}</span>
+            render: (text) => <span style={{ fontWeight: 'bold', color: 'red' }}>{Array.isArray(text) ? text.join(' - ') : text}</span>
         },
         {
             title: "Cán bộ 2",
             dataIndex: "cbo2",
             key: "cbo2",
-            render: (text) => <span style={{ fontWeight: 'bold', color: 'red' }}>{text}</span>
+            render: (text) => <span style={{ fontWeight: 'bold', color: 'red' }}>{Array.isArray(text) ? text.join(' - ') : text}</span>
         }
     ];
 
@@ -67,7 +67,7 @@ const Dashboard = () => {
     const [current, setCurrent] = useState(1);
     const [pageSize, setPageSize] = useState(10);
     const [current2, setCurrent2] = useState(1);
-    const [pageSize2, setPageSize2] = useState(5);
+    const [pageSize2, setPageSize2] = useState(10);
     const [namHoc, setNamHoc] = useState('2024-2025');
     const [hocKy, setHocKy] = useState(null);
 
@@ -150,7 +150,6 @@ const Dashboard = () => {
             });
             if (res1.ok) {
                 const data = await res1.json();
-                console.log('Res hocphan:', data)
                 setThongKeCoiThi(data)
                 // Xử lý dữ liệu nếu cần
             } else {
@@ -235,21 +234,19 @@ const Dashboard = () => {
         );
     }, [listCount, searchTerm]);
 
-    // Tạo danh sách đã lọc dựa trên searchTerm
     const filteredList2 = useMemo(() => {
-        console.log('LLL:', listLichMoi)
         return listLichMoi.filter(item => {
             // Kiểm tra xem có mã môn học nào bắt đầu bằng selectedKhoaCode không (không phân biệt chữ hoa/thường)
             const matchesKhoaCode = !selectedKhoaCode ||
-                item.maHocPhan.some(code => code.toLowerCase().startsWith(selectedKhoaCode.toLowerCase()));
-
+                (item.maHocPhan && item.maHocPhan.some(code => code.toLowerCase().startsWith(selectedKhoaCode.toLowerCase())));
+    
             // Kiểm tra điều kiện tìm kiếm với searchTerm2, không phân biệt chữ hoa/thường
             const lowerSearchTerm = searchTerm2?.toLowerCase() || '';
             const matchesSearchTerm = !searchTerm2 ||
-                item.tenHocPhan.toLowerCase().includes(lowerSearchTerm) ||
-                item.cbo1.toLowerCase().includes(lowerSearchTerm) ||
-                item.cbo2.toLowerCase().includes(lowerSearchTerm);
-
+                (item?.hocPhan && Array.isArray(item.hocPhan) && item.hocPhan.some(hocPhan => hocPhan.toLowerCase().includes(lowerSearchTerm))) ||
+                (item?.cbo1 && Array.isArray(item.cbo1) && item.cbo1.some(cbo => cbo.toLowerCase().includes(lowerSearchTerm))) ||
+                (item?.cbo2 && Array.isArray(item.cbo2) && item.cbo2.some(cbo => cbo.toLowerCase().includes(lowerSearchTerm)));
+    
             // Chỉ trả về những item thỏa mãn cả hai điều kiện
             return matchesKhoaCode && matchesSearchTerm;
         });

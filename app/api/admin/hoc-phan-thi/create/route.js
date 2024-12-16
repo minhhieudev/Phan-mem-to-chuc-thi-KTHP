@@ -8,8 +8,6 @@ export const POST = async (req) => {
 
     const { hocPhans } = await req.json();
 
-    console.log("Dữ liệu nhận được:", hocPhans);
-
     if (!hocPhans || !Array.isArray(hocPhans)) {
       return new Response(JSON.stringify({ message: "Invalid data format" }), { status: 400 });
     }
