@@ -1403,7 +1403,7 @@ const PcCoiThi = () => {
                   type="primary"
                   onClick={() => fetchDataHP()}
                 >
-                  {loading2 ? 'Đang xử lý...' : 'NEXT'}
+                  {loading2 ? 'Đang xử lý...' : 'XỬ LÝ'}
                   {!loading2 && <RightOutlined />}
                 </Button>
 
@@ -1533,7 +1533,7 @@ const PcCoiThi = () => {
             </div >
 
             <div className=" text-center rounded-md p-0 mt-2">
-              <Button type="primary" className="button-chinh-quy" onClick={phanBoSinhVien}>Xử lý</Button>
+              <Button type="primary" className="button-chinh-quy" onClick={phanBoSinhVien}>XỬ LÝ</Button>
             </div>
 
             {title === 'Chọn phòng' && (
