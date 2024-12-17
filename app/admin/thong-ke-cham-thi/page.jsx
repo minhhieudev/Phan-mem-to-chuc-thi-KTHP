@@ -211,6 +211,7 @@ const PcChamThiTable = () => {
             placeholder="Chọn loại kỳ thi"
             onChange={(value) => setLoaiKyThi(value)}
             className="w-[50%]"
+            allowClear
           >
             <Option value="Học kỳ 1">Học kỳ 1</Option>
             <Option value="Học kỳ 1 (đợt 2)">Học kỳ 1 (đợt 2)</Option>

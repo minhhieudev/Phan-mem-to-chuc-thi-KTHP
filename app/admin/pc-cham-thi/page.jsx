@@ -244,6 +244,7 @@ const PcChamThiTable = () => {
             placeholder="Chọn loại kỳ thi"
             onChange={(value) => setLoaiKyThi(value)}
             className="w-[50%]"
+            allowClear
           >
             <Option value="1">Chính thức</Option>
             <Option value="2">Đợt 2</Option>

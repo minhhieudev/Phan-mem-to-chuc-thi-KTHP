@@ -124,10 +124,6 @@ const PcCoiThi = () => {
   }, [selectKhoa]);
 
   useEffect(() => {
-    console.log('Rerender')
-  }, []);
-
-  useEffect(() => {
     const fetchData = async () => {
       try {
         const res4 = await fetch(`/api/admin/khoa`, {

@@ -14,7 +14,7 @@ export const GET = async (req) => {
 
     let filter = {};
 
-    if (loaiKyThi) {
+    if  (loaiKyThi && loaiKyThi !== 'null'&& loaiKyThi !== 'undefined'){
       filter.loaiKyThi = loaiKyThi;
     }
     if (namHoc) {
@@ -28,6 +28,8 @@ export const GET = async (req) => {
       filter.loai = loai;
     }
     const assignments = await PcChamThi.find(filter);
+
+    console.log('HHHHH',filter)
 
     return new Response(JSON.stringify(assignments), { status: 200 });
   } catch (err) {

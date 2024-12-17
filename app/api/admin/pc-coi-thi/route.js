@@ -15,8 +15,9 @@ export const GET = async (req) => {
     const loai = searchParams.get('loai');
     const hocKy = searchParams.get('hocKy');
 
+
     let filter = {};
-    if (loaiKyThi) filter.loaiKyThi = loaiKyThi;
+    if (loaiKyThi && loaiKyThi !== 'null' && loaiKyThi !== 'undefined') filter.loaiKyThi = loaiKyThi;
     if (namHoc) filter.namHoc = namHoc;
     if (loai) filter.loaiDaoTao = loai;
     if (hocKy && hocKy !== 'null' && hocKy !== 'undefined') filter.ky = hocKy;

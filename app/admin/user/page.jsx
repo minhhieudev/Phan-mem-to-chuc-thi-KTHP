@@ -372,7 +372,7 @@ const UserForm = () => {
                             <Button className="bg-blue-500 hover:bg-blue-700" loading={isSubmitting} type="primary" htmlType="submit">
                                 {editRecord ? "Lưu chỉnh sửa" : "Thêm mới"}
                             </Button>
-                            <Button className="ml-4" htmlType="button" onClick={onReset}>
+                            <Button danger className="ml-4" htmlType="button" onClick={onReset}>
                                 Reset
                             </Button>
                         </div>
