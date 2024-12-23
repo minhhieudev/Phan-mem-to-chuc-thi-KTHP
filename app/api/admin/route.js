@@ -14,14 +14,16 @@ const transporter = nodemailer.createTransport({
 export const POST = async (req) => {
   try {
     await connectToDB();
-    const { subject, html, attachments, email } = await req.json();
+    const { subject, html, attachments } = await req.json();
+
+    const allUsers = await User.find().select('email');
 
     //const email = ['minhhieudev31@gmail.com', 'cocxoaidam209@gmail.com']
-    console.log('Email:',email)
+    console.log('Email:',allUsers)
 
     const mailOptions = {
       from: "TRƯỜNG ĐẠI HỌC PHÚ YÊN",
-      to: email.join(', '),
+      to: allUsers.join(', '),
       subject: subject || 'Default Subject',
       html: html || '<p>Default Email Body</p>',
       attachments: attachments,

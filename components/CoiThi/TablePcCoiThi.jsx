@@ -82,6 +82,7 @@ const TablePcCoiThi = ({ list, namHoc, loaiKyThi, loaiDaoTao, hocKy, listPhong, 
   const handleDelete = (recordId) => {
     const newData = data2.filter((item) => item._id !== recordId);
     setData2(newData);
+    setData(newData);
     toast.success("Đã xoá thành công!");
   };
 
@@ -148,7 +149,7 @@ const TablePcCoiThi = ({ list, namHoc, loaiKyThi, loaiDaoTao, hocKy, listPhong, 
     onSearch(); // gọi lại hàm lọc khi bất kỳ bộ lọc nào thay đổi
   }, [searchText, ngayThiFilter, caThiFilter, phongThiFilter, giangVienFilter]);
 
-
+  const uniqueNgayThi = listNgayThi?.map(item => item.ngayThi).filter((value, index, self) => self.indexOf(value) === index);
 
   const columns = [
     {
@@ -381,32 +382,12 @@ const TablePcCoiThi = ({ list, namHoc, loaiKyThi, loaiDaoTao, hocKy, listPhong, 
     },
   ];
 
-  // Phân trang dữ liệu
-  const paginatedData = data?.slice(
-    (current - 1) * pageSize,
-    current * pageSize
-  );
-  const handleSubmit = async () => {
-    setLoading(true); // Bắt đầu loading
-    try {
-        const res = await fetch("/api/admin/lich-thi", {
-            method: "POST",
-            body: JSON.stringify(list),
-            headers: { "Content-Type": "application/json" },
-        });
-
-        if (res.ok) {
-            toast.success("Lưu thành công");
-        } else {
-            toast.error("Failed to save record");
-        }
-    } catch (err) {
-        toast.error("An error occurred while saving data");
-    } finally {
-        setLoading(false); // Kết thúc loading
-    }
+  // Thêm hàm để tính toán dữ liệu đã phân trang
+  const getPaginatedData = () => {
+    const currentData = data.length > 0 ? data : data2;
+    return currentData.slice((current - 1) * pageSize, current * pageSize);
   };
-  const uniqueNgayThi = [...new Set(data2?.map(item => item.ngayThi))];
+
   // Nội dung email
   const contentEmail = `
   <div style="font-family: Arial, sans-serif; line-height: 1.5;">
@@ -418,9 +399,9 @@ const TablePcCoiThi = ({ list, namHoc, loaiKyThi, loaiDaoTao, hocKy, listPhong, 
       
       <h3 style="color: #2980b9;">Thông tin lịch thi:</h3>
       <ul>
-          <li><strong>Thời gian thi:</strong> [Thời gian cụ thể]</li>
-          <li><strong>Địa điểm thi:</strong> [Địa điểm cụ thể]</li>
-          <li><strong>Môn thi:</strong> [Danh sách môn thi]</li>
+          <li><strong>Thời gian thi:</strong></li>
+          <li><strong>Địa điểm thi:</strong> </li>
+          <li><strong>Môn thi:</strong></li>
       </ul>
       
       <p>Quý Thầy / Cô có thể tải xuống lịch thi từ tệp đính kèm trong email này.</p>
@@ -582,7 +563,7 @@ const TablePcCoiThi = ({ list, namHoc, loaiKyThi, loaiDaoTao, hocKy, listPhong, 
               onChange={value => setNgayThiFilter(value)}
               value={ngayThiFilter}
             >
-              {uniqueNgayThi.map((ngayThi, index) => (
+              {uniqueNgayThi?.map((ngayThi, index) => (
                 <Option key={index} value={ngayThi}>
                   {ngayThi}
                 </Option>
@@ -626,7 +607,7 @@ const TablePcCoiThi = ({ list, namHoc, loaiKyThi, loaiDaoTao, hocKy, listPhong, 
           </div>
           <Table
             columns={columns}
-            dataSource={data.length == [] ? data2 : data}
+            dataSource={getPaginatedData()}
             rowKey="_id"
             pagination={false}
           />
@@ -689,7 +670,7 @@ const TablePcCoiThi = ({ list, namHoc, loaiKyThi, loaiDaoTao, hocKy, listPhong, 
         <Pagination
           current={current}
           pageSize={pageSize}
-          total={data.length == 0 ? data2.length : data.length}
+          total={data.length > 0 ? data.length : data2.length}
           onChange={(page, size) => {
             setCurrent(page);
             setPageSize(size);
