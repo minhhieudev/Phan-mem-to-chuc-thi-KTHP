@@ -619,6 +619,52 @@ const PcCoiThi = () => {
   ];
 
   // Hàm đếm số lượng môn thi theo ngày
+  // const countByNgayThi = (array) => {
+  //   const counts = {};
+
+  //   // Đếm số lượng phần tử theo ngayThi, đồng thời đếm số lượng phòng thi và số lượng ca 1, ca 3
+  //   array.forEach(item => {
+  //     const ngayThi = item.ngayThi;
+  //     const caThi = item.ca;
+
+  //     // Khởi tạo nếu chưa có ngày thi trong counts
+  //     if (!counts[ngayThi]) {
+  //       counts[ngayThi] = {
+  //         soLuong: 0, // Tổng số lượng môn thi
+  //         soLuongCa1: 0, // Số lượng ca 1
+  //         soLuongCa3: 0, // Số lượng ca 3
+  //         soPhongCa1: 0,
+  //         soPhongCa3: 0,
+  //       };
+  //     }
+
+  //     // Tăng số lượng môn thi cho ngàyThi hiện tại
+  //     counts[ngayThi].soLuong++
+
+  //     // Đếm số lượng ca 1 và ca 3
+  //     if (caThi === '1') {
+  //       counts[ngayThi].soLuongCa1++
+  //       counts[ngayThi].soPhongCa1 += item.phong.length
+  //     } else if (caThi === '3') {
+  //       counts[ngayThi].soLuongCa3++
+  //       counts[ngayThi].soPhongCa3 += item.phong.length
+
+  //     }
+  //   });
+
+  //   // Chuyển đổi đối tượng counts thành mảng phần tử
+  //   const result = Object.keys(counts).map(ngay => ({
+  //     ngayThi: ngay,
+  //     soLuong: counts[ngay].soLuong, // Tổng số lượng môn thi
+  //     soLuongCa1: counts[ngay].soLuongCa1, // Số lượng ca 1
+  //     soLuongCa3: counts[ngay].soLuongCa3, // Số lượng ca 3
+  //     soPhongCa1: counts[ngay].soPhongCa1, // Số lượng ca 3
+  //     soPhongCa3: counts[ngay].soPhongCa3, // Số lượng ca 3
+  //   }));
+
+  //   return result;
+  // };
+
   const countByNgayThi = (array) => {
     try {
       // Kiểm tra đầu vào
