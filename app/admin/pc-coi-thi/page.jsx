@@ -639,14 +639,14 @@ const PcCoiThi = () => {
       }
 
       // Tăng số lượng môn thi cho ngàyThi hiện tại
-      counts[ngayThi].soLuong++;
+      counts[ngayThi].soLuong += item.maHocPhan.length;
 
       // Đếm số lượng ca 1 và ca 3
       if (caThi === '1') {
-        counts[ngayThi].soLuongCa1++;
+        counts[ngayThi].soLuongCa1+= item.maHocPhan.length;
         counts[ngayThi].soPhongCa1 += item.phong.length
       } else if (caThi === '3') {
-        counts[ngayThi].soLuongCa3++;
+        counts[ngayThi].soLuongCa3+= item.maHocPhan.length;
         counts[ngayThi].soPhongCa3 += item.phong.length
 
       }
@@ -897,6 +897,7 @@ const PcCoiThi = () => {
 
       let result = [];
       let index = 0;
+      let unassignedMons = [...mon]; // Tạo một bản sao của mảng môn học
 
       // Tạo bản đồ lưu trữ các lớp đã phân bổ theo ngày
       let assignedClasses = new Map();
@@ -906,8 +907,8 @@ const PcCoiThi = () => {
         let chunk = [];
         let addedCount = 0;
 
-        while (addedCount < chunkSize + additionalMon && index < mon.length) {
-          const currentMon = mon[index];
+        while (addedCount < chunkSize + additionalMon && index < unassignedMons.length) {
+          const currentMon = unassignedMons[index];
           const { lop } = currentMon;
 
           // Kiểm tra nếu lớp đã xuất hiện trong ngày
@@ -925,9 +926,9 @@ const PcCoiThi = () => {
             addedCount++;
             index++;
           } else {
-            // Nếu có xung đột, chuyển môn này sang ngày sau
-            index++;
-            mon.push(currentMon); // Đưa lại môn vào cuối danh sách để xử lý lại sau
+            // Nếu có xung đột, chuyển môn này xuống cuối danh sách
+            const conflictedMon = unassignedMons.splice(index, 1)[0];
+            unassignedMons.push(conflictedMon);
           }
         }
 

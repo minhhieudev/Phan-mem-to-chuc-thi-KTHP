@@ -149,7 +149,7 @@ const TablePcCoiThi = ({ list, namHoc, loaiKyThi, loaiDaoTao, hocKy, listPhong, 
     onSearch(); // gọi lại hàm lọc khi bất kỳ bộ lọc nào thay đổi
   }, [searchText, ngayThiFilter, caThiFilter, phongThiFilter, giangVienFilter]);
 
-  const uniqueNgayThi = listNgayThi?.map(item => item.ngayThi).filter((value, index, self) => self.indexOf(value) === index);
+  //const uniqueNgayThi = listNgayThi?.map(item => item.ngayThi).filter((value, index, self) => self.indexOf(value) === index);
 
   const columns = [
     {
@@ -387,6 +387,29 @@ const TablePcCoiThi = ({ list, namHoc, loaiKyThi, loaiDaoTao, hocKy, listPhong, 
     const currentData = data.length > 0 ? data : data2;
     return currentData.slice((current - 1) * pageSize, current * pageSize);
   };
+
+
+  const handleSubmit = async () => {
+    setLoading(true); // Bắt đầu loading
+    try {
+        const res = await fetch("/api/admin/lich-thi", {
+            method: "POST",
+            body: JSON.stringify(list),
+            headers: { "Content-Type": "application/json" },
+        });
+
+        if (res.ok) {
+            toast.success("Lưu thành công");
+        } else {
+            toast.error("Failed to save record");
+        }
+    } catch (err) {
+        toast.error("An error occurred while saving data");
+    } finally {
+        setLoading(false); // Kết thúc loading
+    }
+  };
+  const uniqueNgayThi = [...new Set(data2?.map(item => item.ngayThi))];
 
   // Nội dung email
   const contentEmail = `
