@@ -1599,8 +1599,8 @@ const PcCoiThi = () => {
 
             <Row>
               <Col span={6} className="bg-gray-200 rounded-lg p-2">
-                <div className="text-heading4-bold text-blue text-center mb-2 mt-1">SỐ MÔN THI TRONG </div>
-                <div className="  max-h-[500px] overflow-auto">
+                <div className="text-heading4-bold text-blue text-center mb-2 mt-1">SỐ MÔN THI TRONG NGÀY</div>
+                <div className="  max-h-[600px] overflow-auto">
                   {monThiMoiNgay.map((item, index) => (
                     <div
                       key={index}
@@ -1709,7 +1709,7 @@ const PcCoiThi = () => {
               </Modal>
             )}
 
-            <div className=" text-center rounded-md p-0 mt-2">
+            <div className=" text-center rounded-md p-0 mt-0">
               <Button type="primary" className="button-chinh-quy" onClick={() => phanCongCanBo(resultFinals)}>Tạo lịch thi</Button>
             </div>
           </TabPane>

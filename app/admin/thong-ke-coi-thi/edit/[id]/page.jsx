@@ -60,7 +60,9 @@ const PcCoiThiForm = () => {
                 ...data,
                 ngayThi: formattedNgayThi.format('DD/MM/YYYY'), // Chuyển đổi sang 'DD/MM/YYYY' hoặc định dạng cần thiết
                 hocKy: data.ky,
-                lop: data?.lop?.map(lop => Array.isArray(lop) ? lop.join(', ') : lop).join(' - ')
+                lop: data?.lop?.map(lop => Array.isArray(lop) ? lop.join(', ') : lop).join(' - '),
+                cbo1: data?.cbo1?.map(lop => Array.isArray(lop) ? lop.join(', ') : lop).join(' - '),
+                cbo2: data?.cbo2?.map(lop => Array.isArray(lop) ? lop.join(', ') : lop).join(' - ')
               };
 
               setEditRecord(dataFormat);

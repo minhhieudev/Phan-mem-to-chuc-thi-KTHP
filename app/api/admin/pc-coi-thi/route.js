@@ -99,6 +99,8 @@ export const PUT = async (req) => {
     await connectToDB();
 
     const { id, ...data } = await req.json();
+
+    console.log(data);
     if (!id) {
       return new Response(JSON.stringify({ message: "ID bản ghi không được cung cấp." }), {
         status: 400,

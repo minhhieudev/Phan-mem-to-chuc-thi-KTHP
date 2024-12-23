@@ -235,8 +235,8 @@ const Pages = () => {
               return (
                 <Card
                   key={index}
-                  title={exam.hocPhan.join(', ').toUpperCase()}  // Join the array into a string and convert to uppercase
-                  className="rounded-lg shadow-lg overflow-hidden w-full md:w-60"
+                  title={exam.hocPhan.length > 1 ? exam.hocPhan.join(',\n').toUpperCase() : exam.hocPhan.join(', ').toUpperCase()}  // Join the array into a string, convert to uppercase, and add newline if there are more than one name
+                  className="rounded-lg shadow-lg overflow-hidden w-full md:w-70" // Increased width for a larger card
                   style={{
                     backgroundColor: getCardColor(exam.ngayThi),
                     borderRadius: "12px",
@@ -292,7 +292,7 @@ const Pages = () => {
                     return (
                       <Card
                         key={index}
-                        title={exam.hocPhan.join(', ').toUpperCase()}  // Join the array into a string and convert to uppercase
+                        title={ exam.hocPhan.join(',\n').toUpperCase() }  
                         className="rounded-lg shadow-lg overflow-hidden w-full md:w-60"
                         style={{
                           backgroundColor: getCardColor(exam.ngayThi),
@@ -362,8 +362,8 @@ const Pages = () => {
                     return (
                       <Card
                         key={index}
-                        title={exam.hocPhan.join(', ').toUpperCase()}  // Join the array into a string and convert to uppercase
-                        className="rounded-lg shadow-lg overflow-hidden w-full md:w-60"
+                        title={exam.hocPhan.length > 1 ? exam.hocPhan.join(',\n').toUpperCase() : exam.hocPhan.join(', ').toUpperCase()}  // Join the array into a string and convert to uppercase
+                        className="rounded-lg shadow-lg overflow-hidden w-full md:w-70"
                         style={{
                           backgroundColor: getCardColor(exam.ngayThi),
                           borderRadius: "12px",

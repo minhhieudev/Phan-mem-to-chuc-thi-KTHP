@@ -563,7 +563,7 @@ const TablePcCoiThi = ({ list, namHoc, loaiKyThi, loaiDaoTao, hocKy, listPhong, 
           <Spin />
         </div>
       ) : (
-        <div className="flex-grow overflow-auto" style={{ maxHeight: 'calc(85vh - 120px)' }}>
+        <div className="flex-grow overflow-auto" style={{ maxHeight: 'calc(85vh - 60px)' }}>
           <div className="text-base-bold text-orange-600 text-center mb-1" style={{ textTransform: "uppercase" }}>
             KẾT QUẢ PHÂN CÔNG COI THI KỲ THI KẾT THÚC HỌC PHẦN - HỆ {loaiDaoTao} <br /> THUỘC HỌC KỲ {hocKy}, NĂM HỌC {namHoc}
           </div>
@@ -681,7 +681,7 @@ const TablePcCoiThi = ({ list, namHoc, loaiKyThi, loaiDaoTao, hocKy, listPhong, 
         />
       </Modal>
 
-      <div className="mt-2 flex justify-around">
+      <div className="mt-1 flex justify-around">
         <div className="b text-center rounded-md  flex justify-center gap-10">
           <Button type="primary" className="button-chinh-quy" onClick={handleSubmit} loading={loading}>
             Lưu
