@@ -639,14 +639,14 @@ const PcCoiThi = () => {
       }
 
       // Tăng số lượng môn thi cho ngàyThi hiện tại
-      counts[ngayThi].soLuong += item.maHocPhan.length;
+      counts[ngayThi].soLuong ++;
 
       // Đếm số lượng ca 1 và ca 3
       if (caThi === '1') {
-        counts[ngayThi].soLuongCa1+= item.maHocPhan.length;
+        counts[ngayThi].soLuongCa1++;
         counts[ngayThi].soPhongCa1 += item.phong.length
       } else if (caThi === '3') {
-        counts[ngayThi].soLuongCa3+= item.maHocPhan.length;
+        counts[ngayThi].soLuongCa3++;
         counts[ngayThi].soPhongCa3 += item.phong.length
 
       }
