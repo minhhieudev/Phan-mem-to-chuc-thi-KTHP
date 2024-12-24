@@ -357,6 +357,7 @@ const PcCoiThi = () => {
   }, [dataSinhVien])
 
   const fetchDataHP = async () => {
+    console.log('1111111111');
     if (dataSinhVien.length === 0) {
       toast.error('Chưa có danh sách sinh viên !')
       return;
@@ -377,11 +378,13 @@ const PcCoiThi = () => {
   }
   useEffect(() => {
     if (listHocPhanThi.length != 0) {
+      console.log('2222222222');
       dataTranform(dataSinhVien)
     }
   }, [listHocPhanThi])
 
   const dataTranform = (dataSinhVien) => {
+    console.log('3333333333');
     if (!Array.isArray(listHocPhanThi) || listHocPhanThi.length === 0) {
       console.error('listHocPhanThi không phải là một mảng hợp lệ:', listHocPhanThi);
       return;
@@ -621,6 +624,7 @@ const PcCoiThi = () => {
   // Hàm đếm số lượng môn thi theo ngày
   // const countByNgayThi = (array) => {
   //   const counts = {};
+  //   console.log(array)
 
   //   // Đếm số lượng phần tử theo ngayThi, đồng thời đếm số lượng phòng thi và số lượng ca 1, ca 3
   //   array.forEach(item => {
@@ -631,22 +635,22 @@ const PcCoiThi = () => {
   //     if (!counts[ngayThi]) {
   //       counts[ngayThi] = {
   //         soLuong: 0, // Tổng số lượng môn thi
-  //         soLuongCa1: 0, // Số lượng ca 1
-  //         soLuongCa3: 0, // Số lượng ca 3
+  //         //soLuongCa1: 0, // Số lượng ca 1
+  //         //soLuongCa3: 0, // Số lượng ca 3
   //         soPhongCa1: 0,
   //         soPhongCa3: 0,
   //       };
   //     }
 
   //     // Tăng số lượng môn thi cho ngàyThi hiện tại
-  //     counts[ngayThi].soLuong++
+  //     counts[ngayThi].soLuong++ || 0;
 
   //     // Đếm số lượng ca 1 và ca 3
   //     if (caThi === '1') {
-  //       counts[ngayThi].soLuongCa1++
+  //       //counts[ngayThi].soLuongCa1++
   //       counts[ngayThi].soPhongCa1 += item.phong.length
   //     } else if (caThi === '3') {
-  //       counts[ngayThi].soLuongCa3++
+  //       //counts[ngayThi].soLuongCa3++
   //       counts[ngayThi].soPhongCa3 += item.phong.length
 
   //     }
@@ -656,8 +660,8 @@ const PcCoiThi = () => {
   //   const result = Object.keys(counts).map(ngay => ({
   //     ngayThi: ngay,
   //     soLuong: counts[ngay].soLuong, // Tổng số lượng môn thi
-  //     soLuongCa1: counts[ngay].soLuongCa1, // Số lượng ca 1
-  //     soLuongCa3: counts[ngay].soLuongCa3, // Số lượng ca 3
+  //     //soLuongCa1: counts[ngay].soLuongCa1, // Số lượng ca 1
+  //     //soLuongCa3: counts[ngay].soLuongCa3, // Số lượng ca 3
   //     soPhongCa1: counts[ngay].soPhongCa1, // Số lượng ca 3
   //     soPhongCa3: counts[ngay].soPhongCa3, // Số lượng ca 3
   //   }));
@@ -665,7 +669,7 @@ const PcCoiThi = () => {
   //   return result;
   // };
 
-  const countByNgayThi = (array) => {
+   const countByNgayThi = (array) => {
     try {
       // Kiểm tra đầu vào
       if (!Array.isArray(array)) {
@@ -696,7 +700,6 @@ const PcCoiThi = () => {
 
         // Xử lý an toàn số lượng môn và phòng
         const monCount = item?.maHocPhan?.length || 0;
-        const phongCount = item?.phong?.length || 0;
 
         // Cập nhật số liệu
         counts[ngayThi].soLuong += monCount;
@@ -704,10 +707,11 @@ const PcCoiThi = () => {
         // Xử lý theo ca thi
         if (caThi === '1') {
           counts[ngayThi].soLuongCa1 += monCount;
-          counts[ngayThi].soPhongCa1 += phongCount;
+          counts[ngayThi].soPhongCa1 += item?.phong?.length || 0;
+          
         } else if (caThi === '3') {
           counts[ngayThi].soLuongCa3 += monCount;
-          counts[ngayThi].soPhongCa3 += phongCount;
+          counts[ngayThi].soPhongCa3 += item?.phong?.length || 0;
         }
       }
 
@@ -730,6 +734,8 @@ const PcCoiThi = () => {
   };
 
 
+
+ 
   const phanCongCanBo = (resultFinal) => {
     if (tableGV.length < 0) {
       toast.error('Chưa chọn giảng viên !');
@@ -956,53 +962,64 @@ const PcCoiThi = () => {
     // ====================================================================
     const splitMonArray = (mon, listNgay) => {
       const totalDays = listNgay.length;
-      const chunkSize = Math.floor(mon.length / totalDays);
-      const remainder = mon.length % totalDays;
-
-      let result = [];
-      let index = 0;
-      let unassignedMons = [...mon]; // Tạo một bản sao của mảng môn học
-
-      // Tạo bản đồ lưu trữ các lớp đã phân bổ theo ngày
+      
+      // Sắp xếp môn học theo số lớp (giảm dần) để ưu tiên môn có nhiều lớp hơn
+      let unassignedMons = [...mon].sort((a, b) => b.lop.length - a.lop.length);
+      
+      // Khởi tạo mảng kết quả với số ngày
+      let result = Array(totalDays).fill().map(() => []);
+      
+      // Map lưu trữ lớp đã phân bổ theo ngày
       let assignedClasses = new Map();
 
-      for (let i = 0; i < totalDays; i++) {
-        let additionalMon = i < remainder ? 1 : 0;
-        let chunk = [];
-        let addedCount = 0;
+      // Hàm kiểm tra xung đột lớp trong một ngày
+      const hasConflict = (dayIndex, classes) => {
+        const dayClasses = assignedClasses.get(listNgay[dayIndex]) || new Set();
+        return classes.some(c => dayClasses.has(c));
+      };
 
-        while (addedCount < chunkSize + additionalMon && index < unassignedMons.length) {
-          const currentMon = unassignedMons[index];
-          const { lop } = currentMon;
-
-          // Kiểm tra nếu lớp đã xuất hiện trong ngày
-          let conflict = lop.some(l => assignedClasses.get(listNgay[i])?.has(l));
-
-          if (!conflict) {
-            chunk.push(currentMon);
-
-            // Cập nhật danh sách lớp đã phân cho ngày hiện tại
-            if (!assignedClasses.has(listNgay[i])) {
-              assignedClasses.set(listNgay[i], new Set());
-            }
-            lop.forEach(l => assignedClasses.get(listNgay[i]).add(l));
-
-            addedCount++;
-            index++;
-          } else {
-            // Nếu có xung đột, chuyển môn này xuống cuối danh sách
-            const conflictedMon = unassignedMons.splice(index, 1)[0];
-            unassignedMons.push(conflictedMon);
+      // Hàm tìm ngày phù hợp nhất để thêm môn học
+      const findBestDay = (mon) => {
+        let bestDay = 0;
+        let minConflicts = Infinity;
+        
+        for (let i = 0; i < totalDays; i++) {
+          // Đếm số lớp xung đột trong ngày
+          const conflicts = mon.lop.filter(l => 
+            assignedClasses.get(listNgay[i])?.has(l)
+          ).length;
+          
+          // Cập nhật ngày tốt nhất (ít xung đột nhất và ít môn nhất)
+          if (conflicts < minConflicts || 
+             (conflicts === minConflicts && result[i].length < result[bestDay].length)) {
+            minConflicts = conflicts;
+            bestDay = i;
           }
         }
+        
+        return bestDay;
+      };
 
-        // Kiểm tra nếu không thể phân bổ đủ môn và báo lỗi nếu cần
-        if (chunk.length < chunkSize + additionalMon && i === totalDays - 1) {
-          console.error(`Không thể phân bổ đủ môn cho các ngày mà không có lớp trùng lặp. Thiếu ngày thi!`);
-          return [];
+      // Phân bổ từng môn học
+      for (const mon of unassignedMons) {
+        const bestDay = findBestDay(mon);
+        
+        // Thêm môn vào ngày được chọn
+        result[bestDay].push(mon);
+        
+        // Cập nhật danh sách lớp đã phân bổ
+        if (!assignedClasses.has(listNgay[bestDay])) {
+          assignedClasses.set(listNgay[bestDay], new Set());
         }
+        mon.lop.forEach(l => 
+          assignedClasses.get(listNgay[bestDay]).add(l)
+        );
+      }
 
-        result.push(chunk);
+      // Kiểm tra kết quả phân bổ
+      const totalAssigned = result.reduce((sum, day) => sum + day.length, 0);
+      if (totalAssigned !== mon.length) {
+        toast.warning('Một số môn học có thể bị trùng lịch. Vui lòng kiểm tra lại.');
       }
 
       return result;
