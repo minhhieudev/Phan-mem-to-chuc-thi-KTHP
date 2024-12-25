@@ -212,29 +212,29 @@ const PcCoiThi = () => {
     setDataSinhVien([]);
     setIsUploading(true);
     const file = e.target.files[0];
-  
+
     if (!file) {
       console.warn("Không có file nào được chọn.");
       setIsUploading(false);
       return;
     }
-  
+
     const reader = new FileReader();
-  
+
     reader.onload = (event) => {
       const data = event.target.result;
       const workbook = XLSX.read(data, { type: "binary" });
-  
+
       let currentMaMon = ""; // Biến lưu mã học phần hiện tại
       const formattedData = [];
-  
+
       // Đọc tất cả các sheet trong file Excel
       workbook.SheetNames.forEach((sheetName) => {
         const sheet = workbook.Sheets[sheetName];
         const rawData = XLSX.utils.sheet_to_json(sheet, { header: 1 });
-  
+
         rawData.forEach((row) => {
-  
+
           // Kiểm tra dòng chứa "Mã học phần:"
           if (row[0] && row[0].toLowerCase().includes("mã học phần:")) {
             // Dùng regex để lấy mã học phần, bao gồm trường hợp có dấu cách hoặc ký tự lạ
@@ -253,7 +253,7 @@ const PcCoiThi = () => {
         });
       });
 
-            // Map dữ liệu thành cấu trúc { maSV, hoTen, lop, maMon }
+      // Map dữ liệu thành cấu trúc { maSV, hoTen, lop, maMon }
       const formattedDatas = formattedData.map((row, index) => ({
         key: index.toString(),
         maSV: row[0],
@@ -261,8 +261,8 @@ const PcCoiThi = () => {
         lop: row[2],
         maMon: row[3]
       }));
-  
-  
+
+
       // Cập nhật dữ liệu vào state
       if (formattedDatas.length > 0) {
         setDataSinhVien(formattedDatas);
@@ -271,17 +271,17 @@ const PcCoiThi = () => {
       }
       setIsUploading(false);
     };
-  
+
     reader.onerror = () => {
       toast.error("Đã xảy ra lỗi khi đọc file Excel.");
       setIsUploading(false);
     };
-  
+
     reader.readAsBinaryString(file);
   };
-  
-  
-  
+
+
+
 
   // const importSinhVien = (e) => {
   //   setDataSinhVien([]);
@@ -414,8 +414,19 @@ const PcCoiThi = () => {
         result.push(existingItem);
       }
 
+      // Tìm thông tin môn học cho sinh viên
+      const hocPhan = listHocPhanThi.find(hp => hp.maHocPhan === maMon);
+      if (hocPhan) {
+        existingItem.info = hocPhan;  // Lưu thông tin môn thi là một đối tượng duy nhất
+      }
+
       // Thêm thông tin sinh viên vào danh sách sinh viên của môn thi
-      existingItem.sinhVien.push({ maSV, hoTen, lop });
+      existingItem.sinhVien.push({
+        maSV,
+        hoTen,
+        lop,
+        hocPhan: existingItem.info?.tenHocPhan || '' // Gán tên môn thi
+      });
 
       // Tăng tổng số thí sinh
       existingItem.tongSoThiSinh++;
@@ -424,13 +435,6 @@ const PcCoiThi = () => {
       if (!existingItem.lop.includes(lop)) {
         existingItem.lop.push(lop);
       }
-
-      // Kiểm tra và thêm thông tin từ listHocPhanThi vào existingItem.info
-      listHocPhanThi.forEach(hocPhan => {
-        if (hocPhan.maHocPhan === maMon && !existingItem.info) {
-          existingItem.info = hocPhan;  // Lưu thông tin môn thi là một đối tượng duy nhất
-        }
-      });
     });
 
     setResult(result); // Nếu cần thiết
@@ -669,7 +673,7 @@ const PcCoiThi = () => {
   //   return result;
   // };
 
-   const countByNgayThi = (array) => {
+  const countByNgayThi = (array) => {
     try {
       // Kiểm tra đầu vào
       if (!Array.isArray(array)) {
@@ -708,7 +712,7 @@ const PcCoiThi = () => {
         if (caThi === '1') {
           counts[ngayThi].soLuongCa1 += monCount;
           counts[ngayThi].soPhongCa1 += item?.phong?.length || 0;
-          
+
         } else if (caThi === '3') {
           counts[ngayThi].soLuongCa3 += monCount;
           counts[ngayThi].soPhongCa3 += item?.phong?.length || 0;
@@ -735,7 +739,7 @@ const PcCoiThi = () => {
 
 
 
- 
+
   const phanCongCanBo = (resultFinal) => {
     if (tableGV.length < 0) {
       toast.error('Chưa chọn giảng viên !');
@@ -812,7 +816,7 @@ const PcCoiThi = () => {
             group.cbo1 = danhSachGVTheoNgayThi.slice(0, phongCount).map(gv => gv.username).join('-');
             group.cbo2 = danhSachGVTheoNgayThi.slice(phongCount, phongCount * 2).map(gv => gv.username).join('-');
 
-            // Xóa giảng viên đã phân công khỏi danh sách giảng viên của ngày thi
+            // Xóa giảng viên đã phân công khỏi danh sách giảng viên c��a ngày thi
             danhSachGVTheoNgayThi = danhSachGVTheoNgayThi.slice(phongCount * 2);
           } else {
             // Nếu không đủ giảng viên sau khi lấy lại danh sách
@@ -891,7 +895,7 @@ const PcCoiThi = () => {
       let soLuongConLai = mon.tongSoThiSinh; // Số lượng sinh viên cần phân phòng cho môn
       let phongIndex = 0; // Vị trí phòng hiện tại
       let listPhong = phongMay; // Danh sách phòng có sẵn
-      let selectedPhong = []; // Mảng để lưu các phòng đã chọn
+      let selectedPhong = []; // Mảng để lưu các phòng đã ch��n
       let soLuongPhong = []; // Mảng lưu số lượng sinh viên phân cho từng phòng
 
       // Tạo đối tượng item ban đầu
@@ -962,13 +966,13 @@ const PcCoiThi = () => {
     // ====================================================================
     const splitMonArray = (mon, listNgay) => {
       const totalDays = listNgay.length;
-      
+
       // Sắp xếp môn học theo số lớp (giảm dần) để ưu tiên môn có nhiều lớp hơn
       let unassignedMons = [...mon].sort((a, b) => b.lop.length - a.lop.length);
-      
+
       // Khởi tạo mảng kết quả với số ngày
       let result = Array(totalDays).fill().map(() => []);
-      
+
       // Map lưu trữ lớp đã phân bổ theo ngày
       let assignedClasses = new Map();
 
@@ -982,36 +986,36 @@ const PcCoiThi = () => {
       const findBestDay = (mon) => {
         let bestDay = 0;
         let minConflicts = Infinity;
-        
+
         for (let i = 0; i < totalDays; i++) {
           // Đếm số lớp xung đột trong ngày
-          const conflicts = mon.lop.filter(l => 
+          const conflicts = mon.lop.filter(l =>
             assignedClasses.get(listNgay[i])?.has(l)
           ).length;
-          
+
           // Cập nhật ngày tốt nhất (ít xung đột nhất và ít môn nhất)
-          if (conflicts < minConflicts || 
-             (conflicts === minConflicts && result[i].length < result[bestDay].length)) {
+          if (conflicts < minConflicts ||
+            (conflicts === minConflicts && result[i].length < result[bestDay].length)) {
             minConflicts = conflicts;
             bestDay = i;
           }
         }
-        
+
         return bestDay;
       };
 
       // Phân bổ từng môn học
       for (const mon of unassignedMons) {
         const bestDay = findBestDay(mon);
-        
+
         // Thêm môn vào ngày được chọn
         result[bestDay].push(mon);
-        
+
         // Cập nhật danh sách lớp đã phân bổ
         if (!assignedClasses.has(listNgay[bestDay])) {
           assignedClasses.set(listNgay[bestDay], new Set());
         }
-        mon.lop.forEach(l => 
+        mon.lop.forEach(l =>
           assignedClasses.get(listNgay[bestDay]).add(l)
         );
       }
@@ -1073,8 +1077,7 @@ const PcCoiThi = () => {
           tc: [],
           hinhThuc: [],
           thoiGian: [],
-          danhSachThiSinh: [],
-
+          danhSachThiSinh: [], // Khởi tạo danh sách thí sinh
           diaDiem: examSessions,
           namHoc,
           loaiDaoTao,
@@ -1193,7 +1196,7 @@ const PcCoiThi = () => {
                   item.thoiGian.push(closestMatch.info.thoiGian);
 
                   item.tc.push(mon.info.soTinChi);
-                  item.danhSachThiSinh.push(mon.sinhVien);
+                  item.danhSachThiSinh.push(...closestMatch.sinhVien); // Kết hợp danh sách thí sinh
 
                   // Loại bỏ môn đã gộp khỏi danh sách
                   listMonClone = listMonClone.filter(monG => monG.info.tenHocPhan !== closestMatch.info.tenHocPhan);
@@ -1228,7 +1231,7 @@ const PcCoiThi = () => {
                     item.thoiGian.push(closestMatch2.info.thoiGian);
 
                     item.tc.push(closestMatch2.info.soTinChi); // Đảm bảo gán đúng thông tin từ `closestMatch2`
-                    item.danhSachThiSinh.push(closestMatch2.sinhVien);
+                    item.danhSachThiSinh.push(...closestMatch2.sinhVien); // Kết hợp danh sách thí sinh
 
                     // Loại bỏ môn đã gộp khỏi danh sách
                     listMonClone = listMonClone.filter(monG => monG.info.tenHocPhan !== closestMatch2.info.tenHocPhan);

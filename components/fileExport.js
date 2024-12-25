@@ -47,7 +47,7 @@ export const exportLichThiExcel = (dataList, title, hocKy, namHoc, loaiDaoTao) =
       data.ngayThi,
 
       data.ca == '1'?'Sáng' : 'Chiều',
-      data.phong.map(p => p.tenPhong).join(", "),
+      data.phong.map(p => p.tenPhong || p).join(", "),
       data.thoiGian.join(', '),
 
       data.soLuong.join(', '),
@@ -188,3 +188,51 @@ export const exportLichThi = (dataList, title, hocKy, namHoc, loaiDaoTao) => {
 //   // Export the workbook to a file
 //   XLSX.writeFile(wb, "Bang_Tong_Hop_Lao_Dong_Giang_Vien.xlsx");
 // };
+
+
+
+export const exportDSSV = (dataList, hocKy, namHoc, phong) => {
+  if (!dataList || dataList.length === 0) {
+    console.error("No data available to export");
+    return;
+  }
+
+
+  const ws = XLSX.utils.aoa_to_sheet([
+    ["TRƯỜNG ĐẠI HỌC PHÚ YÊN", "", "", "", "", "", "CỘNG HOÀ XÃ HỘI CHỦ NGHĨA VIỆT NAM",],
+    ["PHÒNG QUẢN LÝ CHẤT LƯỢNG", "", "", "", "", "", "", "Độc lập - Tự do - Hạnh phúc"],
+    [],
+    ["", "", "", `DANH SÁCH THÍ SINH DỰ THI - PHÒNG ${phong}`,],
+    ["", "", "", `THUỘC HỌC KỲ ${hocKy}, NĂM HỌC ${namHoc}`,],
+    [],
+    [
+      "      STT",'Họ và tên', "Mã sinh viên",'Lớp','Môn thi'
+    ],
+  ])
+
+  ws["!merges"] = [
+    { s: { r: 0, c: 0 }, e: { r: 0, c: 2 } }, // TRƯỜNG ĐẠI HỌC PHÚ YÊN
+    { s: { r: 1, c: 0 }, e: { r: 1, c: 2 } },
+
+  ]
+
+  // Add data to the worksheet
+  dataList.forEach((data, index) => {
+    const row = [
+      index + 1,
+      data.hoTen,
+      data.maSV,
+      
+      data.lop,
+      data.hocPhan,
+
+    ];
+    XLSX.utils.sheet_add_aoa(ws, [row], { origin: -1 });
+  })
+  // Create a new workbook and add the worksheet
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, "Sheet1");
+
+  // Export the workbook to a file
+  XLSX.writeFile(wb, `danh-sach-sinh-vien-phong-${phong}.xlsx`);
+};

@@ -4,7 +4,7 @@ import React, { useEffect, useState } from "react";
 import { Table, Popconfirm, Button, Input, Space, Pagination, Spin, Modal, Select } from "antd";
 import toast from "react-hot-toast";
 import { useSession } from "next-auth/react";
-import { exportLichThi, exportLichThiExcel } from '../fileExport'
+import { exportDSSV, exportLichThi, exportLichThiExcel } from '../fileExport'
 
 const TablePcCoiThi = ({ list, namHoc, loaiKyThi, loaiDaoTao, hocKy, listPhong, listNgayThi }) => {
   const [data2, setData2] = useState(list);
@@ -18,6 +18,7 @@ const TablePcCoiThi = ({ list, namHoc, loaiKyThi, loaiDaoTao, hocKy, listPhong, 
   const [pageSize, setPageSize] = useState(10);
   const [loading, setLoading] = useState(false);
   const [searchText, setSearchText] = useState("");
+  const [phong, setPhong] = useState("");
 
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [currentList, setCurrentList] = useState([]);
@@ -46,15 +47,18 @@ const TablePcCoiThi = ({ list, namHoc, loaiKyThi, loaiDaoTao, hocKy, listPhong, 
   }, [list]);
 
   const save = () => {
+
     const updatedData = data2.map((item, index) => (item._id === editingKey ? editingRow : item));
     setData(updatedData);
     setEditingKey("");
     toast.success("Thay đổi thành công!");
   }
 
-  const showModal = (danhSachThiSinh) => {
-    const flattenedDanhSach = danhSachThiSinh.flat();
+  const showModal = (danhSachThiSinh, phong, index, listSoLuong) => {
+    setCurrentList([])
+    setPhong(phong.tenPhong);
 
+    const flattenedDanhSach = danhSachThiSinh.flat();
     const sortedDanhSach = flattenedDanhSach
       .filter(item => item.hoTen)
       .sort((a, b) => {
@@ -63,6 +67,21 @@ const TablePcCoiThi = ({ list, namHoc, loaiKyThi, loaiDaoTao, hocKy, listPhong, 
         const lastNameB = typeof b.hoTen === 'string' ? b.hoTen.trim().split(' ').pop().toLowerCase() : '';
         return lastNameA.localeCompare(lastNameB);
       });
+
+
+    const list = listSoLuong[0];
+    const currentSoLuong = list[index] || 0;
+
+    if (list.length > 1) {
+
+      const startIndex = index > 0 ? list.slice(0, index).reduce((a, b) => a + b, 0) - 1 : 0; // Tính chỉ số bắt đầu
+      const danhSachSinhVien = sortedDanhSach.slice(startIndex, startIndex + currentSoLuong); // Cắt danh sách sinh viên
+
+      setCurrentList(danhSachSinhVien);
+      setIsModalVisible(true);
+
+      return;
+    }
 
     // Sau đó gọi Modal để hiển thị danh sách đã sắp xếp
     setCurrentList(sortedDanhSach);
@@ -80,6 +99,8 @@ const TablePcCoiThi = ({ list, namHoc, loaiKyThi, loaiDaoTao, hocKy, listPhong, 
   };
 
   const handleDelete = (recordId) => {
+    console.log('Dataaaaaaaaaaaaa:', list)
+
     const newData = data2.filter((item) => item._id !== recordId);
     setData2(newData);
     setData(newData);
@@ -332,18 +353,31 @@ const TablePcCoiThi = ({ list, namHoc, loaiKyThi, loaiDaoTao, hocKy, listPhong, 
         ),
       width: 75,
     },
+
     {
       title: 'DS SV',
       dataIndex: 'danhSachThiSinh',
       key: 'danhSachThiSinh',
-      render: (text, record) => (
-        <Button size="small" type="dashed" danger onClick={() => showModal(text)}>
-          Xem
-        </Button>
-
-      ),
+      render: (text, record) => {
+        // Kiểm tra số lượng phòng thi
+        const soPhong = record.phong.length; // Số lượng phòng thi
+        return (
+          <div className="flex flex-col gap-2">
+            {Array.from({ length: soPhong }).map((_, index) => (
+              <Button
+                key={index}
+                size="small"
+                type="dashed"
+                danger
+                onClick={() => showModal(text, record.phong[index], index, record.soLuong)} // Hiển thị modal cho từng phòng
+              >
+                Xem
+              </Button>
+            ))}
+          </div>
+        );
+      },
       width: 15,
-
     },
 
     {
@@ -392,21 +426,21 @@ const TablePcCoiThi = ({ list, namHoc, loaiKyThi, loaiDaoTao, hocKy, listPhong, 
   const handleSubmit = async () => {
     setLoading(true); // Bắt đầu loading
     try {
-        const res = await fetch("/api/admin/lich-thi", {
-            method: "POST",
-            body: JSON.stringify(list),
-            headers: { "Content-Type": "application/json" },
-        });
+      const res = await fetch("/api/admin/lich-thi", {
+        method: "POST",
+        body: JSON.stringify(list),
+        headers: { "Content-Type": "application/json" },
+      });
 
-        if (res.ok) {
-            toast.success("Lưu thành công");
-        } else {
-            toast.error("Failed to save record");
-        }
+      if (res.ok) {
+        toast.success("Lưu thành công");
+      } else {
+        toast.error("Failed to save record");
+      }
     } catch (err) {
-        toast.error("An error occurred while saving data");
+      toast.error("An error occurred while saving data");
     } finally {
-        setLoading(false); // Kết thúc loading
+      setLoading(false); // Kết thúc loading
     }
   };
   const uniqueNgayThi = [...new Set(data2?.map(item => item.ngayThi))];
@@ -674,11 +708,22 @@ const TablePcCoiThi = ({ list, namHoc, loaiKyThi, loaiDaoTao, hocKy, listPhong, 
               className: 'font-bold text-green-600'
 
             },
+            {
+              title: 'Môn thi',
+              dataIndex: 'hocPhan',
+              key: 'hocPhan',
+              className: 'font-bold '
+
+            },
           ]}
           pagination={false}
           rowKey={(record) => record.index}  // Sử dụng index làm khóa
           scroll={{ y: 400 }} // Set the vertical scroll height to 400px
         />
+        <div className="w-full text-center flex justify-center">
+          <Button onClick={() => exportDSSV(currentList, hocKy, namHoc, phong)} type="primary" className="text-center mt-4 button-lien-thong-vlvh" >Xuất Excel</Button>
+
+        </div>
       </Modal>
 
       <div className="mt-1 flex justify-around">

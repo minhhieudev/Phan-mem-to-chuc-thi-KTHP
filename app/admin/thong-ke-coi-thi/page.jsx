@@ -5,7 +5,7 @@ import { Select, Input, Table, Popconfirm, Spin, Button, Space, Pagination, Moda
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
 import { FileExcelOutlined } from '@ant-design/icons';
-import { exportLichThi } from '../../../components/fileExport'
+import { exportDSSV, exportLichThi, exportLichThiExcel } from '../../../components/fileExport'
 
 
 const { Option } = Select;
@@ -14,7 +14,7 @@ const PcCoiThiTable = () => {
   const [dataList, setDataList] = useState([]);
   const [filteredData, setFilteredData] = useState([]);
   const [namHoc, setNamHoc] = useState("2024-2025");
-  const [hocKy, setHocKy] = useState("");
+  const [hocKy, setHocKy] = useState("1");
   const [loaiKyThi, setLoaiKyThi] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
   const [loading, setLoading] = useState(false);
@@ -26,6 +26,8 @@ const PcCoiThiTable = () => {
 
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [currentList, setCurrentList] = useState([]);
+  const [phong, setPhong] = useState("");
+  const [dssv, setDSSV] = useState([]);
 
   const router = useRouter();
 
@@ -86,9 +88,13 @@ const PcCoiThiTable = () => {
     }
   };
 
-  const showModal = (danhSachThiSinh) => {
-    const flattenedDanhSach = danhSachThiSinh.flat();
+  const showModal = (danhSachThiSinh, phong, index, listSoLuong) => {
 
+    console.log(phong)
+    setCurrentList([])
+    setPhong(phong);
+
+    const flattenedDanhSach = danhSachThiSinh.flat();
     const sortedDanhSach = flattenedDanhSach
       .filter(item => item.hoTen)
       .sort((a, b) => {
@@ -98,10 +104,26 @@ const PcCoiThiTable = () => {
         return lastNameA.localeCompare(lastNameB);
       });
 
+
+    const list = listSoLuong[0];
+    const currentSoLuong = list[index] || 0;
+
+    if (list.length > 1) {
+
+      const startIndex = index > 0 ? list.slice(0, index).reduce((a, b) => a + b, 0) - 1 : 0; // Tính chỉ số bắt đầu
+      const danhSachSinhVien = sortedDanhSach.slice(startIndex, startIndex + currentSoLuong); // Cắt danh sách sinh viên
+
+      setCurrentList(danhSachSinhVien);
+      setIsModalVisible(true);
+
+      return;
+    }
+
     // Sau đó gọi Modal để hiển thị danh sách đã sắp xếp
     setCurrentList(sortedDanhSach);
     setIsModalVisible(true);
   };
+
 
   const handleCancel = () => {
     setIsModalVisible(false);
@@ -199,14 +221,26 @@ const PcCoiThiTable = () => {
       title: 'DS SV',
       dataIndex: 'danhSachThiSinh',
       key: 'danhSachThiSinh',
-      render: (text, record) => (
-        <Button size="small" type="dashed" danger onClick={() => showModal(text)}>
-          Xem
-        </Button>
-
-      ),
+      render: (text, record) => {
+        // Kiểm tra số lượng phòng thi
+        const soPhong = record.phong.length; // Số lượng phòng thi
+        return (
+          <div className="flex flex-col gap-2">
+            {Array.from({ length: soPhong }).map((_, index) => (
+              <Button
+                key={index}
+                size="small"
+                type="dashed"
+                danger
+                onClick={() => showModal(text, record.phong[index], index, record.soLuong)} // Hiển thị modal cho từng phòng
+              >
+                Xem
+              </Button>
+            ))}
+          </div>
+        );
+      },
       width: 15,
-
     },
     {
       title: 'Hành động',
@@ -327,10 +361,12 @@ const PcCoiThiTable = () => {
       <div className="mt-2 flex justify-between">
         <Button
           className="button-lien-thong-vlvh text-white font-bold shadow-md "
-          onClick={() => exportLichThi(paginatedData, `LỊCH COI THI KẾT THÚC HỌC PHẦN - HỆ`, hocKy, namHoc, loai)}
+          onClick={() => exportLichThiExcel(paginatedData, `LỊCH COI THI KẾT THÚC HỌC PHẦN - HỆ`, hocKy, namHoc, loai)}
         ><FileExcelOutlined />
           Xuất file Excel
         </Button>
+
+
 
         <Pagination
           current={current}
@@ -358,6 +394,12 @@ const PcCoiThiTable = () => {
           dataSource={currentList}
           columns={[
             {
+              title: 'STT',
+              dataIndex: 'index',
+              render: (text, record, index) => <span style={{ fontWeight: 'bold' }}>{index + 1}</span>,
+              width:60
+            },
+            {
               title: 'Họ và Tên',
               dataIndex: 'hoTen',
               key: 'hoTen',
@@ -377,11 +419,22 @@ const PcCoiThiTable = () => {
               className: 'font-bold text-green-600'
 
             },
+            {
+              title: 'Môn thi',
+              dataIndex: 'hocPhan',
+              key: 'hocPhan',
+              className: 'font-bold '
+
+            },
           ]}
           pagination={false}
           rowKey={(record) => record.index}  // Sử dụng index làm khóa
           scroll={{ y: 400 }} // Set the vertical scroll height to 400px
         />
+        <div className="w-full text-center flex justify-center">
+          <Button onClick={() => exportDSSV(currentList, hocKy, namHoc, phong)} type="primary" className="text-center mt-4 button-lien-thong-vlvh" >Xuất Excel</Button>
+
+        </div>
       </Modal>
 
     </div>

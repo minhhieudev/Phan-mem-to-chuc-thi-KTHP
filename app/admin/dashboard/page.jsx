@@ -69,7 +69,8 @@ const Dashboard = () => {
     const [current2, setCurrent2] = useState(1);
     const [pageSize2, setPageSize2] = useState(10);
     const [namHoc, setNamHoc] = useState('2024-2025');
-    const [hocKy, setHocKy] = useState(null);
+    const [hocKy, setHocKy] = useState('1');
+    const [loaiKyThi, setLoaiKyThi] = useState('1');
 
     const [listCount, setListCount] = useState([]);
     const [searchTerm, setSearchTerm] = useState('');
@@ -144,7 +145,7 @@ const Dashboard = () => {
                 toast.error("Failed to fetch thống kê chấm thi");
             }
 
-            const res1 = await fetch(`/api/admin/dashboard/get-hocphan?namHoc=${namHoc}&hocKy=${hocKy}&khoa=${selectedKhoa}`, {
+            const res1 = await fetch(`/api/admin/dashboard/get-hocphan?namHoc=${namHoc}&hocKy=${hocKy}&khoa=${selectedKhoa}&loaiKyThi=${loaiKyThi}`, {
                 method: "GET",
                 headers: { "Content-Type": "application/json" },
             });
@@ -202,7 +203,7 @@ const Dashboard = () => {
     useEffect(() => {
         fetchDataThongKe();
 
-    }, [namHoc, hocKy]);
+    }, [namHoc, hocKy, loaiKyThi]);
     useEffect(() => {
         fetchLichSapDienRa();
 
@@ -239,14 +240,14 @@ const Dashboard = () => {
             // Kiểm tra xem có mã môn học nào bắt đầu bằng selectedKhoaCode không (không phân biệt chữ hoa/thường)
             const matchesKhoaCode = !selectedKhoaCode ||
                 (item.maHocPhan && item.maHocPhan.some(code => code.toLowerCase().startsWith(selectedKhoaCode.toLowerCase())));
-    
+
             // Kiểm tra điều kiện tìm kiếm với searchTerm2, không phân biệt chữ hoa/thường
             const lowerSearchTerm = searchTerm2?.toLowerCase() || '';
             const matchesSearchTerm = !searchTerm2 ||
                 (item?.hocPhan && Array.isArray(item.hocPhan) && item.hocPhan.some(hocPhan => hocPhan.toLowerCase().includes(lowerSearchTerm))) ||
                 (item?.cbo1 && Array.isArray(item.cbo1) && item.cbo1.some(cbo => cbo.toLowerCase().includes(lowerSearchTerm))) ||
                 (item?.cbo2 && Array.isArray(item.cbo2) && item.cbo2.some(cbo => cbo.toLowerCase().includes(lowerSearchTerm)));
-    
+
             // Chỉ trả về những item thỏa mãn cả hai điều kiện
             return matchesKhoaCode && matchesSearchTerm;
         });
@@ -299,6 +300,21 @@ const Dashboard = () => {
                                 </Select>
                             </h2>
                         </div>
+                      
+                        <div className="flex gap-3">
+                            <p>Kỳ thi: </p>
+                            <h2 className="text-xl font-bold mb-0">
+                                <Select onChange={(value) => setLoaiKyThi(value)} className="font-bold" value={loaiKyThi} style={{ width: 120 }} allowClear>
+                                    <Option value="1">Chính thức</Option>
+                                    <Option value="2">Đợt 2</Option>
+                                    <Option value="3">Đợt 3</Option>
+                                    <Option value="4">Đợt 4</Option>
+                                    <Option value="5">Đợt 5</Option>
+                                    <Option value="6">Đợt 6</Option>
+                                    <Option value="7">Đợt 7</Option>
+                                </Select>
+                            </h2>
+                        </div>
                     </div>
                 </div>
 
@@ -323,8 +339,8 @@ const Dashboard = () => {
                     <div className="flex items-center">
                         <FileOutlined style={{ fontSize: "90px" }} className="mr-4 text-purple-500" /> {/* Đổi icon */}
                         <div>
-                            <h2 className="text-xl font-bold mb-2">CÓ {thongKeChamThi.totalSoBai} </h2>
-                            <p>BÀI THI</p>
+                            <h2 className="text-xl font-bold mb-2">CÓ {thongKeCoiThi.countMon} </h2>
+                            <p>HỌC PHẦN THI</p>
                         </div>
                     </div>
                     {/* <Progress

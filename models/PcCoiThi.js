@@ -65,7 +65,8 @@ const PcCoiThiSchema = new mongoose.Schema({
       {
         maSV: { type: String, required: true },  // Mã sinh viên
         hoTen: { type: String, required: true },  // Họ tên sinh viên
-        lop: { type: String, required: true }  // Lớp của sinh viên
+        lop: { type: String, required: true } , // Lớp của sinh viên
+        hocPhan: { type: String, required: true }  // Lớp của sinh viên
       }
     ],
     default: []  // Giá trị mặc định là một mảng rỗng
