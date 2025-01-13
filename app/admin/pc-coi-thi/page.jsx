@@ -212,29 +212,29 @@ const PcCoiThi = () => {
     setDataSinhVien([]);
     setIsUploading(true);
     const file = e.target.files[0];
-
+  
     if (!file) {
       console.warn("Không có file nào được chọn.");
       setIsUploading(false);
       return;
     }
-
+  
     const reader = new FileReader();
-
+  
     reader.onload = (event) => {
       const data = event.target.result;
       const workbook = XLSX.read(data, { type: "binary" });
-
+  
       let currentMaMon = ""; // Biến lưu mã học phần hiện tại
       const formattedData = [];
-
+  
       // Đọc tất cả các sheet trong file Excel
       workbook.SheetNames.forEach((sheetName) => {
         const sheet = workbook.Sheets[sheetName];
         const rawData = XLSX.utils.sheet_to_json(sheet, { header: 1 });
-
+  
         rawData.forEach((row) => {
-
+  
           // Kiểm tra dòng chứa "Mã học phần:"
           if (row[0] && row[0].toLowerCase().includes("mã học phần:")) {
             // Dùng regex để lấy mã học phần, bao gồm trường hợp có dấu cách hoặc ký tự lạ
@@ -253,7 +253,7 @@ const PcCoiThi = () => {
         });
       });
 
-      // Map dữ liệu thành cấu trúc { maSV, hoTen, lop, maMon }
+            // Map dữ liệu thành cấu trúc { maSV, hoTen, lop, maMon }
       const formattedDatas = formattedData.map((row, index) => ({
         key: index.toString(),
         maSV: row[0],
@@ -261,8 +261,8 @@ const PcCoiThi = () => {
         lop: row[2],
         maMon: row[3]
       }));
-
-
+  
+  
       // Cập nhật dữ liệu vào state
       if (formattedDatas.length > 0) {
         setDataSinhVien(formattedDatas);
@@ -271,17 +271,17 @@ const PcCoiThi = () => {
       }
       setIsUploading(false);
     };
-
+  
     reader.onerror = () => {
       toast.error("Đã xảy ra lỗi khi đọc file Excel.");
       setIsUploading(false);
     };
-
+  
     reader.readAsBinaryString(file);
   };
-
-
-
+  
+  
+  
 
   // const importSinhVien = (e) => {
   //   setDataSinhVien([]);
@@ -357,7 +357,6 @@ const PcCoiThi = () => {
   }, [dataSinhVien])
 
   const fetchDataHP = async () => {
-    console.log('1111111111');
     if (dataSinhVien.length === 0) {
       toast.error('Chưa có danh sách sinh viên !')
       return;
@@ -378,13 +377,11 @@ const PcCoiThi = () => {
   }
   useEffect(() => {
     if (listHocPhanThi.length != 0) {
-      console.log('2222222222');
       dataTranform(dataSinhVien)
     }
   }, [listHocPhanThi])
 
   const dataTranform = (dataSinhVien) => {
-    console.log('3333333333');
     if (!Array.isArray(listHocPhanThi) || listHocPhanThi.length === 0) {
       console.error('listHocPhanThi không phải là một mảng hợp lệ:', listHocPhanThi);
       return;
@@ -414,19 +411,8 @@ const PcCoiThi = () => {
         result.push(existingItem);
       }
 
-      // Tìm thông tin môn học cho sinh viên
-      const hocPhan = listHocPhanThi.find(hp => hp.maHocPhan === maMon);
-      if (hocPhan) {
-        existingItem.info = hocPhan;  // Lưu thông tin môn thi là một đối tượng duy nhất
-      }
-
       // Thêm thông tin sinh viên vào danh sách sinh viên của môn thi
-      existingItem.sinhVien.push({
-        maSV,
-        hoTen,
-        lop,
-        hocPhan: existingItem.info?.tenHocPhan || '' // Gán tên môn thi
-      });
+      existingItem.sinhVien.push({ maSV, hoTen, lop });
 
       // Tăng tổng số thí sinh
       existingItem.tongSoThiSinh++;
@@ -435,6 +421,13 @@ const PcCoiThi = () => {
       if (!existingItem.lop.includes(lop)) {
         existingItem.lop.push(lop);
       }
+
+      // Kiểm tra và thêm thông tin từ listHocPhanThi vào existingItem.info
+      listHocPhanThi.forEach(hocPhan => {
+        if (hocPhan.maHocPhan === maMon && !existingItem.info) {
+          existingItem.info = hocPhan;  // Lưu thông tin môn thi là một đối tượng duy nhất
+        }
+      });
     });
 
     setResult(result); // Nếu cần thiết
@@ -626,118 +619,51 @@ const PcCoiThi = () => {
   ];
 
   // Hàm đếm số lượng môn thi theo ngày
-  // const countByNgayThi = (array) => {
-  //   const counts = {};
-  //   console.log(array)
-
-  //   // Đếm số lượng phần tử theo ngayThi, đồng thời đếm số lượng phòng thi và số lượng ca 1, ca 3
-  //   array.forEach(item => {
-  //     const ngayThi = item.ngayThi;
-  //     const caThi = item.ca;
-
-  //     // Khởi tạo nếu chưa có ngày thi trong counts
-  //     if (!counts[ngayThi]) {
-  //       counts[ngayThi] = {
-  //         soLuong: 0, // Tổng số lượng môn thi
-  //         //soLuongCa1: 0, // Số lượng ca 1
-  //         //soLuongCa3: 0, // Số lượng ca 3
-  //         soPhongCa1: 0,
-  //         soPhongCa3: 0,
-  //       };
-  //     }
-
-  //     // Tăng số lượng môn thi cho ngàyThi hiện tại
-  //     counts[ngayThi].soLuong++ || 0;
-
-  //     // Đếm số lượng ca 1 và ca 3
-  //     if (caThi === '1') {
-  //       //counts[ngayThi].soLuongCa1++
-  //       counts[ngayThi].soPhongCa1 += item.phong.length
-  //     } else if (caThi === '3') {
-  //       //counts[ngayThi].soLuongCa3++
-  //       counts[ngayThi].soPhongCa3 += item.phong.length
-
-  //     }
-  //   });
-
-  //   // Chuyển đổi đối tượng counts thành mảng phần tử
-  //   const result = Object.keys(counts).map(ngay => ({
-  //     ngayThi: ngay,
-  //     soLuong: counts[ngay].soLuong, // Tổng số lượng môn thi
-  //     //soLuongCa1: counts[ngay].soLuongCa1, // Số lượng ca 1
-  //     //soLuongCa3: counts[ngay].soLuongCa3, // Số lượng ca 3
-  //     soPhongCa1: counts[ngay].soPhongCa1, // Số lượng ca 3
-  //     soPhongCa3: counts[ngay].soPhongCa3, // Số lượng ca 3
-  //   }));
-
-  //   return result;
-  // };
-
   const countByNgayThi = (array) => {
-    try {
-      // Kiểm tra đầu vào
-      if (!Array.isArray(array)) {
-        console.error('Input không phải là mảng');
-        return [];
+    const counts = {};
+
+    // Đếm số lượng phần tử theo ngayThi, đồng thời đếm số lượng phòng thi và số lượng ca 1, ca 3
+    array.forEach(item => {
+      const ngayThi = item.ngayThi;
+      const caThi = item.ca;
+
+      // Khởi tạo nếu chưa có ngày thi trong counts
+      if (!counts[ngayThi]) {
+        counts[ngayThi] = {
+          soLuong: 0, // Tổng số lượng môn thi
+          soLuongCa1: 0, // Số lượng ca 1
+          soLuongCa3: 0, // Số lượng ca 3
+          soPhongCa1: 0,
+          soPhongCa3: 0,
+        };
       }
 
-      const counts = {};
+      // Tăng số lượng môn thi cho ngàyThi hiện tại
+      counts[ngayThi].soLuong++;
 
-      // Xử lý từng item một cách an toàn
-      for (const item of array) {
-        const ngayThi = item?.ngayThi;
-        const caThi = item?.ca;
+      // Đếm số lượng ca 1 và ca 3
+      if (caThi === '1') {
+        counts[ngayThi].soLuongCa1++;
+        counts[ngayThi].soPhongCa1 += item.phong.length
+      } else if (caThi === '3') {
+        counts[ngayThi].soLuongCa3++;
+        counts[ngayThi].soPhongCa3 += item.phong.length
 
-        // Bỏ qua nếu không có ngày thi
-        if (!ngayThi) continue;
-
-        // Khởi tạo object cho ngày thi mới
-        if (!counts[ngayThi]) {
-          counts[ngayThi] = {
-            soLuong: 0,
-            soLuongCa1: 0,
-            soLuongCa3: 0,
-            soPhongCa1: 0,
-            soPhongCa3: 0,
-          };
-        }
-
-        // Xử lý an toàn số lượng môn và phòng
-        const monCount = item?.maHocPhan?.length || 0;
-
-        // Cập nhật số liệu
-        counts[ngayThi].soLuong += monCount;
-
-        // Xử lý theo ca thi
-        if (caThi === '1') {
-          counts[ngayThi].soLuongCa1 += monCount;
-          counts[ngayThi].soPhongCa1 += item?.phong?.length || 0;
-
-        } else if (caThi === '3') {
-          counts[ngayThi].soLuongCa3 += monCount;
-          counts[ngayThi].soPhongCa3 += item?.phong?.length || 0;
-        }
       }
+    });
 
-      // Chuyển đổi kết quả
-      const result = Object.entries(counts).map(([ngay, data]) => ({
-        ngayThi: ngay,
-        soLuong: data.soLuong,
-        soLuongCa1: data.soLuongCa1,
-        soLuongCa3: data.soLuongCa3,
-        soPhongCa1: data.soPhongCa1,
-        soPhongCa3: data.soPhongCa3,
-      }));
+    // Chuyển đổi đối tượng counts thành mảng phần tử
+    const result = Object.keys(counts).map(ngay => ({
+      ngayThi: ngay,
+      soLuong: counts[ngay].soLuong, // Tổng số lượng môn thi
+      soLuongCa1: counts[ngay].soLuongCa1, // Số lượng ca 1
+      soLuongCa3: counts[ngay].soLuongCa3, // Số lượng ca 3
+      soPhongCa1: counts[ngay].soPhongCa1, // Số lượng ca 3
+      soPhongCa3: counts[ngay].soPhongCa3, // Số lượng ca 3
+    }));
 
-      return result;
-
-    } catch (error) {
-      console.error('Lỗi trong quá trình xử lý:', error);
-      return [];
-    }
+    return result;
   };
-
-
 
 
   const phanCongCanBo = (resultFinal) => {
@@ -816,7 +742,7 @@ const PcCoiThi = () => {
             group.cbo1 = danhSachGVTheoNgayThi.slice(0, phongCount).map(gv => gv.username).join('-');
             group.cbo2 = danhSachGVTheoNgayThi.slice(phongCount, phongCount * 2).map(gv => gv.username).join('-');
 
-            // Xóa giảng viên đã phân công khỏi danh sách giảng viên c��a ngày thi
+            // Xóa giảng viên đã phân công khỏi danh sách giảng viên của ngày thi
             danhSachGVTheoNgayThi = danhSachGVTheoNgayThi.slice(phongCount * 2);
           } else {
             // Nếu không đủ giảng viên sau khi lấy lại danh sách
@@ -895,7 +821,7 @@ const PcCoiThi = () => {
       let soLuongConLai = mon.tongSoThiSinh; // Số lượng sinh viên cần phân phòng cho môn
       let phongIndex = 0; // Vị trí phòng hiện tại
       let listPhong = phongMay; // Danh sách phòng có sẵn
-      let selectedPhong = []; // Mảng để lưu các phòng đã ch��n
+      let selectedPhong = []; // Mảng để lưu các phòng đã chọn
       let soLuongPhong = []; // Mảng lưu số lượng sinh viên phân cho từng phòng
 
       // Tạo đối tượng item ban đầu
@@ -966,64 +892,52 @@ const PcCoiThi = () => {
     // ====================================================================
     const splitMonArray = (mon, listNgay) => {
       const totalDays = listNgay.length;
+      const chunkSize = Math.floor(mon.length / totalDays);
+      const remainder = mon.length % totalDays;
 
-      // Sắp xếp môn học theo số lớp (giảm dần) để ưu tiên môn có nhiều lớp hơn
-      let unassignedMons = [...mon].sort((a, b) => b.lop.length - a.lop.length);
+      let result = [];
+      let index = 0;
 
-      // Khởi tạo mảng kết quả với số ngày
-      let result = Array(totalDays).fill().map(() => []);
-
-      // Map lưu trữ lớp đã phân bổ theo ngày
+      // Tạo bản đồ lưu trữ các lớp đã phân bổ theo ngày
       let assignedClasses = new Map();
 
-      // Hàm kiểm tra xung đột lớp trong một ngày
-      const hasConflict = (dayIndex, classes) => {
-        const dayClasses = assignedClasses.get(listNgay[dayIndex]) || new Set();
-        return classes.some(c => dayClasses.has(c));
-      };
+      for (let i = 0; i < totalDays; i++) {
+        let additionalMon = i < remainder ? 1 : 0;
+        let chunk = [];
+        let addedCount = 0;
 
-      // Hàm tìm ngày phù hợp nhất để thêm môn học
-      const findBestDay = (mon) => {
-        let bestDay = 0;
-        let minConflicts = Infinity;
+        while (addedCount < chunkSize + additionalMon && index < mon.length) {
+          const currentMon = mon[index];
+          const { lop } = currentMon;
 
-        for (let i = 0; i < totalDays; i++) {
-          // Đếm số lớp xung đột trong ngày
-          const conflicts = mon.lop.filter(l =>
-            assignedClasses.get(listNgay[i])?.has(l)
-          ).length;
+          // Kiểm tra nếu lớp đã xuất hiện trong ngày
+          let conflict = lop.some(l => assignedClasses.get(listNgay[i])?.has(l));
 
-          // Cập nhật ngày tốt nhất (ít xung đột nhất và ít môn nhất)
-          if (conflicts < minConflicts ||
-            (conflicts === minConflicts && result[i].length < result[bestDay].length)) {
-            minConflicts = conflicts;
-            bestDay = i;
+          if (!conflict) {
+            chunk.push(currentMon);
+
+            // Cập nhật danh sách lớp đã phân cho ngày hiện tại
+            if (!assignedClasses.has(listNgay[i])) {
+              assignedClasses.set(listNgay[i], new Set());
+            }
+            lop.forEach(l => assignedClasses.get(listNgay[i]).add(l));
+
+            addedCount++;
+            index++;
+          } else {
+            // Nếu có xung đột, chuyển môn này sang ngày sau
+            index++;
+            mon.push(currentMon); // Đưa lại môn vào cuối danh sách để xử lý lại sau
           }
         }
 
-        return bestDay;
-      };
-
-      // Phân bổ từng môn học
-      for (const mon of unassignedMons) {
-        const bestDay = findBestDay(mon);
-
-        // Thêm môn vào ngày được chọn
-        result[bestDay].push(mon);
-
-        // Cập nhật danh sách lớp đã phân bổ
-        if (!assignedClasses.has(listNgay[bestDay])) {
-          assignedClasses.set(listNgay[bestDay], new Set());
+        // Kiểm tra nếu không thể phân bổ đủ môn và báo lỗi nếu cần
+        if (chunk.length < chunkSize + additionalMon && i === totalDays - 1) {
+          console.error(`Không thể phân bổ đủ môn cho các ngày mà không có lớp trùng lặp. Thiếu ngày thi!`);
+          return [];
         }
-        mon.lop.forEach(l =>
-          assignedClasses.get(listNgay[bestDay]).add(l)
-        );
-      }
 
-      // Kiểm tra kết quả phân bổ
-      const totalAssigned = result.reduce((sum, day) => sum + day.length, 0);
-      if (totalAssigned !== mon.length) {
-        toast.warning('Một số môn học có thể bị trùng lịch. Vui lòng kiểm tra lại.');
+        result.push(chunk);
       }
 
       return result;
@@ -1077,7 +991,8 @@ const PcCoiThi = () => {
           tc: [],
           hinhThuc: [],
           thoiGian: [],
-          danhSachThiSinh: [], // Khởi tạo danh sách thí sinh
+          danhSachThiSinh: [],
+
           diaDiem: examSessions,
           namHoc,
           loaiDaoTao,
@@ -1196,7 +1111,7 @@ const PcCoiThi = () => {
                   item.thoiGian.push(closestMatch.info.thoiGian);
 
                   item.tc.push(mon.info.soTinChi);
-                  item.danhSachThiSinh.push(...closestMatch.sinhVien); // Kết hợp danh sách thí sinh
+                  item.danhSachThiSinh.push(mon.sinhVien);
 
                   // Loại bỏ môn đã gộp khỏi danh sách
                   listMonClone = listMonClone.filter(monG => monG.info.tenHocPhan !== closestMatch.info.tenHocPhan);
@@ -1231,7 +1146,7 @@ const PcCoiThi = () => {
                     item.thoiGian.push(closestMatch2.info.thoiGian);
 
                     item.tc.push(closestMatch2.info.soTinChi); // Đảm bảo gán đúng thông tin từ `closestMatch2`
-                    item.danhSachThiSinh.push(...closestMatch2.sinhVien); // Kết hợp danh sách thí sinh
+                    item.danhSachThiSinh.push(closestMatch2.sinhVien);
 
                     // Loại bỏ môn đã gộp khỏi danh sách
                     listMonClone = listMonClone.filter(monG => monG.info.tenHocPhan !== closestMatch2.info.tenHocPhan);
@@ -1683,8 +1598,8 @@ const PcCoiThi = () => {
 
             <Row>
               <Col span={6} className="bg-gray-200 rounded-lg p-2">
-                <div className="text-heading4-bold text-blue text-center mb-2 mt-1">SỐ MÔN THI TRONG NGÀY</div>
-                <div className="  max-h-[600px] overflow-auto">
+                <div className="text-heading4-bold text-blue text-center mb-2 mt-1">SỐ MÔN THI TRONG </div>
+                <div className="  max-h-[500px] overflow-auto">
                   {monThiMoiNgay.map((item, index) => (
                     <div
                       key={index}
@@ -1793,7 +1708,7 @@ const PcCoiThi = () => {
               </Modal>
             )}
 
-            <div className=" text-center rounded-md p-0 mt-0">
+            <div className=" text-center rounded-md p-0 mt-2">
               <Button type="primary" className="button-chinh-quy" onClick={() => phanCongCanBo(resultFinals)}>Tạo lịch thi</Button>
             </div>
           </TabPane>
