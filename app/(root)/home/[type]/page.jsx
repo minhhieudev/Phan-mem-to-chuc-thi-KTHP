@@ -42,6 +42,8 @@ const Pages = () => {
       if (res.ok) {
         const data = await res.json();
         setListData(data);
+        console.log("data:", data);
+
       } else {
         message.error("Failed to fetch data");
       }
@@ -63,7 +65,6 @@ const Pages = () => {
       if (res.ok) {
         const data = await res.json();
         setListData2(data);
-        console.log("Error:", data);
 
       } else {
         message.error("Failed to fetch data");
@@ -225,17 +226,34 @@ const Pages = () => {
 
           <div className="space-y-6">
             {sortedGroupedData.today.map((exam, index) => {
+              let filteredCbo1 = null;
+              let filteredCbo2 = null;
+              let roomIndex = null;
+
               // Filter cán bộ (invigilators) to show only the ones that match the current user
-              const filteredCbo1 = exam.cbo1.includes(user.username) ? user.username : null;
-              const filteredCbo2 = exam.cbo2.includes(user.username) ? user.username : null;
+              for (let i = 0; i < exam.cbo1.length; i++) {
+                if (exam.cbo1[i] === user.username) {
+                  filteredCbo1 = user.username
+                  filteredCbo2 = exam.cbo2[i]
+                  roomIndex = i
+                }
+
+                if (exam.cbo2[i] === user.username) {
+                  filteredCbo1 = exam.cbo1[i]
+                  filteredCbo2 = user.username
+                  roomIndex = i
+
+                }
+              }
+
 
               // Find the room index for the selected cán bộ
-              const roomIndex = (filteredCbo1 || filteredCbo2) ? index : null;
+              //const roomIndex = (filteredCbo1 || filteredCbo2) ? index : null;
 
               return (
                 <Card
                   key={index}
-                  title={exam.hocPhan.length > 1 ? exam.hocPhan.join(',\n').toUpperCase() : exam.hocPhan.join(', ').toUpperCase()}  // Join the array into a string, convert to uppercase, and add newline if there are more than one name
+                  // Join the array into a string, convert to uppercase, and add newline if there are more than one name
                   className="rounded-lg shadow-lg overflow-hidden w-full md:w-70" // Increased width for a larger card
                   style={{
                     backgroundColor: getCardColor(exam.ngayThi),
@@ -245,6 +263,8 @@ const Pages = () => {
                   hoverable
                   onClick={() => alert(`Bạn đã chọn môn: ${exam.hocPhan.join(', ')}`)}  // Join array for alert
                 >
+                  <div className="font-bold text-blue-700 bottom-b-2 text-center">{exam.hocPhan.join(' - ').toUpperCase()}</div>
+
                   <div className="p-4">
                     <p className="text-black mb-1 text-lg font-bold">
                       <CalendarOutlined /> Ngày thi: {exam.ngayThi}
@@ -282,17 +302,29 @@ const Pages = () => {
                 <h3 className="text-lg font-bold mb-1">SẮP DIỄN RA</h3>
                 <div className="flex flex-col md:flex-row justify-center gap-4">
                   {sortedGroupedData.upcoming.map((exam, index) => {
-                    // Filter cán bộ (invigilators) to show only the ones that match the current user
-                    const filteredCbo1 = exam.cbo1.includes(user.username) ? user.username : null;
-                    const filteredCbo2 = exam.cbo2.includes(user.username) ? user.username : null;
+                    let filteredCbo1 = null;
+                    let filteredCbo2 = null;
+                    let roomIndex = null;
 
-                    // Find the room index for the selected cán bộ
-                    const roomIndex = (filteredCbo1 || filteredCbo2) ? index : null;
+                    // Filter cán bộ (invigilators) to show only the ones that match the current user
+                    for (let i = 0; i < exam.cbo1.length; i++) {
+                      if (exam.cbo1[i] === user.username) {
+                        filteredCbo1 = user.username
+                        filteredCbo2 = exam.cbo2[i]
+                        roomIndex = i
+                      }
+
+                      if (exam.cbo2[i] === user.username) {
+                        filteredCbo1 = exam.cbo1[i]
+                        filteredCbo2 = user.username
+                        roomIndex = i
+
+                      }
+                    }
 
                     return (
                       <Card
                         key={index}
-                        title={ exam.hocPhan.join(',\n').toUpperCase() }  
                         className="rounded-lg shadow-lg overflow-hidden w-full md:w-60"
                         style={{
                           backgroundColor: getCardColor(exam.ngayThi),
@@ -302,6 +334,7 @@ const Pages = () => {
                         hoverable
                         onClick={() => alert(`Bạn đã chọn môn: ${exam.hocPhan.join(', ')}`)}  // Join array for alert
                       >
+                        <div className="font-bold text-blue-700 bottom-b-2 text-center">{exam.hocPhan.join(' - ').toUpperCase()}</div>
                         <div className="p-4">
                           <p className="text-black mb-1 text-lg font-bold">
                             <CalendarOutlined /> Ngày thi: {exam.ngayThi}
@@ -312,17 +345,11 @@ const Pages = () => {
                               <p className="text-black mb-1 text-lg font-bold">
                                 <TeamOutlined /> Cán bộ 1: {filteredCbo1}
                               </p>
-                              <p className="text-black mb-1 text-lg font-bold">
-                                <TeamOutlined /> Cán bộ 2: {exam.cbo2[roomIndex]}
-                              </p>
                             </div>
                           )}
                           {/* Display filtered cán bộ 2 if it matches user.username */}
                           {filteredCbo2 && (
                             <div>
-                              <p className="text-black mb-1 text-lg font-bold">
-                                <TeamOutlined /> Cán bộ 1: {exam.cbo1[roomIndex]}
-                              </p>
                               <p className="text-black mb-1 text-lg font-bold">
                                 <TeamOutlined /> Cán bộ 2: {filteredCbo2}
                               </p>
@@ -352,17 +379,30 @@ const Pages = () => {
                 <h3 className="text-lg font-bold mb-1">ĐÃ QUA</h3>
                 <div className="flex flex-col md:flex-row justify-center gap-4">
                   {sortedGroupedData.past.map((exam, index) => {
-                    // Filter cán bộ (invigilators) to show only the ones that match the current user
-                    const filteredCbo1 = exam.cbo1.includes(user.username) ? user.username : null;
-                    const filteredCbo2 = exam.cbo2.includes(user.username) ? user.username : null;
+                    let filteredCbo1 = null;
+                    let filteredCbo2 = null;
+                    let roomIndex = null;
 
-                    // Find the room index for the selected cán bộ
-                    const roomIndex = (filteredCbo1 || filteredCbo2) ? index : null;
+                    // Filter cán bộ (invigilators) to show only the ones that match the current user
+                    for (let i = 0; i < exam.cbo1.length; i++) {
+                      if (exam.cbo1[i] === user.username) {
+                        filteredCbo1 = user.username
+                        filteredCbo2 = exam.cbo2[i]
+                        roomIndex = i
+                      }
+
+                      if (exam.cbo2[i] === user.username) {
+                        filteredCbo1 = exam.cbo1[i]
+                        filteredCbo2 = user.username
+                        roomIndex = i
+
+                      }
+                    }
 
                     return (
                       <Card
                         key={index}
-                        title={exam.hocPhan.length > 1 ? exam.hocPhan.join(',\n').toUpperCase() : exam.hocPhan.join(', ').toUpperCase()}  // Join the array into a string and convert to uppercase
+
                         className="rounded-lg shadow-lg overflow-hidden w-full md:w-70"
                         style={{
                           backgroundColor: getCardColor(exam.ngayThi),
@@ -372,6 +412,8 @@ const Pages = () => {
                         hoverable
                         onClick={() => alert(`Bạn đã chọn môn: ${exam.hocPhan.join(', ')}`)}  // Join array for alert
                       >
+                        <div className="font-bold text-blue-700 bottom-b-2 text-center">{exam.hocPhan.join(' - ').toUpperCase()}</div>
+
                         <div className="p-4">
                           <p className="text-black mb-1 text-lg font-bold">
                             <CalendarOutlined /> Ngày thi: {exam.ngayThi}

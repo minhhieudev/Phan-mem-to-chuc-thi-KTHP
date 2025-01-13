@@ -15,12 +15,23 @@ export const GET = async (req) => {
     const loai = searchParams.get('loai');
     const hocKy = searchParams.get('hocKy');
 
+    const cb = searchParams.get('gvGiangDay') || '';
+
+
 
     let filter = {};
     if (loaiKyThi && loaiKyThi !== 'null' && loaiKyThi !== 'undefined') filter.loaiKyThi = loaiKyThi;
     if (namHoc) filter.namHoc = namHoc;
     if (loai) filter.loaiDaoTao = loai;
     if (hocKy && hocKy !== 'null' && hocKy !== 'undefined') filter.ky = hocKy;
+
+
+    if (cb) {
+      filter.$or = [
+        { cbo1: { $regex: cb, $options: 'i' } },
+        { cbo2: { $regex: cb, $options: 'i' } }
+      ];
+    }
 
     const assignments = await PcCoiThi.find(filter);
 
