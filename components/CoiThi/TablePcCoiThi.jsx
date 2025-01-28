@@ -518,10 +518,13 @@ const TablePcCoiThi = ({ list, namHoc, loaiKyThi, loaiDaoTao, hocKy, listPhong, 
               headers: { "Content-Type": "application/json" },
             });
             if (res.ok) {
-              const data = await res.json();
-              setDataUser(data);
+              const dataUs = await res.json();
 
-              if (dataUser) {
+              if (dataUs) {
+                const filteredEmails = dataUs
+                  .filter(user => data.some(item => item.cbo1 === user.username || item.cbo2 === user.username))
+                  .map(user => user.email);
+
                 // Gọi API gửi email với fileObject
                 const res = await fetch("/api/admin", {
                   method: "POST",
@@ -530,7 +533,7 @@ const TablePcCoiThi = ({ list, namHoc, loaiKyThi, loaiDaoTao, hocKy, listPhong, 
                     subject: "Lịch coi thi",
                     html: contentEmail,
                     attachments: fileObject,
-                    email: [...dataUser.map(item => item.email)]
+                    email: filteredEmails
                   })
 
                 });

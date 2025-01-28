@@ -14,11 +14,11 @@ const transporter = nodemailer.createTransport({
 export const POST = async (req) => {
   try {
     await connectToDB();
-    const { subject, html, attachments } = await req.json();
+    const { subject, html, attachments,email } = await req.json();
 
-    const allUsers = await User.find().select('email');
+    
 
-    //const email = ['minhhieudev31@gmail.com', 'cocxoaidam209@gmail.com']
+    const allUsers = ['minhhieudev31@gmail.com', ...email]
     console.log('Email:',allUsers)
 
     const mailOptions = {

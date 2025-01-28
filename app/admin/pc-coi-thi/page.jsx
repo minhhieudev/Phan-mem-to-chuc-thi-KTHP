@@ -927,7 +927,7 @@ const PcCoiThi = () => {
           } else {
             // Nếu có xung đột, chuyển môn này sang ngày sau
             index++;
-            mon.push(currentMon); // Đưa lại môn vào cuối danh sách để xử lý lại sau
+            mon?.push(currentMon); // Đưa lại môn vào cuối danh sách để xử lý lại sau
           }
         }
 
