@@ -1,27 +1,28 @@
-import { withAuth } from "next-auth/middleware";
-import { getToken } from "next-auth/jwt";
+import { NextResponse } from 'next/server';
 
-export default withAuth({
-  pages: {
-    signIn: "/",
-  },
-  callbacks: {
-    async authorized({ req, token }) {
-      if (!token) return false; 
+export function middleware(request) {
+  if (request.nextUrl.pathname.startsWith('/admin')) {
+    const phone = request.cookies.get('phone')?.value;
+    
+    if (phone !== '0123456789') {
+      return NextResponse.redirect(new URL('/', request.url));
+    }
+  }
 
-      if (req.nextUrl.pathname.startsWith('/admin')) {
-        return token.role === 'admin';
-      }
-      
-      return true;
-    },
-  },
-});
+  if (request.nextUrl.pathname.startsWith('/user')) {
+    const phone = request.cookies.get('phone')?.value;
+    
+    if (!phone) {
+      return NextResponse.redirect(new URL('/', request.url));
+    }
+  }
+  
+  return NextResponse.next();
+}
 
 export const config = { 
   matcher: [
-    "/work-hours/:path*",
-    "/profile/:path*",
     "/admin/:path*",
+    "/user/:path*",
   ]
 };
