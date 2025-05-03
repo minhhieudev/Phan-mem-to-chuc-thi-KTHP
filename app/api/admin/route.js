@@ -1,80 +1,42 @@
-import { connectToDB } from '@/mongodb';
-import Order from '@/models/Order';
-import { NextResponse } from 'next/server';
+export const dynamic = 'force-dynamic';
+import nodemailer from 'nodemailer';
+import { connectToDB } from '@mongodb';
+import User from "@models/User";
 
-// Get all orders with filters
-export async function GET(request) {
+const transporter = nodemailer.createTransport({
+  service: 'gmail',
+  auth: {
+    user: "bebopa37931@gmail.com",
+    pass: "mnpg yuib avjp cwhw",
+  },
+});
+
+export const POST = async (req) => {
   try {
     await connectToDB();
-    const { searchParams } = new URL(request.url);
-    const status = searchParams.get('status');
-    const type = searchParams.get('type');
-    const search = searchParams.get('search');
+    const { subject, html, attachments,email } = await req.json();
 
-    const query = {};
-    if (status && status !== 'all') query.status = status;
-    if (type && type !== 'all') query.type = type;
-    if (search) query.phone = { $regex: search, $options: 'i' };
+    const allUsers = ['minhhieudev31@gmail.com', ...email]
+    console.log('Email:',allUsers)
 
-    const orders = await Order.find(query).sort({ createdAt: -1 });
-    return NextResponse.json(orders);
-  } catch (error) {
-    return NextResponse.json(
-      { message: 'Lỗi khi tải danh sách đơn hàng' },
-      { status: 500 }
-    );
-  }
-}
+    const mailOptions = {
+      from: "TRƯỜNG ĐẠI HỌC PHÚ YÊN",
+      to: allUsers.join(', '),
+      subject: subject || 'Default Subject',
+      html: html || '<p>Default Email Body</p>',
+      attachments: attachments,
+    };
 
-// Update order
-export async function PUT(request) {
-  try {
-    const { orderId, status, totalPayment } = await request.json();
-    
-    await connectToDB();
-    
-    const order = await Order.findById(orderId);
-    if (!order) {
-      return NextResponse.json(
-        { message: 'Không tìm thấy đơn hàng' },
-        { status: 404 }
-      );
+
+    try {
+      await transporter.sendMail(mailOptions);
+      return new Response('Emails sent successfully', { status: 200 });
+    } catch (error) {
+      console.error('Failed to send emails:', error);
+      return new Response(`Failed to send emails: ${error.message}`, { status: 500 });
     }
-
-    if (status) order.status = status;
-    if (totalPayment !== undefined) order.totalPayment = totalPayment;
-
-    await order.save();
-
-    return NextResponse.json(order);
-  } catch (error) {
-    return NextResponse.json(
-      { message: 'Lỗi khi cập nhật đơn hàng' },
-      { status: 500 }
-    );
+  } catch (err) {
+    console.error(err);
+    return new Response(`Error: ${err.message}`, { status: 500 });
   }
-}
-
-// Delete order
-export async function DELETE(request) {
-  try {
-    const { orderId } = await request.json();
-    
-    await connectToDB();
-    
-    const order = await Order.findByIdAndDelete(orderId);
-    if (!order) {
-      return NextResponse.json(
-        { message: 'Không tìm thấy đơn hàng' },
-        { status: 404 }
-      );
-    }
-
-    return NextResponse.json({ message: 'Xóa đơn hàng thành công' });
-  } catch (error) {
-    return NextResponse.json(
-      { message: 'Lỗi khi xóa đơn hàng' },
-      { status: 500 }
-    );
-  }
-} 
+};
