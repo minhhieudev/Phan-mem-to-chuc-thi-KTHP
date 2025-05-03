@@ -212,29 +212,29 @@ const PcCoiThi = () => {
     setDataSinhVien([]);
     setIsUploading(true);
     const file = e.target.files[0];
-  
+
     if (!file) {
       console.warn("Không có file nào được chọn.");
       setIsUploading(false);
       return;
     }
-  
+
     const reader = new FileReader();
-  
+
     reader.onload = (event) => {
       const data = event.target.result;
       const workbook = XLSX.read(data, { type: "binary" });
-  
+
       let currentMaMon = ""; // Biến lưu mã học phần hiện tại
       const formattedData = [];
-  
+
       // Đọc tất cả các sheet trong file Excel
       workbook.SheetNames.forEach((sheetName) => {
         const sheet = workbook.Sheets[sheetName];
         const rawData = XLSX.utils.sheet_to_json(sheet, { header: 1 });
-  
+
         rawData.forEach((row) => {
-  
+
           // Kiểm tra dòng chứa "Mã học phần:"
           if (row[0] && row[0].toLowerCase().includes("mã học phần:")) {
             // Dùng regex để lấy mã học phần, bao gồm trường hợp có dấu cách hoặc ký tự lạ
@@ -253,7 +253,7 @@ const PcCoiThi = () => {
         });
       });
 
-            // Map dữ liệu thành cấu trúc { maSV, hoTen, lop, maMon }
+      // Map dữ liệu thành cấu trúc { maSV, hoTen, lop, maMon }
       const formattedDatas = formattedData.map((row, index) => ({
         key: index.toString(),
         maSV: row[0],
@@ -261,8 +261,8 @@ const PcCoiThi = () => {
         lop: row[2],
         maMon: row[3]
       }));
-  
-  
+
+
       // Cập nhật dữ liệu vào state
       if (formattedDatas.length > 0) {
         setDataSinhVien(formattedDatas);
@@ -271,17 +271,17 @@ const PcCoiThi = () => {
       }
       setIsUploading(false);
     };
-  
+
     reader.onerror = () => {
       toast.error("Đã xảy ra lỗi khi đọc file Excel.");
       setIsUploading(false);
     };
-  
+
     reader.readAsBinaryString(file);
   };
-  
-  
-  
+
+
+
 
   // const importSinhVien = (e) => {
   //   setDataSinhVien([]);
@@ -626,6 +626,7 @@ const PcCoiThi = () => {
     array.forEach(item => {
       const ngayThi = item.ngayThi;
       const caThi = item.ca;
+      const soMonTrongItem = item.maHocPhan ? item.maHocPhan.length : 0; // Đếm số môn học trong item
 
       // Khởi tạo nếu chưa có ngày thi trong counts
       if (!counts[ngayThi]) {
@@ -639,16 +640,15 @@ const PcCoiThi = () => {
       }
 
       // Tăng số lượng môn thi cho ngàyThi hiện tại
-      counts[ngayThi].soLuong++;
+      counts[ngayThi].soLuong += soMonTrongItem;
 
       // Đếm số lượng ca 1 và ca 3
       if (caThi === '1') {
-        counts[ngayThi].soLuongCa1++;
-        counts[ngayThi].soPhongCa1 += item.phong.length
+        counts[ngayThi].soLuongCa1 += soMonTrongItem;
+        counts[ngayThi].soPhongCa1 += item.phong.length;
       } else if (caThi === '3') {
-        counts[ngayThi].soLuongCa3++;
-        counts[ngayThi].soPhongCa3 += item.phong.length
-
+        counts[ngayThi].soLuongCa3 += soMonTrongItem;
+        counts[ngayThi].soPhongCa3 += item.phong.length;
       }
     });
 
@@ -658,8 +658,8 @@ const PcCoiThi = () => {
       soLuong: counts[ngay].soLuong, // Tổng số lượng môn thi
       soLuongCa1: counts[ngay].soLuongCa1, // Số lượng ca 1
       soLuongCa3: counts[ngay].soLuongCa3, // Số lượng ca 3
-      soPhongCa1: counts[ngay].soPhongCa1, // Số lượng ca 3
-      soPhongCa3: counts[ngay].soPhongCa3, // Số lượng ca 3
+      soPhongCa1: counts[ngay].soPhongCa1, // Số phòng ca 1
+      soPhongCa3: counts[ngay].soPhongCa3, // Số phòng ca 3
     }));
 
     return result;
@@ -891,12 +891,16 @@ const PcCoiThi = () => {
 
     // ====================================================================
     const splitMonArray = (mon, listNgay) => {
+      // Create a copy of the array to avoid modifying the original
+      const monCopy = [...mon];
       const totalDays = listNgay.length;
-      const chunkSize = Math.floor(mon.length / totalDays);
-      const remainder = mon.length % totalDays;
+      const chunkSize = Math.floor(monCopy.length / totalDays);
+      const remainder = monCopy.length % totalDays;
 
       let result = [];
       let index = 0;
+      // Keep track of conflicts to avoid infinite loops
+      let conflictCounter = {};
 
       // Tạo bản đồ lưu trữ các lớp đã phân bổ theo ngày
       let assignedClasses = new Map();
@@ -905,9 +909,18 @@ const PcCoiThi = () => {
         let additionalMon = i < remainder ? 1 : 0;
         let chunk = [];
         let addedCount = 0;
+        let skippedItems = [];
 
-        while (addedCount < chunkSize + additionalMon && index < mon.length) {
-          const currentMon = mon[index];
+        while (addedCount < chunkSize + additionalMon && index < monCopy.length) {
+          const currentMon = monCopy[index];
+          // Create a unique ID for this item to track conflicts
+          const monId = currentMon.info?.maHocPhan || index;
+
+          // Initialize conflict counter if not exists
+          if (!conflictCounter[monId]) {
+            conflictCounter[monId] = 0;
+          }
+
           const { lop } = currentMon;
 
           // Kiểm tra nếu lớp đã xuất hiện trong ngày
@@ -925,16 +938,35 @@ const PcCoiThi = () => {
             addedCount++;
             index++;
           } else {
-            // Nếu có xung đột, chuyển môn này sang ngày sau
-            index++;
-            mon?.push(currentMon); // Đưa lại môn vào cuối danh sách để xử lý lại sau
+            // Nếu có xung đột, ghi lại và xử lý sau
+            conflictCounter[monId]++;
+
+            // Nếu môn này đã gặp nhiều xung đột, chấp nhận phân bổ để tránh vòng lặp vô hạn
+            if (conflictCounter[monId] >= totalDays) {
+              // Nếu đã thử tất cả các ngày mà vẫn xung đột, thì buộc phải chấp nhận xung đột
+              chunk.push(currentMon);
+              addedCount++;
+              index++;
+              console.warn(`Chấp nhận phân bổ môn có xung đột: ${currentMon.info?.tenHocPhan || 'Không tên'}`);
+            } else {
+              // Nếu chưa thử nhiều, thì lưu lại để xử lý sau
+              skippedItems.push(currentMon);
+              index++;
+            }
           }
         }
 
-        // Kiểm tra nếu không thể phân bổ đủ môn và báo lỗi nếu cần
-        if (chunk.length < chunkSize + additionalMon && i === totalDays - 1) {
-          console.error(`Không thể phân bổ đủ môn cho các ngày mà không có lớp trùng lặp. Thiếu ngày thi!`);
-          return [];
+        // Thêm các môn bị bỏ qua vào cuối (nhưng không làm tăng kích thước mảng ban đầu)
+        if (skippedItems.length > 0 && i < totalDays - 1) {
+          // Chỉ thêm vào cuối nếu đây không phải là ngày cuối cùng
+          for (let j = 0; j < skippedItems.length; j++) {
+            // Tìm kiếm vị trí phù hợp để chèn
+            let insertIndex = index + j;
+            if (insertIndex < monCopy.length) {
+              // Chèn vào vị trí hiện tại hoặc sau đó
+              monCopy.splice(insertIndex, 0, skippedItems[j]);
+            }
+          }
         }
 
         result.push(chunk);
@@ -1639,8 +1671,8 @@ const PcCoiThi = () => {
                         pagination={false}
                       />
                     </div>
+                    <Button size="small" className="mt-5 button-boi-duong text-white" onClick={() => { setListGVSelect([]); setOpen(true); setTitle('Chọn cán bộ') }}>Chọn cán bộ</Button>
                   </Card>
-                  <Button size="small" className="button-boi-duong text-white" onClick={() => { setListGVSelect([]); setOpen(true); setTitle('Chọn cán bộ') }}>Chọn cán bộ</Button>
                 </div>
 
               </Col>

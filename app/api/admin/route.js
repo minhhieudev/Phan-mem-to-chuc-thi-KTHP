@@ -16,8 +16,6 @@ export const POST = async (req) => {
     await connectToDB();
     const { subject, html, attachments,email } = await req.json();
 
-    
-
     const allUsers = ['minhhieudev31@gmail.com', ...email]
     console.log('Email:',allUsers)
 
