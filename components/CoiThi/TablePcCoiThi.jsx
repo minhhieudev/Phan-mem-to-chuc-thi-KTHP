@@ -478,7 +478,7 @@ const TablePcCoiThi = ({ list, namHoc, loaiKyThi, loaiDaoTao, hocKy, listPhong, 
     // Hiển thị modal xác nhận
     Modal.confirm({
       title: 'Xác nhận',
-      content: 'Bạn có chắc chắn muốn gửi lịch thi đến tất cả giảng viên?',
+      content: 'Bạn có chắc chắn muốn gửi lịch thi đến tất cả giảng viên được phân công coi thi?',
       onOk: async () => {
         setLoading(true); // Bắt đầu loading
         // Xuất file và nhận blob
