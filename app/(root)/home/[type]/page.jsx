@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Row, Col, Button, Input, Tabs, Spin, Select, Card } from "antd";
+import { Row, Col, Button, Input, Tabs, Spin, Select, Card, Tag, Divider, Empty, Badge } from "antd";
 import { useParams } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
@@ -10,25 +10,29 @@ import {
   TeamOutlined,
   ClockCircleOutlined,
   HomeOutlined,
-  ArrowLeftOutlined
+  ArrowLeftOutlined,
+  InfoCircleOutlined,
+  EnvironmentOutlined,
+  BookOutlined
 } from "@ant-design/icons";
 import Loader from "@components/Loader";
 import moment from "moment";
 
+const { TabPane } = Tabs;
+const { Option } = Select;
+
 const Pages = () => {
   const { type } = useParams();
   const [loading, setLoading] = useState(true);
-
   const router = useRouter();
-
   const { data: session } = useSession();
-
   const user = session?.user;
 
   const [selectNamHoc, setSelectNamHoc] = useState("2024-2025");
   const [selectKy, setSelectKy] = useState("1");
   const [listData, setListData] = useState([]);
   const [listData2, setListData2] = useState([]);
+  const [activeTab, setActiveTab] = useState("upcoming");
 
   const fetchData = async () => {
     try {
@@ -42,8 +46,6 @@ const Pages = () => {
       if (res.ok) {
         const data = await res.json();
         setListData(data);
-        console.log("data:", data);
-
       } else {
         message.error("Failed to fetch data");
       }
@@ -53,6 +55,7 @@ const Pages = () => {
       message.error("Failed to fetch data");
     }
   };
+  
   const fetchData2 = async () => {
     try {
       const res = await fetch(
@@ -65,7 +68,6 @@ const Pages = () => {
       if (res.ok) {
         const data = await res.json();
         setListData2(data);
-
       } else {
         message.error("Failed to fetch data");
       }
@@ -85,546 +87,467 @@ const Pages = () => {
 
   const getCardColor = (ngayThi) => {
     const today = moment();
-    const examDate = moment(ngayThi, "DD/MM/YYYY");
+    const examDate = moment(ngayThi, "DD-MM-YYYY");
 
     if (examDate.isBefore(today, "day")) {
-      return "#d0d0d0";
+      return "#f5f5f5"; // Lighter gray for past events
     } else if (examDate.isSame(today, "day")) {
-      return "#4a90e2";
+      return "#e6f7ff"; // Light blue for today's events
     } else {
-      return "#c9e7a0";
+      return "white"; // White for upcoming events
     }
   };
 
-  // Nhóm dữ liệu theo màu
-  const groupByColor = () => {
+  const getBorderColor = (ngayThi) => {
+    const today = moment();
+    const examDate = moment(ngayThi, "DD-MM-YYYY");
+
+    if (examDate.isBefore(today, "day")) {
+      return "#d9d9d9"; // Gray border for past events
+    } else if (examDate.isSame(today, "day")) {
+      return "#1890ff"; // Blue border for today's events
+    } else {
+      return "#52c41a"; // Green border for upcoming events
+    }
+  };
+
+  // Nhóm dữ liệu theo thời gian
+  const groupByTime = (data) => {
     const groups = {
       past: [],
       today: [],
       upcoming: [],
     };
 
-    listData.forEach((item) => {
-      const examDate = moment(item.ngayThi, "DD/MM/YYYY");
-      if (examDate.isBefore(moment(), "day")) {
+    data.forEach((item) => {
+      const examDate = moment(item.ngayThi, "DD-MM-YYYY");
+      const today = moment();
+      
+      if (examDate.isBefore(today, "day")) {
         groups.past.push(item);
-      } else if (examDate.isSame(moment(), "day")) {
+      } else if (examDate.isSame(today, "day")) {
         groups.today.push(item);
       } else {
         groups.upcoming.push(item);
       }
     });
 
-    return groups;
-  };
-  // Nhóm dữ liệu theo màu
-  const groupByColor2 = () => {
-    const groups = {
-      past: [],
-      today: [],
-      upcoming: [],
-    };
-
-    listData2.forEach((item) => {
-      const examDate = moment(item.ngayThi, "DD/MM/YYYY");
-      if (examDate.isBefore(moment(), "day")) {
-        groups.past.push(item);
-      } else if (examDate.isSame(moment(), "day")) {
-        groups.today.push(item);
-      } else {
-        groups.upcoming.push(item);
-      }
+    // Sort each group by date
+    Object.keys(groups).forEach(key => {
+      groups[key].sort((a, b) => 
+        moment(a.ngayThi, "DD-MM-YYYY").diff(moment(b.ngayThi, "DD-MM-YYYY"))
+      );
     });
 
     return groups;
   };
 
-  const groupedData = groupByColor();
-  const groupedData2 = groupByColor2();
+  const groupedData = groupByTime(listData);
+  const groupedData2 = groupByTime(listData2);
 
-  const sortedGroupedData = {
-    past: groupedData.past.sort((a, b) =>
-      moment(a.ngayThi, "DD/MM/YYYY").diff(moment(b.ngayThi, "DD/MM/YYYY"))
-    ),
-    today: groupedData.today.sort((a, b) =>
-      moment(a.ngayThi, "DD/MM/YYYY").diff(moment(b.ngayThi, "DD/MM/YYYY"))
-    ),
-    upcoming: groupedData.upcoming.sort((a, b) =>
-      moment(a.ngayThi, "DD/MM/YYYY").diff(moment(b.ngayThi, "DD/MM/YYYY"))
-    ),
+  const formatCaExam = (ca) => {
+    return ca === "1" ? "Sáng" : ca === "3" ? "Chiều" : ca;
   };
-  const sortedGroupedData2 = {
-    past: groupedData2.past.sort((a, b) =>
-      moment(a.ngayThi, "DD/MM/YYYY").diff(moment(b.ngayThi, "DD/MM/YYYY"))
-    ),
-    today: groupedData2.today.sort((a, b) =>
-      moment(a.ngayThi, "DD/MM/YYYY").diff(moment(b.ngayThi, "DD/MM/YYYY"))
-    ),
-    upcoming: groupedData2.upcoming.sort((a, b) =>
-      moment(a.ngayThi, "DD/MM/YYYY").diff(moment(b.ngayThi, "DD/MM/YYYY"))
-    ),
+
+  // Render a single card for lịch coi thi
+  const renderCoiThiCard = (exam, index) => {
+    let filteredCbo1 = null;
+    let filteredCbo2 = null;
+    let roomIndex = null;
+
+    // Find the user in cbo1 or cbo2 arrays
+    for (let i = 0; i < exam.cbo1.length; i++) {
+      if (exam.cbo1[i] === user.username) {
+        filteredCbo1 = user.username;
+        filteredCbo2 = exam.cbo2[i];
+        roomIndex = i;
+        break;
+      }
+
+      if (exam.cbo2[i] === user.username) {
+        filteredCbo1 = exam.cbo1[i];
+        filteredCbo2 = user.username;
+        roomIndex = i;
+        break;
+      }
+    }
+
+    if (roomIndex === null) return null;
+
+    // Format the date display
+    const formattedDate = moment(exam.ngayThi, "DD-MM-YYYY").format("DD/MM/YYYY");
+    const isToday = moment(exam.ngayThi, "DD-MM-YYYY").isSame(moment(), "day");
+    const isPast = moment(exam.ngayThi, "DD-MM-YYYY").isBefore(moment(), "day");
+    
+    return (
+      <Card
+        key={index}
+        className="rounded-lg overflow-hidden w-full mb-4 hover:shadow-xl transition-shadow"
+        style={{
+          backgroundColor: getCardColor(exam.ngayThi),
+          borderLeft: `5px solid ${getBorderColor(exam.ngayThi)}`,
+          boxShadow: "0 4px 8px rgba(0,0,0,0.1)"
+        }}
+        hoverable
+      >
+        <div className="flex flex-col md:flex-row gap-4">
+          {/* Left column with date and status */}
+          <div className="md:w-1/5 flex flex-col items-center justify-center p-2 border-r border-gray-200">
+            <div className="text-4xl font-bold text-gray-900">
+              {formattedDate.split('/')[0]}
+            </div>
+            <div className="text-sm text-gray-500">
+              {moment(exam.ngayThi, "DD-MM-YYYY").format("MM/YYYY")}
+            </div>
+            <Badge 
+              status={isToday ? "processing" : isPast ? "default" : "success"} 
+              text={isToday ? "Hôm nay" : isPast ? "Đã qua" : "Sắp tới"} 
+              className="mt-2"
+            />
+            <Tag color={exam.ca === "1" ? "blue" : "orange"} className="mt-2">
+              {formatCaExam(exam.ca)}
+            </Tag>
+          </div>
+          
+          {/* Right column with exam details */}
+          <div className="md:w-4/5 p-2">
+            <h3 className="text-lg font-bold text-blue-700 mb-3">
+              <BookOutlined className="mr-2" />
+              {exam.hocPhan.join(' - ').toUpperCase()}
+            </h3>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+              <div>
+                <p className="flex items-center text-gray-800">
+                  <EnvironmentOutlined className="mr-2 text-red-500" />
+                  <span className="font-medium">Phòng thi:</span>
+                  <span className="ml-1 font-bold">{exam.phong[roomIndex]}</span>
+                </p>
+                
+                <p className="flex items-center text-gray-800">
+                  <TeamOutlined className="mr-2 text-green-500" />
+                  <span className="font-medium">Cán bộ 1:</span>
+                  <span className={`ml-1 ${filteredCbo1 === user.username ? 'text-blue-600 font-bold' : 'font-normal'}`}>{filteredCbo1}</span>
+                </p>
+                
+                <p className="flex items-center text-gray-800">
+                  <TeamOutlined className="mr-2 text-green-500" />
+                  <span className="font-medium">Cán bộ 2:</span>
+                  <span className={`ml-1 ${filteredCbo2 === user.username ? 'text-blue-600 font-bold' : 'font-normal'}`}>{filteredCbo2}</span>
+                </p>
+              </div>
+              
+              <div>
+                <p className="flex items-center text-gray-800">
+                  <InfoCircleOutlined className="mr-2 text-purple-500" />
+                  <span className="font-medium">Hình thức:</span>
+                  <span className="ml-1">{exam.hinhThuc ? exam.hinhThuc.join(', ') : 'N/A'}</span>
+                </p>
+                
+                <p className="flex items-center text-gray-800">
+                  <ClockCircleOutlined className="mr-2 text-orange-500" />
+                  <span className="font-medium">Thời gian:</span>
+                  <span className="ml-1">{exam.thoiGian ? exam.thoiGian.join(', ') : 'N/A'}</span>
+                </p>
+                
+                <p className="flex items-center text-gray-800">
+                  <HomeOutlined className="mr-2 text-blue-500" />
+                  <span className="font-medium">Địa điểm:</span>
+                  <span className="ml-1">{exam.diaDiem || 'N/A'}</span>
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </Card>
+    );
+  };
+
+  // Render a single card for lịch chấm thi
+  const renderChamThiCard = (exam, index) => {
+    const formattedDate = moment(exam.ngayThi, "DD-MM-YYYY").format("DD/MM/YYYY");
+    const isToday = moment(exam.ngayThi, "DD-MM-YYYY").isSame(moment(), "day");
+    const isPast = moment(exam.ngayThi, "DD-MM-YYYY").isBefore(moment(), "day");
+    
+    return (
+      <Card
+        key={index}
+        className="rounded-lg overflow-hidden w-full mb-4 hover:shadow-xl transition-shadow"
+        style={{
+          backgroundColor: getCardColor(exam.ngayThi),
+          borderLeft: `5px solid ${getBorderColor(exam.ngayThi)}`,
+          boxShadow: "0 4px 8px rgba(0,0,0,0.1)"
+        }}
+        hoverable
+      >
+        <div className="flex flex-col md:flex-row gap-4">
+          {/* Left column with date and status */}
+          <div className="md:w-1/5 flex flex-col items-center justify-center p-2 border-r border-gray-200">
+            <div className="text-4xl font-bold text-gray-900">
+              {formattedDate.split('/')[0]}
+            </div>
+            <div className="text-sm text-gray-500">
+              {moment(exam.ngayThi, "DD-MM-YYYY").format("MM/YYYY")}
+            </div>
+            <Badge 
+              status={isToday ? "processing" : isPast ? "default" : "success"} 
+              text={isToday ? "Hôm nay" : isPast ? "Đã qua" : "Sắp tới"} 
+              className="mt-2"
+            />
+          </div>
+          
+          {/* Right column with exam details */}
+          <div className="md:w-4/5 p-2">
+            <h3 className="text-lg font-bold text-blue-700 mb-3">
+              <BookOutlined className="mr-2" />
+              {exam.hocPhan.join(' - ').toUpperCase()}
+            </h3>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+              <div>
+                <p className="flex items-center text-gray-800">
+                  <TeamOutlined className="mr-2 text-green-500" />
+                  <span className="font-medium">Cán bộ 1:</span>
+                  <span className={`ml-1 ${exam.cb1 === user.username ? 'text-blue-600 font-bold' : 'font-normal'}`}>{exam.cb1}</span>
+                </p>
+                
+                <p className="flex items-center text-gray-800">
+                  <TeamOutlined className="mr-2 text-green-500" />
+                  <span className="font-medium">Cán bộ 2:</span>
+                  <span className={`ml-1 ${exam.cb2 === user.username ? 'text-blue-600 font-bold' : 'font-normal'}`}>{exam.cb2}</span>
+                </p>
+              </div>
+              
+              <div>
+                <p className="flex items-center text-gray-800">
+                  <InfoCircleOutlined className="mr-2 text-purple-500" />
+                  <span className="font-medium">Số bài:</span>
+                  <span className="ml-1 font-bold">{exam.soBai}</span>
+                </p>
+                
+                <p className="flex items-center text-gray-800">
+                  <InfoCircleOutlined className="mr-2 text-orange-500" />
+                  <span className="font-medium">Loại kỳ thi:</span>
+                  <span className="ml-1">{exam.loaiKyThi}</span>
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </Card>
+    );
   };
 
   return loading ? (
     <Loader />
   ) : (
-    <div className="bg-white w-[95%] rounded-md shadow-md mx-auto p-4 mt-5 h-fit">
-      <Button
-        className="button-kiem-nhiem text-white font-bold shadow-md"
-        onClick={() => router.push(`/home`)}
-        size="small"
-      >
-        <div className="hover:color-blue "><ArrowLeftOutlined
-          style={{
-            color: 'white',
-            fontSize: '18px',
-          }}
-        /> QUAY LẠI</div>
-      </Button>
-      {type == 'coi-thi' && (
-        <div className="px-4">
-          <div className="flex justify-center items-center mb-3">
-            <h1 className="text-heading3-bold text-center text-3xl font-bold">
-              LỊCH COI THI
-            </h1>
+    <div className="bg-white w-[95%] rounded-md shadow-md mx-auto p-4 mt-5">
+      <div className="flex justify-between items-center mb-4">
+        <Button
+          className="flex items-center text-white font-bold shadow-md"
+          onClick={() => router.push(`/home`)}
+          type="primary"
+          size="middle"
+        >
+          <ArrowLeftOutlined /> QUAY LẠI
+        </Button>
+        
+        <h1 className="text-2xl md:text-3xl font-bold text-center text-blue-800">
+          {type === 'coi-thi' ? 'LỊCH COI THI' : 'LỊCH CHẤM THI'}
+        </h1>
+        
+        <div className="w-[100px]"></div> {/* Spacer for flex alignment */}
+      </div>
+
+      <div className="mb-6 bg-gray-50 p-4 rounded-lg shadow-sm">
+        <div className="flex flex-col md:flex-row items-end justify-center gap-4">
+          <div className="font-bold flex flex-col w-full md:w-auto">
+            <label htmlFor="namHoc" className="block text-sm text-gray-700 mb-1">
+              Năm học
+            </label>
+            <Select
+              id="namHoc"
+              value={selectNamHoc}
+              onChange={(value) => setSelectNamHoc(value)}
+              className="w-full md:w-48"
+              placeholder="Chọn năm học"
+            >
+              <Option value="2024-2025">2024-2025</Option>
+              <Option value="2023-2024">2023-2024</Option>
+              <Option value="2022-2023">2022-2023</Option>
+            </Select>
           </div>
 
-          <div className="flex flex-col md:flex-row justify-center gap-4 mb-6">
-            <div className="font-bold flex flex-col">
-              <label htmlFor="namHoc" className="block text-sm text-gray-700 mb-1">
-                Năm học
-              </label>
-              <Select
-                id="namHoc"
-                value={selectNamHoc}
-                onChange={(value) => setSelectNamHoc(value)}
-                className="w-full md:w-48"
-                placeholder="Chọn năm học"
-              >
-                <Option value="2024-2025">2024-2025</Option>
-                <Option value="2023-2024">2023-2024</Option>
-                <Option value="2022-2023">2022-2023</Option>
-              </Select>
-            </div>
-
-            <div className="font-bold flex flex-col">
-              <label htmlFor="ky" className="block text-sm text-gray-700 mb-1">
-                Kỳ
-              </label>
-              <Select allowClear
-                id="ky"
-                value={selectKy}
-                onChange={(value) => setSelectKy(value)}
-                className="w-full md:w-32"
-                placeholder="Chọn kỳ"
-              >
-                <Option value="1">1</Option>
-                <Option value="2">2</Option>
-              </Select>
-            </div>
+          <div className="font-bold flex flex-col w-full md:w-auto">
+            <label htmlFor="ky" className="block text-sm text-gray-700 mb-1">
+              Học kỳ
+            </label>
+            <Select
+              id="ky"
+              value={selectKy}
+              onChange={(value) => setSelectKy(value)}
+              className="w-full md:w-32"
+              placeholder="Chọn kỳ"
+              allowClear
+            >
+              <Option value="1">1</Option>
+              <Option value="2">2</Option>
+              <Option value="he">Hè</Option>
+            </Select>
           </div>
+        </div>
+      </div>
 
-          <div className="space-y-6">
-            {sortedGroupedData.today.map((exam, index) => {
-              let filteredCbo1 = null;
-              let filteredCbo2 = null;
-              let roomIndex = null;
-
-              // Filter cán bộ (invigilators) to show only the ones that match the current user
-              for (let i = 0; i < exam.cbo1.length; i++) {
-                if (exam.cbo1[i] === user.username) {
-                  filteredCbo1 = user.username
-                  filteredCbo2 = exam.cbo2[i]
-                  roomIndex = i
-                }
-
-                if (exam.cbo2[i] === user.username) {
-                  filteredCbo1 = exam.cbo1[i]
-                  filteredCbo2 = user.username
-                  roomIndex = i
-
-                }
+      {type === 'coi-thi' && (
+        <div className="mt-4">
+          <Tabs 
+            activeKey={activeTab}
+            onChange={setActiveTab}
+            type="card"
+            centered
+            className="custom-tabs"
+          >
+            <TabPane 
+              tab={
+                <span>
+                  <ClockCircleOutlined /> Sắp tới 
+                  {groupedData.upcoming.length > 0 && <Badge count={groupedData.upcoming.length} style={{ marginLeft: 8 }} />}
+                </span>
               }
-
-
-              // Find the room index for the selected cán bộ
-              //const roomIndex = (filteredCbo1 || filteredCbo2) ? index : null;
-
-              return (
-                <Card
-                  key={index}
-                  // Join the array into a string, convert to uppercase, and add newline if there are more than one name
-                  className="rounded-lg shadow-lg overflow-hidden w-full md:w-70" // Increased width for a larger card
-                  style={{
-                    backgroundColor: getCardColor(exam.ngayThi),
-                    borderRadius: "12px",
-                    transition: "transform 0.3s ease",
-                  }}
-                  hoverable
-                  onClick={() => alert(`Bạn đã chọn môn: ${exam.hocPhan.join(', ')}`)}  // Join array for alert
-                >
-                  <div className="font-bold text-blue-700 bottom-b-2 text-center">{exam.hocPhan.join(' - ').toUpperCase()}</div>
-
-                  <div className="p-4">
-                    <p className="text-black mb-1 text-lg font-bold">
-                      <CalendarOutlined /> Ngày thi: {exam.ngayThi}
-                    </p>
-                    {/* Display filtered cán bộ 1 if it matches user.username */}
-                    {filteredCbo1 && (
-                      <p className="text-black mb-1 text-lg font-bold">
-                        <TeamOutlined /> Cán bộ 1: {filteredCbo1}
-                      </p>
-                    )}
-                    {/* Display filtered cán bộ 2 if it matches user.username */}
-                    {filteredCbo2 && (
-                      <p className="text-black mb-1 text-lg font-bold">
-                        <TeamOutlined /> Cán bộ 2: {filteredCbo2}
-                      </p>
-                    )}
-                    <p className="text-black mb-1 text-lg font-bold">
-                      <ClockCircleOutlined /> Ca thi: {exam.ca}
-                    </p>
-                    {/* Show the room for the invigilator */}
-                    {roomIndex !== null && (
-                      <p className="text-black text-lg font-bold">
-                        <HomeOutlined /> Phòng thi: {exam.phong[roomIndex]}
-                      </p>
-                    )}
-                  </div>
-                </Card>
-              );
-            })}
-
-
-
-            {sortedGroupedData.upcoming.length > 0 && (
-              <div>
-                <h3 className="text-lg font-bold mb-1">SẮP DIỄN RA</h3>
-                <div className="flex flex-col md:flex-row justify-center gap-4">
-                  {sortedGroupedData.upcoming.map((exam, index) => {
-                    let filteredCbo1 = null;
-                    let filteredCbo2 = null;
-                    let roomIndex = null;
-
-                    // Filter cán bộ (invigilators) to show only the ones that match the current user
-                    for (let i = 0; i < exam.cbo1.length; i++) {
-                      if (exam.cbo1[i] === user.username) {
-                        filteredCbo1 = user.username
-                        filteredCbo2 = exam.cbo2[i]
-                        roomIndex = i
-                      }
-
-                      if (exam.cbo2[i] === user.username) {
-                        filteredCbo1 = exam.cbo1[i]
-                        filteredCbo2 = user.username
-                        roomIndex = i
-
-                      }
-                    }
-
-                    return (
-                      <Card
-                        key={index}
-                        className="rounded-lg shadow-lg overflow-hidden w-full md:w-60"
-                        style={{
-                          backgroundColor: getCardColor(exam.ngayThi),
-                          borderRadius: "12px",
-                          transition: "transform 0.3s ease",
-                        }}
-                        hoverable
-                        onClick={() => alert(`Bạn đã chọn môn: ${exam.hocPhan.join(', ')}`)}  // Join array for alert
-                      >
-                        <div className="font-bold text-blue-700 bottom-b-2 text-center">{exam.hocPhan.join(' - ').toUpperCase()}</div>
-                        <div className="p-4">
-                          <p className="text-black mb-1 text-lg font-bold">
-                            <CalendarOutlined /> Ngày thi: {exam.ngayThi}
-                          </p>
-                          {/* Display filtered cán bộ 1 if it matches user.username */}
-                          {filteredCbo1 && (
-                            <div>
-                              <p className="text-black mb-1 text-lg font-bold">
-                                <TeamOutlined /> Cán bộ 1: {filteredCbo1}
-                              </p>
-                            </div>
-                          )}
-                          {/* Display filtered cán bộ 2 if it matches user.username */}
-                          {filteredCbo2 && (
-                            <div>
-                              <p className="text-black mb-1 text-lg font-bold">
-                                <TeamOutlined /> Cán bộ 2: {filteredCbo2}
-                              </p>
-                            </div>
-
-                          )}
-                          <p className="text-black mb-1 text-lg font-bold">
-                            <ClockCircleOutlined /> Ca thi: {exam.ca}
-                          </p>
-                          {/* Show the room for the invigilator */}
-                          {roomIndex !== null && (
-                            <p className="text-black text-lg font-bold">
-                              <HomeOutlined /> Phòng thi: {exam.phong[roomIndex]}
-                            </p>
-                          )}
-                        </div>
-                      </Card>
-                    );
-                  })}
-                </div>
+              key="upcoming"
+            >
+              <div className="p-2">
+                {groupedData.upcoming.length > 0 ? (
+                  groupedData.upcoming.map((exam, index) => renderCoiThiCard(exam, index))
+                ) : (
+                  <Empty description="Không có lịch coi thi sắp tới" />
+                )}
               </div>
-            )}
-
-
-            {sortedGroupedData.past.length > 0 && (
-              <div>
-                <h3 className="text-lg font-bold mb-1">ĐÃ QUA</h3>
-                <div className="flex flex-col md:flex-row justify-center gap-4">
-                  {sortedGroupedData.past.map((exam, index) => {
-                    let filteredCbo1 = null;
-                    let filteredCbo2 = null;
-                    let roomIndex = null;
-
-                    // Filter cán bộ (invigilators) to show only the ones that match the current user
-                    for (let i = 0; i < exam.cbo1.length; i++) {
-                      if (exam.cbo1[i] === user.username) {
-                        filteredCbo1 = user.username
-                        filteredCbo2 = exam.cbo2[i]
-                        roomIndex = i
-                      }
-
-                      if (exam.cbo2[i] === user.username) {
-                        filteredCbo1 = exam.cbo1[i]
-                        filteredCbo2 = user.username
-                        roomIndex = i
-
-                      }
-                    }
-
-                    return (
-                      <Card
-                        key={index}
-
-                        className="rounded-lg shadow-lg overflow-hidden w-full md:w-70"
-                        style={{
-                          backgroundColor: getCardColor(exam.ngayThi),
-                          borderRadius: "12px",
-                          transition: "transform 0.3s ease",
-                        }}
-                        hoverable
-                        onClick={() => alert(`Bạn đã chọn môn: ${exam.hocPhan.join(', ')}`)}  // Join array for alert
-                      >
-                        <div className="font-bold text-blue-700 bottom-b-2 text-center">{exam.hocPhan.join(' - ').toUpperCase()}</div>
-
-                        <div className="p-4">
-                          <p className="text-black mb-1 text-lg font-bold">
-                            <CalendarOutlined /> Ngày thi: {exam.ngayThi}
-                          </p>
-                          {/* Display filtered cán bộ 1 if it matches user.username */}
-                          {filteredCbo1 && (
-                            <p className="text-black mb-1 text-lg font-bold">
-                              <TeamOutlined /> Cán bộ 1: {filteredCbo1}
-                            </p>
-                          )}
-                          {/* Display filtered cán bộ 2 if it matches user.username */}
-                          {filteredCbo2 && (
-                            <p className="text-black mb-1 text-lg font-bold">
-                              <TeamOutlined /> Cán bộ 2: {filteredCbo2}
-                            </p>
-                          )}
-                          <p className="text-black mb-1 text-lg font-bold">
-                            <ClockCircleOutlined /> Ca thi: {exam.ca}
-                          </p>
-                          {/* Show the room for the invigilator */}
-                          {roomIndex !== null && (
-                            <p className="text-black text-lg font-bold">
-                              <HomeOutlined /> Phòng thi: {exam.phong[roomIndex]}
-                            </p>
-                          )}
-                        </div>
-                      </Card>
-                    );
-                  })}
-                </div>
+            </TabPane>
+            
+            <TabPane 
+              tab={
+                <span>
+                  <CalendarOutlined /> Hôm nay
+                  {groupedData.today.length > 0 && <Badge count={groupedData.today.length} style={{ marginLeft: 8 }} color="#108ee9" />}
+                </span>
+              }
+              key="today"
+            >
+              <div className="p-2">
+                {groupedData.today.length > 0 ? (
+                  groupedData.today.map((exam, index) => renderCoiThiCard(exam, index))
+                ) : (
+                  <Empty description="Không có lịch coi thi hôm nay" />
+                )}
               </div>
-            )}
-
-
-          </div>
-          {listData == 0 && (
-            <h2 className="font-bold text-center">Chưa có lịch </h2>
-
-          )}
+            </TabPane>
+            
+            <TabPane 
+              tab={
+                <span>
+                  <EnvironmentOutlined /> Đã qua
+                  {groupedData.past.length > 0 && <Badge count={groupedData.past.length} style={{ marginLeft: 8 }} color="#aaa" />}
+                </span>
+              }
+              key="past"
+            >
+              <div className="p-2">
+                {groupedData.past.length > 0 ? (
+                  groupedData.past.map((exam, index) => renderCoiThiCard(exam, index))
+                ) : (
+                  <Empty description="Không có lịch coi thi đã qua" />
+                )}
+              </div>
+            </TabPane>
+          </Tabs>
         </div>
       )}
 
       {type === 'cham-thi' && (
-        <div>
-          <div className="flex justify-center items-center mb-3">
-            <h1 className="text-heading3-bold text-center text-3xl font-bold">LỊCH CHẤM THI</h1>
-          </div>
-
-          <div className="flex flex-col md:flex-row justify-center gap-4 mb-6">
-            <div className="font-bold flex flex-col">
-              <label htmlFor="namHoc" className="block text-sm text-gray-700 mb-1">
-                Năm học
-              </label>
-              <Select
-                id="namHoc"
-                value={selectNamHoc}
-                onChange={(value) => setSelectNamHoc(value)}
-                className="w-full md:w-48"
-                placeholder="Chọn năm học"
-              >
-                <Option value="2024-2025">2024-2025</Option>
-                <Option value="2023-2024">2023-2024</Option>
-                <Option value="2022-2023">2022-2023</Option>
-              </Select>
-            </div>
-
-            <div className="font-bold flex flex-col">
-              <label htmlFor="ky" className="block text-sm text-gray-700 mb-1">
-                Kỳ
-              </label>
-              <Select allowClear
-                id="ky"
-                value={selectKy}
-                onChange={(value) => setSelectKy(value)}
-                className="w-full md:w-32"
-                placeholder="Chọn kỳ"
-              >
-                <Option value="1">1</Option>
-                <Option value="2">2</Option>
-              </Select>
-            </div>
-          </div>
-
-          <div className="space-y-6">
-            {sortedGroupedData2.today.length > 0 && (
-              <div>
-                <h3 className="text-lg font-bold mb-1">HÔM NAY</h3>
-                <div className="flex flex-col md:flex-row justify-center gap-4">
-                  {sortedGroupedData2.today.map((exam, index) => (
-                    <Card
-                      key={index}
-                      title={exam.hocPhan.join(', ').toUpperCase()}
-                      className="rounded-lg shadow-lg overflow-hidden"
-                      style={{
-                        backgroundColor: getCardColor(exam.ngayThi),
-                        borderRadius: "12px",
-                        transition: "transform 0.3s ease",
-                      }}
-                      hoverable
-                    >
-                      <div className="p-4">
-                        <p className="text-black mb-1 text-lg font-bold">
-                          <CalendarOutlined /> Ngày thi: {exam.ngayThi}
-                        </p>
-                        <p className="text-black mb-1 text-lg font-bold">
-                          <TeamOutlined /> Cán bộ 1: {exam.cb1}
-                        </p>
-                        <p className="text-black mb-1 text-lg font-bold">
-                          <TeamOutlined /> Cán bộ 2: {exam.cb2}
-                        </p>
-                        <p className="text-black mb-1 text-lg font-bold">
-                          <ClockCircleOutlined /> Số bài: {exam.soBai}
-                        </p>
-                        <p className="text-black text-lg font-bold">
-                          <HomeOutlined /> Loại kỳ thi: {exam.loaiKyThi}
-                        </p>
-                      </div>
-                    </Card>
-                  ))}
-                </div>
+        <div className="mt-4">
+          <Tabs 
+            activeKey={activeTab}
+            onChange={setActiveTab}
+            type="card"
+            centered
+            className="custom-tabs"
+          >
+            <TabPane 
+              tab={
+                <span>
+                  <ClockCircleOutlined /> Sắp tới 
+                  {groupedData2.upcoming.length > 0 && <Badge count={groupedData2.upcoming.length} style={{ marginLeft: 8 }} />}
+                </span>
+              }
+              key="upcoming"
+            >
+              <div className="p-2">
+                {groupedData2.upcoming.length > 0 ? (
+                  groupedData2.upcoming.map((exam, index) => renderChamThiCard(exam, index))
+                ) : (
+                  <Empty description="Không có lịch chấm thi sắp tới" />
+                )}
               </div>
-            )}
-
-            {sortedGroupedData2.upcoming.length > 0 && (
-              <div>
-                <h3 className="text-lg font-bold mb-1">SẮP DIỄN RA</h3>
-                <div className="flex flex-col md:flex-row justify-center gap-4">
-                  {sortedGroupedData2.upcoming.map((exam, index) => (
-                    <Card
-                      key={index}
-                      title={exam.hocPhan.join(', ').toUpperCase()}
-                      className="rounded-lg shadow-lg overflow-hidden"
-                      style={{
-                        backgroundColor: getCardColor(exam.ngayThi),
-                        borderRadius: "12px",
-                        transition: "transform 0.3s ease",
-                      }}
-                      hoverable
-                      onClick={() => alert(`Bạn đã chọn môn: ${exam.hocPhan.join(', ')}`)}
-                    >
-                      <div className="p-4">
-                        <p className="text-black mb-1 text-lg font-bold">
-                          <CalendarOutlined /> Ngày thi: {exam.ngayThi}
-                        </p>
-                        <p className="text-black mb-1 text-lg font-bold">
-                          <TeamOutlined /> Cán bộ 1: {exam.cb1}
-                        </p>
-                        <p className="text-black mb-1 text-lg font-bold">
-                          <TeamOutlined /> Cán bộ 2: {exam.cb2}
-                        </p>
-                        <p className="text-black mb-1 text-lg font-bold">
-                          <ClockCircleOutlined /> Số bài: {exam.soBai}
-                        </p>
-                        <p className="text-black text-lg font-bold">
-                          <HomeOutlined /> Loại kỳ thi: {exam.loaiKyThi}
-                        </p>
-                      </div>
-                    </Card>
-                  ))}
-                </div>
+            </TabPane>
+            
+            <TabPane 
+              tab={
+                <span>
+                  <CalendarOutlined /> Hôm nay
+                  {groupedData2.today.length > 0 && <Badge count={groupedData2.today.length} style={{ marginLeft: 8 }} color="#108ee9" />}
+                </span>
+              }
+              key="today"
+            >
+              <div className="p-2">
+                {groupedData2.today.length > 0 ? (
+                  groupedData2.today.map((exam, index) => renderChamThiCard(exam, index))
+                ) : (
+                  <Empty description="Không có lịch chấm thi hôm nay" />
+                )}
               </div>
-            )}
-
-            {sortedGroupedData2.past.length > 0 && (
-              <div>
-                <h3 className="text-lg font-bold mb-1">ĐÃ QUA</h3>
-                <div className="flex flex-col md:flex-row justify-center gap-4">
-                  {sortedGroupedData2.past.map((exam, index) => (
-                    <Card
-                      key={index}
-                      title={exam.hocPhan.join(', ').toUpperCase()}
-                      className="rounded-lg shadow-lg overflow-hidden"
-                      style={{
-                        backgroundColor: getCardColor(exam.ngayThi),
-                        borderRadius: "12px",
-                        transition: "transform 0.3s ease",
-                      }}
-                      hoverable
-                      onClick={() => alert(`Bạn đã chọn môn: ${exam.hocPhan.join(', ')}`)}
-                    >
-                      <div className="p-4">
-                        <p className="text-black mb-1 text-lg font-bold">
-                          <CalendarOutlined /> Ngày thi: {exam.ngayThi}
-                        </p>
-                        <p className="text-black mb-1 text-lg font-bold">
-                          <TeamOutlined /> Cán bộ 1: {exam.cb1}
-                        </p>
-                        <p className="text-black mb-1 text-lg font-bold">
-                          <TeamOutlined /> Cán bộ 2: {exam.cb2}
-                        </p>
-                        <p className="text-black mb-1 text-lg font-bold">
-                          <ClockCircleOutlined /> Số bài: {exam.soBai}
-                        </p>
-                        <p className="text-black text-lg font-bold">
-                          <HomeOutlined /> Loại kỳ thi: {exam.loaiKyThi}
-                        </p>
-                      </div>
-                    </Card>
-                  ))}
-                </div>
+            </TabPane>
+            
+            <TabPane 
+              tab={
+                <span>
+                  <EnvironmentOutlined /> Đã qua
+                  {groupedData2.past.length > 0 && <Badge count={groupedData2.past.length} style={{ marginLeft: 8 }} color="#aaa" />}
+                </span>
+              }
+              key="past"
+            >
+              <div className="p-2">
+                {groupedData2.past.length > 0 ? (
+                  groupedData2.past.map((exam, index) => renderChamThiCard(exam, index))
+                ) : (
+                  <Empty description="Không có lịch chấm thi đã qua" />
+                )}
               </div>
-            )}
-          </div>
-
-          {listData2 == 0 && (
-            <h2 className="font-bold text-center">Chưa có lịch </h2>
-
-          )}
+            </TabPane>
+          </Tabs>
         </div>
       )}
-
+      
+      {/* Custom CSS for tabs */}
+      <style jsx global>{`
+        .custom-tabs .ant-tabs-tab {
+          padding: 10px 20px;
+          margin-right: 5px;
+          border-radius: 8px 8px 0 0;
+          transition: all 0.3s;
+        }
+        
+        .custom-tabs .ant-tabs-tab-active {
+          background-color: #f0f5ff;
+          font-weight: bold;
+        }
+        
+        .custom-tabs .ant-tabs-nav {
+          margin-bottom: 16px;
+        }
+      `}</style>
     </div>
   );
 };

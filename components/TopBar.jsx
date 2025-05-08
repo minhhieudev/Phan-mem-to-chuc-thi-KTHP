@@ -20,7 +20,7 @@ const TopBar = () => {
   return (
     <div className="topbar">
       <div className="flex items-center gap-2">
-        <Link href="/chats">
+        <Link href="/home">
           <img src="https://upload.wikimedia.org/wikipedia/vi/2/2e/Dai_hoc_phu_yen_logo.png" alt="logo" className="logo" />
         </Link>
         <div className="max-sm:hidden">

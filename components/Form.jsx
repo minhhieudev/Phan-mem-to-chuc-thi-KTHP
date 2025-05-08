@@ -94,7 +94,7 @@ const Form = ({ type }) => {
           <div>
             <div className="input">
               <input
-                defaultValue="admin@gmail.com"
+                defaultValue="dung@gmail.com"
                 {...register("email", { required: "Email is required" })}
                 type="email"
                 placeholder="Email"
