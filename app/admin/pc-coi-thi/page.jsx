@@ -981,11 +981,12 @@ const PcCoiThi = () => {
 
     let resultFinal = [];    // Kết quả
     mons.forEach((mon, index) => {
-      let soPhongConLai = phongHoc.sort((a, b) => b.soCho - a.soCho);// Có lại phòng
-      let listMon = mon;
-      let listMonClone = mon;
-
-
+      let soPhongConLai = phongHoc.sort((a, b) => b.soCho - a.soCho); // Sắp xếp phòng theo sức chứa giảm dần
+      
+      // THÊM DÒNG NÀY: Sắp xếp môn học theo số sinh viên giảm dần
+      let listMon = mon.sort((a, b) => b.tongSoThiSinh - a.tongSoThiSinh);
+      let listMonClone = [...listMon];
+      
       let listSize = listMon.length
       let hocPhanDaDuyet = []
 

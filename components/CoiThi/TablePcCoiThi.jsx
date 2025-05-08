@@ -47,11 +47,35 @@ const TablePcCoiThi = ({ list, namHoc, loaiKyThi, loaiDaoTao, hocKy, listPhong, 
   }, [list]);
 
   const save = () => {
-
-    const updatedData = data2.map((item, index) => (item._id === editingKey ? editingRow : item));
-    setData(updatedData);
+    // Cập nhật dữ liệu
+    const updatedData = data2.map((item) => (item._id === editingKey ? editingRow : item));
+    
+    // Sắp xếp dữ liệu theo ngày thi tăng dần
+    const sortedData = [...updatedData].sort((a, b) => {
+      // Chuyển đổi chuỗi ngày thành đối tượng Date để so sánh
+      const dateA = convertStringToDate(a.ngayThi);
+      const dateB = convertStringToDate(b.ngayThi);
+      return dateA - dateB;
+    });
+    
+    // Cập nhật cả data và data2
+    setData(sortedData);
+    setData2(sortedData);
+    
     setEditingKey("");
     toast.success("Thay đổi thành công!");
+  }
+
+  // Hàm hỗ trợ chuyển đổi chuỗi ngày sang đối tượng Date
+  const convertStringToDate = (dateString) => {
+    // Giả định rằng chuỗi ngày có định dạng "DD-MM-YYYY"
+    if (!dateString) return new Date(0); // Trả về ngày epoch nếu không có giá trị
+    
+    const parts = dateString.split('-');
+    if (parts.length !== 3) return new Date(0);
+    
+    // Tạo đối tượng Date (lưu ý: tháng trong JS bắt đầu từ 0)
+    return new Date(parts[2], parts[1] - 1, parts[0]);
   }
 
   const showModal = (danhSachThiSinh, phong, index, listSoLuong) => {
@@ -454,13 +478,6 @@ const TablePcCoiThi = ({ list, namHoc, loaiKyThi, loaiDaoTao, hocKy, listPhong, 
       
       <p>Trong lịch thi này, Quý Thầy / Cô sẽ thấy các thông tin chi tiết về thời gian, địa điểm và môn thi. Xin vui lòng kiểm tra kỹ lưỡng và phản hồi nếu có bất kỳ thắc mắc hay điều chỉnh nào cần thiết.</p>
       
-      <h3 style="color: #2980b9;">Thông tin lịch thi:</h3>
-      <ul>
-          <li><strong>Thời gian thi:</strong></li>
-          <li><strong>Địa điểm thi:</strong> </li>
-          <li><strong>Môn thi:</strong></li>
-      </ul>
-      
       <p>Quý Thầy / Cô có thể tải xuống lịch thi từ tệp đính kèm trong email này.</p>
       
       <p>Nếu có bất kỳ câu hỏi hay cần thêm thông tin, xin vui lòng liên hệ với Phòng Hành chính - Nhân sự qua email hoặc số điện thoại dưới đây.</p>
@@ -639,7 +656,7 @@ const TablePcCoiThi = ({ list, namHoc, loaiKyThi, loaiDaoTao, hocKy, listPhong, 
               value={caThiFilter}
             >
               <Option value="1">Sáng</Option>
-              <Option value="5">Chiều</Option>
+              <Option value="3">Chiều</Option>
             </Select>
 
             <Select

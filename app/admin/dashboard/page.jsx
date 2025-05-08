@@ -362,7 +362,7 @@ const Dashboard = () => {
                             <Select
                                 allowClear
                                 size="small"
-                                placeholder="Chọn mã môn"
+                                placeholder="Chọn khoa"
                                 onChange={(value) => handleSelectKhoaCode(value)} // Đảm bảo gọi hàm này khi chọn
                                 className="w-[90%]"
                             >
