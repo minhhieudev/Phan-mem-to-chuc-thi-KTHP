@@ -352,11 +352,11 @@ const Pages = () => {
           <ArrowLeftOutlined /> QUAY LẠI
         </Button>
         
-        <h1 className="text-2xl md:text-3xl font-bold text-center text-blue-800">
+        <h1 className="text-xl md:text-2xl font-bold text-center text-blue-800 ml-2 w-[200px]">
           {type === 'coi-thi' ? 'LỊCH COI THI' : 'LỊCH CHẤM THI'}
         </h1>
         
-        <div className="w-[100px]"></div> {/* Spacer for flex alignment */}
+        <div className="w-[70px]"></div> {/* Spacer for flex alignment */}
       </div>
 
       <div className="mb-6 bg-gray-50 p-4 rounded-lg shadow-sm">
