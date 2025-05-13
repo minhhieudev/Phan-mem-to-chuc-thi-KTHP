@@ -342,6 +342,7 @@ const Pages = () => {
     <Loader />
   ) : (
     <div className="bg-white w-[95%] rounded-md shadow-md mx-auto p-4 mt-5">
+      
       <div className="flex justify-between items-center mb-4">
         <Button
           className="flex items-center text-white font-bold shadow-md"
