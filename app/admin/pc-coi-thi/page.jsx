@@ -45,6 +45,7 @@ const PcCoiThi = () => {
 
   const [selectKhoa, setSelectKhoa] = useState("");
   const [khoaOptions, setKhoaOptions] = useState([]);
+  const [selectAllKhoa, setSelectAllKhoa] = useState('');
 
   const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef(null);
@@ -1710,13 +1711,34 @@ const PcCoiThi = () => {
                       onChange={setSelectKhoa}
                       style={{ marginBottom: '16px' }} // Thêm style để tạo khoảng cách với các thành phần khác
                     >
-
                       {khoaOptions.map(khoa => (
                         <Select.Option key={khoa} value={khoa}>
                           {khoa}
                         </Select.Option>
                       ))}
-
+                    </Select>
+                    
+                    <Select
+                      placeholder="Chọn tất cả theo khoa"
+                      className="w-48"
+                      value={selectAllKhoa}
+                      onChange={(value) => {
+                        setSelectAllKhoa(value);
+                        if (value === 'all' && selectKhoa) {
+                          // Lọc trực tiếp từ listGV thay vì dùng filteredListGV
+                          const gvTheoKhoa = listGV.filter(gv => gv.khoa === selectKhoa);
+                          gvTheoKhoa.forEach(gv => {
+                            if (!listGVSelect.some(item => item._id === gv._id)) {
+                              handleSelectGV(true, gv);
+                            }
+                          });
+                          // Reset lại giá trị sau khi chọn
+                          setTimeout(() => setSelectAllKhoa(''), 100);
+                        }
+                      }}
+                      style={{ marginBottom: '16px' }}
+                    >
+                      <Select.Option value="all">Chọn tất cả khoa này</Select.Option>
                     </Select>
                   </div>
                 </div>
